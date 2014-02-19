@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="650" height="250" creationComplete="cargaDatos()" 
+		   label="{nombreCatalogo}">
+	<fx:Metadata>
+		[Event(name="contactCreated", type="ContactEvent")]
+		[Event(name="contactUpdated", type="ContactEvent")]
+		[Event(name="contactDeleted", type="ContactEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import objectosJava.Book;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable] public var book:Book;
+			[Bindable] public var catalogo:ArrayCollection;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			
+			
+			private function cargaDatos():void
+			{
+				roUsuarios.findAll();
+				
+			}
+			
+						
+			private function resultHandlerFindAll(event:ResultEvent):void
+			{
+				catalogo = ArrayCollection(event.result)
+				dg.dataProvider = catalogo
+
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roUsuarios" destination="UsuarioService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+	</fx:Declarations>
+	
+	<s:DataGrid id="dg" x="10" y="10" width="95%" height="75%">
+	</s:DataGrid>
+	<s:Button x="380" y="205" label="Nuevo"/>
+	<s:Button x="439" y="205" label="Modificar"/>
+	<s:Button x="511" y="205" label="Eliminar"/>
+	<s:Button x="575" y="205" label="Cerrar" click="parent.removeChild(this)"/>
+</mx:Canvas>

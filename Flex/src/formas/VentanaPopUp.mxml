@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="572" height="225" close="handleCloseEvent();">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	
+	<fx:Metadata>
+		[Event(name="ventanaPopCreated", type="VentanaPopUpEvent")]
+		[Event(name="ventanaPopUpdated", type="VentanaPopUpEvent")]
+		[Event(name="ventanaPopDeleted", type="VentanaPopUpEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.charts.Legend;
+			import mx.charts.PieChart;
+			import mx.charts.chartClasses.Series;
+			import mx.charts.series.PieSeries;
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.containers.ControlBar;
+			import mx.containers.Panel;
+			import mx.containers.TileDirection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.data.ChangeObject;
+			import mx.data.ChangedItems;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.events.ListEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			import mx.utils.StringUtil;
+			
+			import objectosJava.Indicadores;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] private var numAgentesConectados:int;
+			
+			import mx.managers.PopUpManager;
+			
+			// Handle the close button and Cancel button.
+			private function handleCloseEvent():void {
+				PopUpManager.removePopUp(this);
+			}            
+			
+			/////// Handle the OK button.
+			//private function processLogin():void {
+			//	// Check credentials (not shown) then remove pop up.
+			//	PopUpManager.removePopUp(this);
+			//}
+		]]>
+	</fx:Script>
+	<s:HGroup>
+		<s:Form id="frmAlarma" width="510">
+			<s:TextArea id="taMensajeAlarma"  width="100%" height="100%" editable="false"/>
+		</s:Form>
+	</s:HGroup>
+		<s:Button id="btnAceptar" label="Aceptar" click="handleCloseEvent();" x="250" y="0" />
+</s:TitleWindow>

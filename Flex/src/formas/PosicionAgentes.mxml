@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="cargaDatos()"
+		   locale.Editar_Posicion="en_ES"
+		   width.grid="100%" height.grid="100%">
+	
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			
+			import formas.VistaCallCenter;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.data.ItemReference;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			import mx.charts.Legend;
+			import mx.containers.Panel;
+			import objectosJava.*;
+			
+			[Bindable] public var chanel:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var message:String;			 
+			[Bindable] private var legend:Legend;
+			[Bindable] private var panel:Panel;
+				
+		    [Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var colBD:int;
+			[Bindable] public var filaBD:int;
+			[Bindable] public var tamanioDiferente:int;
+			
+     
+			
+			private function cargaDatos():void
+			{
+				tamanioDiferente=0;
+				Guardar.enabled=false;
+				PosicionAgente.ObtieneNumColumnas();
+				PosicionAgente.ObtieneNumFilas();
+				//rowCount.value=1;
+				//colCount.value=1;
+				
+			}
+			private function editarPosicion():void{
+				//var vistaCall:VistaCallCenter = new VistaCallCenter();
+				//vistaCall.bandEntrada=1;				
+			  var ventana_posiciones:VistaCallCenter = PopUpManager.createPopUp(this, VistaCallCenter, true) as VistaCallCenter;		 
+			 
+			  ventana_posiciones.numcolumnas=this.colCount.value;
+			  ventana_posiciones.numfilas= this.rowCount.value;
+			  ventana_posiciones.endpoint=endpoint;
+			  ventana_posiciones.bandEntrada=1;
+			  if (rowCount.value>7 || colCount.value>12){
+				  
+				  ventana_posiciones.horizontalScrollPolicy="on"; 
+				  ventana_posiciones.verticalScrollPolicy="on";
+				  
+				  ventana_posiciones.width=1385;//tamaño vertical
+				  ventana_posiciones.height=800;//tamaño horizontal
+			  }
+
+			  
+			  
+							
+			}
+			
+			private function ConfirmaGuardar(event:CloseEvent):void{				
+				
+				if (event.detail == Alert.YES){
+					guardaPosiciones(); 				
+					//Alert.show( "Tu Respuesta fue Si");
+				}
+				else 
+				{
+					rowCount.value = filaBD;
+					colCount.value = colBD ;
+					valida_numFilCol();
+				}
+			}
+			
+			private function guardaPosiciones():void{
+				var coordenada:String ;
+				//Alert.show(String(tamanioDiferente));
+				PosicionAgente.limpiaPosiciones();
+				for (var numfila:int=1; numfila <= this.rowCount.value; numfila++)
+				{
+					for(var numcol:int=1; numcol<=this.colCount.value;numcol++)
+					{
+						coordenada= String(numfila)+":"+ String(numcol);
+						PosicionAgente.generaPosiciones(coordenada);
+					}
+				}
+				PosicionAgente.tamanioCallCenter(this.rowCount.value,this.colCount.value);
+				
+			}
+
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			private function result_numCol(event:ResultEvent):void
+			{
+				if (int(event.result) == 0 ){
+					colCount.value=1;
+					} else {
+					colCount.value=int(event.result);
+					colBD=int(event.result);
+				}
+					
+			}
+			
+			private function result_numFilas(event:ResultEvent):void
+			{
+				if (int(event.result) == 0 ){
+					rowCount.value=1
+				}else{
+					rowCount.value=int(event.result);
+					filaBD=int(event.result);
+				}
+					
+			}
+			
+			private function valida_numFilCol( ):void
+			{
+				if(String(colCount.value)=="NaN" || String(rowCount.value)=="NaN"){
+					Alert.show("Caractér no valido");
+					rowCount.value = filaBD ;
+					colCount.value = colBD;
+				}else
+					if (rowCount.value == filaBD && colCount.value == colBD ){
+						 Guardar.enabled=false;
+						 editaPos.enabled=true;
+						 tamanioDiferente=0;
+					}else{
+						Guardar.enabled=true;
+						editaPos.enabled=false;
+						tamanioDiferente=1;
+					}
+				
+				
+			}
+			
+			private function faultHandlerDatos(event:ResultEvent):void
+			{				 
+				var transac:int;
+				transac= int(event.result);
+				
+				if (transac == 0){
+				Alert.show("Error al guardar datos");
+				Guardar.enabled=true;
+				editaPos.enabled=false;
+				}else 
+				{
+					Alert.show("Datos guardados Correctamente.");
+					Guardar.enabled=false;
+					editaPos.enabled=true;
+				}
+			}
+			
+			 
+		]]>
+	</fx:Script>
+
+	
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="Editar_Posicion"/>
+	</mx:states>
+	<fx:Declarations>	
+		<s:RemoteObject id="PosicionAgente" destination="PosicionAgenteService" endpoint="{endpoint}" fault="faultHandler(event)">
+			<s:method fault="faultHandler(event)" name="ObtieneNumColumnas" result="result_numCol(event)"/>
+			<s:method fault="faultHandler(event)" name="ObtieneNumFilas" result="result_numFilas(event)"/>
+			<s:method fault="faultHandler(event)" name="limpiaPosiciones"  />
+			<s:method fault="faultHandler(event)" name="tamanioCallCenter"  result="faultHandlerDatos(event)" />
+			
+			
+		</s:RemoteObject> 
+	</fx:Declarations>
+	<s:HGroup includeIn="Editar_Posicion" y="10" left="10" right="10" horizontalCenter="0">
+		<s:Button x="374" y="37" label="Guardar"  />
+		<s:Button label="Cerrar" />
+	</s:HGroup>
+		
+	<s:Label x="40" y="51" text="Número de Filas"
+			 x.grid="44" y.grid="75" height.grid="22" verticalAlign.grid="middle"/>
+	<s:NumericStepper id="colCount" maximum="50" minimum="1" change="valida_numFilCol()"
+					  x.grid="171" y.grid="41" />
+	<s:TextInput includeIn="Editar_Posicion" x="171" y="42" width="65"/>
+	<s:NumericStepper id="rowCount" maximum="50" minimum="1" change="valida_numFilCol()"  
+					  x.grid="171" y.grid="73"/>
+	<s:Button id="editaPos" x="40" y="148" width="112" height="41"
+			  label="Editar vista de Call Center" click="editarPosicion()"
+			  height.grid="67" label.grid="Editar vista  de Call Center"/>
+	<s:Button id="Guardar" x="171" y="148" label="Guardar" click='Alert.show("¿Estás seguro de cambiar el  tamaño del  Call Center?", "Aviso",3,this,ConfirmaGuardar);'/>
+	<s:Button includeIn="Editar_Posicion" x="40" y="197" width="112" height="46"
+			  label="Configuración Actual"/>
+	<s:Button x="171" y="213" label="Cancelar" click="parent.removeChild(this)"/>
+	<s:Label includeIn="grid" x="40" y="41" width="127" height="26" text="Número de Columnas"
+			 verticalAlign="middle"/>
+	
+	
+</mx:Canvas>

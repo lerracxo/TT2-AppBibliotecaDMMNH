@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="cargaDatos()"
+		   width.alta_modificacion="95%" height.alta_modificacion="95%"
+		   width.grid="732" height.grid="389" locale="en_ES"
+		   
+		   xmlns:local="objetosJava.MyDataGrid">
+	<fx:Metadata>
+		[Event(name="usarioCreated", type="UsuarioEvent")]
+		[Event(name="usuarioUpdated", type="UsuarioEvent")]
+		[Event(name="usuarioDeleted", type="UsuarioEvent")]
+	</fx:Metadata> 
+
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.DataGrid;
+			import mx.events.CloseEvent;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import objectosJava.MonitoreoAgentes;
+			//import objectosJava.MyDataGrid;
+			
+			import spark.events.GridSelectionEvent;
+			import spark.events.IndexChangeEvent;
+			
+			
+			
+			//Variables generales del sistema
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			
+			//Variables de uso particular
+
+			
+			private function cargaDatos():void{
+				//Alert.show("Iniciado");
+				roMonitoreoAgentes.findAll();
+				//Inicialización del campo
+				tf_hora.text=""+1;
+				//var dg_prueba:DataGrid = new MyDataGrid();
+				
+				var miTimer:Timer = new Timer(1000,0);
+				
+				//miTimer.addEventListener(TimerEvent.TIMER, alMostrar);
+				
+				miTimer.addEventListener(TimerEvent.TIMER, cuentaSegundos);
+				
+				miTimer.start();
+				
+				
+			}
+			
+			private function cuentaSegundos(evento:TimerEvent):void{
+				var tiempo:int = int(tf_hora.text);
+				tiempo = tiempo + 1;
+				tf_hora.text=""+tiempo;
+			}
+			
+			private function alMostrar(evento:TimerEvent):void{
+				var momento:Date = new Date(); //me creo un objeto llamado momento y lo asocio don Date y me da la fecha del momento del equipo y a partir de ese momento voy a continuacion sacar inf.
+				
+				var meses:Array = new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+				var diasSemana:Array = new Array("Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado");
+				
+				var anyo:uint = momento.fullYear; //año y entero
+				var mes:String = meses[momento.month]; //aqi rcupero el mes q toca pero a partir del array q tengo definid mas arriba. (Recuperamos el mes del array de los meses) si ponemos [] dentro nos devuelve texto
+				var numDia:uint = momento.date;
+				var dia:String = diasSemana[momento.day];
+				//recuperamos el dia dentro del mes correspondient
+				
+				
+				//Si es necesario, añado ceros delante
+				//ls 3 valores los almacenos en 3 variables. Si no qeremos q añada 0 delante qito en estas 3 variablesanyadoCeroDelante y la funcion siguiente no se crea: function anyadoCeroDelante(valor:uint):String{}
+				var hora:String = anyadoCeroDelante(momento.hours); 
+				var minuto:String = anyadoCeroDelante(momento.minutes);
+				var segundo:String = anyadoCeroDelante(momento.seconds);
+				
+				//" / "+ dia + " " + numDia + " " + mes + " " + anyo;
+				
+				tf_hora.text =   hora + ":" + minuto + ":" + segundo;
+			}
+			
+			private function anyadoCeroDelante(valor:uint):String{
+				
+				var retorno:String = "";
+				if(valor <10){ //si es menos de 10 se mostrara
+					retorno = "0" + valor;
+				}else{
+					retorno = String(valor); //me qedo el valor tal cual
+				}
+				return retorno;
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			
+			
+			private function resultHandlerFindAll(event:ResultEvent):void{
+				
+				var arreglo:ArrayCollection = ArrayCollection(event.result);
+				var elemento:MonitoreoAgentes = MonitoreoAgentes(arreglo[0]);
+				dg_monitor_agentes.dataProvider = arreglo;
+			}
+		
+
+			protected function dg_monitor_agentes_selectionChangeHandler(event:GridSelectionEvent):void
+			{
+				bt_desc_agente.enabled=true;
+				bt_enviar_mensaje.enabled=true;
+				
+				dg_monitor_agentes.columns
+					setStyle("selectionColor", 0xDF34F9);
+					
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="alta_modificacion"/>
+	</mx:states>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roMonitoreoAgentes" destination="MonitorearAgentesService" fault="faultHandler(event)"  endpoint="{endpoint}">	
+			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		
+	</fx:Declarations>
+	
+	<s:HGroup includeIn="grid" left="10" right="10" top="10" bottom="287" horizontalCenter="0"
+			  verticalCenter="-139">
+		
+		<s:Button label="Cerrar" click="parent.removeChild(this)"/>
+	</s:HGroup>
+	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
+	</s:HGroup>
+	
+	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" right="319" height="325" >
+		<s:layout>
+			<s:FormLayout paddingTop="-10" paddingLeft="0" gap="0" rowHeight="35" requestedRowCount="10" />
+		</s:layout>
+	</s:Form>
+	<s:Group includeIn="grid" x="10" y="49" width="722" height="329">
+		
+
+		
+		<s:DataGrid id="dg_monitor_agentes" x="10" y="10" width="563" height="250" enabled="true"  >
+			<s:columns>
+				<s:ArrayList >
+					<s:GridColumn dataField="id_usr" headerText="Id" ></s:GridColumn>
+					<s:GridColumn dataField="nombre_usr" headerText="Nombre" ></s:GridColumn>
+					<s:GridColumn dataField="apellido_usr" headerText="Apellido" ></s:GridColumn>
+					<s:GridColumn dataField="num_camp_usr" headerText="Número de Campañas" ></s:GridColumn>
+					<s:GridColumn dataField="extension" headerText="Extensión" ></s:GridColumn>
+					<s:GridColumn dataField="estatus" headerText="Estatus" ></s:GridColumn>
+					<s:GridColumn dataField="tiempo_estado" headerText="Tiempo"></s:GridColumn>
+				</s:ArrayList>
+			</s:columns>
+		</s:DataGrid>
+
+		
+		<s:Button id="bt_desc_agente" x="583" y="15" label="Desconectar Agente" enabled="false"/>
+		<s:Button id="bt_desc_todos" x="581" y="59" width="131" label="Desconectar Todos"
+				  enabled="true"/>
+		<s:Button id="bt_enviar_mensaje" x="581" y="106" width="131" label="Enviar mensaje"
+				  enabled="false"/>
+		<s:Button id="bt_eviar_mensaje_todos" x="581" y="149" width="131" label="Enviar Mensaje a Todos"/>
+		<s:TextInput id="tf_hora" x="10" y="268" width="333"/>
+		
+		
+	</s:Group>
+
+	
+</mx:Canvas>

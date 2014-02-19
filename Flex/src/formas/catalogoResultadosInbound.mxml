@@ -1,0 +1,896 @@
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="cargaDatos()"
+		   width.alta_modificacion="95%" height.alta_modificacion="95%"
+		   width.grid="762" height.grid="360" locale="en_ES">
+	<fx:Metadata>
+		[Event(name="usarioCreated", type="UsuarioEvent")]
+		[Event(name="usuarioUpdated", type="UsuarioEvent")]
+		[Event(name="usuarioDeleted", type="UsuarioEvent")]
+	</fx:Metadata> 
+
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			import flash.profiler.showRedrawRegions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import objectosJava.*;
+			import objectosJava.ResultadosInbound;
+			import objectosJava.ResultadosInbound_Campana;
+			
+			import spark.events.GridSelectionEvent;
+			import spark.events.IndexChangeEvent;
+			
+			//Variables generales del sistema
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var usuariologeado:Usuario;
+			
+			//Variables de uso particular
+			[Bindable] public var resultados:ResultadosInbound = new ResultadosInbound(); //Nuevo Resultado
+			[Bindable] public var datosGrid:ArrayCollection; //Grid del lado derecho
+			[Bindable] public var datosGridCampana:ArrayCollection; //Grid del lado izquiero			
+			[Bindable] public var datosCMBXCampana:ArrayCollection; //Combobox de camapanas			
+			[Bindable] public var ModificacionesPendientes:ArrayCollection = new ArrayCollection(); //Array de las nuevas relaciones
+
+			
+			private var id_campana:int = 0; //Variable para saber si se ha elegido alguna campana 	
+			private var fla_camp_modif:int = 0; //Bandera para saber caundo una campana ha sido modificada			
+			private var numero_cambios:int = 0 ; //Variable usada para saber cuantas ejecuciones de modificaciones se esperan
+			private var fla_todas_campanas:int = 0; //Bandera para saber si se ha seleccionado todas las campanas
+
+			private function cargaDatos():void
+			{
+				roResultadosInbound.findAll();
+				roResultadosInbound.findAllcampanas();
+				dg_res_campana.dataProvider.removeAll();
+				bt_editar.enabled = true;
+				bt_cancelar.enabled=false;
+				chb_todas_campanas.enabled= false;
+				te_resultado.enabled= false 
+				dg_result.enabled = false
+				dg_res_campana.enabled = false
+				bt_agregar.enabled = false	
+				bt_a1.enabled= false
+				bt_at.enabled = false
+				bt_q1.enabled = false
+				bt_qt.enabled = false
+				bt_guardar.enabled = false
+				bt_eliminarResultado.enabled=false;
+				cb_campanas.selectedIndex = -1;
+				cb_campanas.enabled = true;
+				chb_todas_campanas.selected = false;
+				fla_camp_modif = 0;
+				fla_todas_campanas = 0;
+				ModificacionesPendientes.removeAll();				
+			}
+			
+			private function resultHandlerFindAll(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result)
+				dg_result.dataProvider = datosGrid
+				
+			}
+			
+			private function resultHandlerfindNoEnUnaCampana(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result)
+				dg_result.dataProvider = datosGrid
+			}
+			
+			private function resultHandlerFindAllcampanas(event:ResultEvent):void
+			{
+				datosCMBXCampana = ArrayCollection(event.result)
+
+			}
+			
+			
+			private function eliminaListener(eventObj:CloseEvent):void {
+				// Check to see if the OK button was pressed.
+				//Alert.show("Debe Seleccionar un registro");
+				
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.okLabel = "Aceptar";
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			private function resultHandlerCreate(event:ResultEvent):void
+			{
+				if( int (event.result) == -1  ){
+					Alert.okLabel = "Aceptar";
+					Alert.show("El resultado que ha ingresado ya existe.","Error");
+				}			
+				if(id_campana == 0){
+					cargaDatos()
+				}
+				else{
+					roResultadosInbound.findByIdCampanasInbound(id_campana)
+					roResultadosInbound.findNoEnUnaCampana(id_campana)	
+				}									
+			}
+			
+			private function resultHandlerUpdate(event:ResultEvent):void
+			{			
+				cargaDatos()				
+			}
+			
+			private function resultHandlerRemove(event:ResultEvent):void
+			{				
+				cargaDatos()				
+			}
+			
+			
+			protected function editar():void
+			{
+				bt_editar.enabled = false;
+				bt_cancelar.enabled=true;
+				chb_todas_campanas.enabled= true;
+				te_resultado.enabled= true;
+				dg_result.enabled = true;
+				dg_res_campana.enabled = true;
+				bt_agregar.enabled = true;
+				bt_a1.enabled= true;
+				bt_at.enabled = true;
+				bt_q1.enabled = true;
+				bt_qt.enabled = true;
+				bt_guardar.enabled = true;
+				bt_eliminarResultado.enabled=true;		
+			}
+			
+			protected function cancelar():void
+			{
+				bt_editar.enabled = true;
+				bt_cancelar.enabled=false;
+				chb_todas_campanas.enabled= false;
+				te_resultado.enabled= false 
+				dg_result.enabled = false
+				dg_res_campana.enabled = false
+				bt_agregar.enabled = false	
+				bt_a1.enabled= false
+				bt_at.enabled = false
+				bt_q1.enabled = false
+				bt_qt.enabled = false
+				bt_guardar.enabled = false
+				bt_eliminarResultado.enabled=false;
+				
+				sub_sec_cancelar();
+			}
+			
+			protected function sub_sec_cancelar():void{			
+				if(fla_todas_campanas==1){
+					roResultadosInbound.findEnNingunaCampanaInbound();//Se hace la llamada a la funcion que llena el DataGrid derecho para todas las campanas
+					roResultadosInbound.findEnAlgunaCampanaInbound();// Se hace la llamada a la funcion que llena el DataGrid izquierdo para todas las campanas
+				}
+				else{
+					roResultadosInbound.findByIdCampanasInbound(id_campana);//Se hace la llamada a la funcion que llena el DataGrid derecho para una campana
+					roResultadosInbound.findNoEnUnaCampana(id_campana);//Se hace la llamada a la funcion que llena el DataGrid izquierdo para una campana
+				}		
+				ModificacionesPendientes.removeAll();	
+				fla_camp_modif = 0					
+				id_campana = 0;	
+			}
+			
+			protected function cb_campanas_changeHandler(event:IndexChangeEvent):void
+			{
+				if(fla_camp_modif == 0 ){	
+					id_campana = cb_campanas.selectedItem.id_camp
+					//Alert.show("El identificador de camapaña es: "+id_campana);
+					roResultadosInbound.findByIdCampanasInbound(id_campana)
+					roResultadosInbound.findNoEnUnaCampana(id_campana)	
+				}
+				else{
+					Alert.okLabel = "Aceptar";
+					Alert.show("Se han realizado cambios en la campaña actual,\nGuarda o cancela los cambios");
+				}
+
+			}
+			
+			protected function resultHandlerFindByIdcampanasInbound(event:ResultEvent):void
+			{
+				dg_res_campana.dataProvider =  ArrayCollection(event.result)				
+			}
+			
+			protected function bt_agregar_clickHandler():void
+			{		
+				resultados.id_res_in = 0;
+				var validarNombre:ValidationResultEvent = validator_resultado.validate();
+				
+				//Verifica el validador
+				if(validarNombre.type != ValidationResultEvent.VALID	){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Favor de verificar el nombre del resultado","Error");
+					return;
+				}
+				
+				//Obtiene el nombre del resultado, y lo envía para su registro.
+				resultados.resultado = te_resultado.text;
+				roResultadosInbound.create(resultados);
+				
+				//Resetea el campo y el validador.
+				te_resultado.text = '';
+				te_resultado.errorString="";
+				
+			}
+			
+			protected function ModificarResultadoACampana(rs_nuevo:ResultadosInbound_Campana ):void
+			{
+				
+				//Busca si el elemento que se quiere agregar se ha eliminado recientemente
+				var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana();
+				
+				resultado_campana.descripcion = rs_nuevo.descripcion;
+				resultado_campana.estatus = rs_nuevo.estatus;
+				resultado_campana.id_camp = rs_nuevo.id_camp;
+				resultado_campana.id_res_in = rs_nuevo.id_res_in;
+				resultado_campana.nombre_camp = rs_nuevo.nombre_camp;
+				resultado_campana.resultado = rs_nuevo.resultado;
+				resultado_campana.var_control = rs_nuevo.var_control;	
+				
+				
+				var len_modificaciones:int = 0;
+				len_modificaciones = ModificacionesPendientes.length - 1;
+				
+				for(len_modificaciones ; len_modificaciones >=0 ;len_modificaciones --){					
+					if(	resultado_campana.id_camp == ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(len_modificaciones)).id_camp 
+						&& resultado_campana.id_res_in == ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(len_modificaciones)).id_res_in  ){
+						
+						if(resultado_campana.var_control == 3){
+							ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(len_modificaciones)).estatus = resultado_campana.estatus;
+							
+							//Alert.show("Se realizó un cambio de estatus "+ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(len_modificaciones)).estatus
+								//+" a una tarea pendiente\nLongitud del arreglo"+ModificacionesPendientes.length+"\nvar_control acutal: "+ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(len_modificaciones)).var_control);
+							
+							return;
+						}
+						
+						ModificacionesPendientes.removeItemAt(len_modificaciones);
+						//len_modificaciones= ModificacionesPendientes.length - 1;
+						//Alert.show("Se ha encontrado una duplicación: "+ModificacionesPendientes.length+"\n"+resultado_campana.resultado+" : "+len_modificaciones);
+						
+						return;
+						
+						//Alert.show("Se encontro una coincidencia\nid_camp: "+resultado_campana.id_camp+
+							//"\n id_res_in:"+resultado_campana.id_res_in+"\nvar_control: "+resultado_campana.var_control );
+						
+					}
+				}
+				//var fla_existeResultado:int = EliminacionesPendientes.getItemIndex(resultado_campana);
+				
+				//sAlert.show("Se agregó una nueva tarea"+"\nvar_control acutal: "+resultado_campana.var_control);
+				ModificacionesPendientes.addItem(resultado_campana);				
+				fla_camp_modif = 1;
+			}
+				
+			protected function bt_a1_clickHandler():void
+			{
+				// Mueve un resultado a una campana seleccionada
+				
+				try{
+					
+					//Alert.show("ID_CAMPANA: "+id_campana+" FLA_TODAS_CAMPANAS: "+fla_todas_campanas  + " RESULTADO: "+ (id_campana < 1 || fla_todas_campanas == 1) );
+					if(id_campana < 1 && fla_todas_campanas == 0 ){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Debes seleccionar un resultado y una campaña.");
+						return;
+					}
+					
+					var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana()
+					
+					resultado_campana.id_res_in = dg_result.selectedItem.id_res_in
+					resultado_campana.resultado = dg_result.selectedItem.resultado
+					resultado_campana.id_camp=id_campana;
+					resultado_campana.var_control=1; //Uno para saber que se quiere agregar
+											
+					ArrayCollection(dg_res_campana.dataProvider).addItem( resultado_campana )
+						
+					ModificarResultadoACampana (resultado_campana);
+					
+					//Alert.show(""+dg_result.selectedIndex);
+					
+					ArrayCollection(dg_result.dataProvider).removeItemAt(dg_result.selectedIndex);
+
+
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Debes seleccionar un resultado y una campaña.");
+					//exception_message(error);
+				}
+			}
+			
+			
+			protected function bt_at_clickHandler():void
+			{
+				// Mueve todos los resultados a una campana seleccionada
+				
+				try{
+					
+					if((id_campana < 1) && (fla_todas_campanas == 0)){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Debes seleccionar una campaña.");
+						return;
+					}
+					
+					var contador:int = dg_result.dataProvider.length - 1
+						
+						for(contador; contador >= 0 ;contador --){
+							
+							var resultado:ResultadosInbound = new ResultadosInbound()
+							var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana();
+							
+							resultado = ResultadosInbound (dg_result.dataProvider.getItemAt(contador));
+							
+							resultado_campana.id_res_in = resultado.id_res_in;
+							resultado_campana.resultado = resultado.resultado;
+							resultado_campana.id_camp=id_campana;
+							resultado_campana.var_control=1; //Uno para saber que se quiere agregar
+	
+							
+							ArrayCollection(dg_res_campana.dataProvider).addItem( resultado_campana )
+							ArrayCollection(dg_result.dataProvider).removeItemAt(contador);
+							
+							ModificarResultadoACampana (resultado_campana);							
+				}
+					
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Debes seleccionar un resultado y una campaña.");
+					//exception_message(error);
+				}
+			}
+			
+			protected function bt_q1_clickHandler():void
+			{
+				try{
+					if(id_campana < 1 && fla_todas_campanas == 0){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Debes seleccionar un resultado y una campaña.");
+						return;
+					}
+					var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana()
+						
+						//Se obtiene el objeto que se va a eliminar
+					resultado_campana.id_res_in = dg_res_campana.selectedItem.id_res_in
+					resultado_campana.resultado = dg_res_campana.selectedItem.resultado
+					resultado_campana.descripcion = dg_res_campana.selectedItem.descripcion 
+					resultado_campana.var_control=2; //Uno para saber que se quiere eliminar
+						
+					resultado_campana.id_camp=id_campana;
+					
+					// Valida que no se trate de un resultado que no se pueda eliminar
+					if( resultado_campana.id_res_in == 1 || resultado_campana.id_res_in == 2 || 
+						resultado_campana.id_res_in == 3 ||  resultado_campana.id_res_in == 4 || 
+						resultado_campana.id_res_in == 5 ||  resultado_campana.id_res_in == 6){
+						Alert.okLabel = "Aceptar";
+						Alert.show("No es posible quitar el resultado seleccionado.","Aviso");
+						return;
+					}
+					
+					//Se Agrega al arreglo visible correspondiente
+					ArrayCollection(dg_result.dataProvider).addItem( resultado_campana )
+						
+						//Se agrega a la pila de eliminados
+					ModificarResultadoACampana (resultado_campana);
+
+					//Se quita del arreglo 
+					ArrayCollection(dg_res_campana.dataProvider).removeItemAt(dg_res_campana.selectedIndex);
+					
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Debes seleccionar un resultado y una campaña.");
+					//exception_message(error);
+				}
+			}
+			
+			protected function bt_qt_clickHandler():void
+			{
+				// Mueve todos los resultados a una campana seleccionada
+				
+				try{
+					
+					//Alert.show("ID_CAMPANA: "+id_campana+" FLA_TODAS_CAMPANAS: "+fla_todas_campanas  + " RESULTADO: "+ (id_campana < 1 || fla_todas_campanas == 1) );
+
+					if( id_campana < 1 && fla_todas_campanas == 0){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Debes seleccionar una campaña.");
+						return;
+					}	
+					var contador:int = dg_res_campana.dataProvider.length - 1
+					
+					for(contador; contador >= 0 ;contador --){
+						
+						var resultado:ResultadosInbound = new ResultadosInbound()
+						var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana();
+						
+						resultado_campana = ResultadosInbound_Campana (dg_res_campana.dataProvider.getItemAt(contador));
+						
+						resultado.descripcion=resultado_campana.descripcion;
+						resultado.resultado=resultado_campana.resultado;
+						resultado.id_res_in=resultado_campana.id_res_in
+						
+						resultado_campana.var_control=2; //Uno para saber que se quiere eliminar
+						if( resultado.id_res_in == 1 || resultado.id_res_in == 2 || 
+							resultado.id_res_in == 3 || resultado.id_res_in == 4 || 
+							resultado.id_res_in == 5 || resultado.id_res_in == 6){
+							//Alert.show("No es posible quitar el resultado seleccionado.","Aviso");
+						}
+						else{
+							ArrayCollection(dg_result.dataProvider).addItem( resultado )
+							ModificarResultadoACampana (resultado_campana);
+							ArrayCollection(dg_res_campana.dataProvider).removeItemAt(contador);
+						}
+						
+					}
+					
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";	
+					Alert.show("Debes seleccionar un resultado y una campaña.");
+					//exception_message(error);
+				}
+			}
+			
+			protected function exception_message(error:Error):void{
+				
+				var stackTraceText:String = ObjectUtil.toString(error.getStackTrace());
+				var messageText:String = error.message;
+				var toStringText:String = error.toString();
+				var nameText:String = error.name;
+				var errorIdText:String = String(error.errorID);
+				
+				Alert.show(stackTraceText+"  "+ messageText +"  "+nameText);
+			}
+			
+			protected function guardar():void{
+				
+				try{
+					
+					var contador:int = 0;
+					var contador_local:int = 0;					
+					var resultado_campana:ResultadosInbound_Campana = new ResultadosInbound_Campana();
+					var resultado_todas:ResultadosInbound_Campana = new ResultadosInbound_Campana();
+					var Campana_Todas:ArrayCollection = dg_res_campana.dataProvider as ArrayCollection;					
+					contador = ModificacionesPendientes.length -1 ;
+					numero_cambios=contador;
+					datosCMBXCampana
+					
+					if(fla_todas_campanas == 1){
+						roResultadosInbound.deleteCampanaInbound_Todas();
+						while (contador_local < datosCMBXCampana.length){
+							var contador_resultado:int = 0;
+							for (contador_resultado; contador_resultado < Campana_Todas.length; contador_resultado ++ ){
+								resultado_todas =  ResultadosInbound_Campana (Campana_Todas.getItemAt(contador_resultado));
+								resultado_todas.id_camp = datosCMBXCampana[contador_local].id_camp
+								roResultadosInbound.createCampanaInbound(resultado_todas); 
+							}
+							contador_local = contador_local + 1;
+						}
+						numero_cambios = 0;	
+						contador --;
+					}
+					else{
+						if(contador == -1){
+							Alert.okLabel = "Aceptar";
+							Alert.show("No hay nada que guardar.");
+							return;
+						}
+						for(contador; contador >= 0;contador --){
+							resultado_campana =  ResultadosInbound_Campana (ModificacionesPendientes.getItemAt(contador));
+							//resultado_campana.id_camp = datosCMBXCampana[contador_local].id_camp
+								
+							contador_local=0;
+							switch(resultado_campana.var_control){
+								case 1: 
+									roResultadosInbound.createCampanaInbound(resultado_campana); 
+									break;
+							
+								case 2:		
+									roResultadosInbound.deleteCampanaInbound(resultado_campana);
+									break;
+					
+								case 3:
+									roResultadosInbound.updateCampanaInbound(resultado_campana); 
+									break;
+							}
+						}
+					
+					}
+					cargaDatos();
+				}
+				catch(error:Error){
+					exception_message(error);
+				}
+			}
+			
+			
+			protected function resultHandlercreateCampanaInbound(event:ResultEvent):void{
+				trace("resultHandlercreateCampanaInbound, NumCam "+numero_cambios)
+				
+
+				if(numero_cambios == 0){
+					if(event.result == 1){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+					}
+					else{
+						Alert.okLabel = "Aceptar";
+						Alert.show("Ha ocurrido un error al insertar el resultado ","Error");
+						if(fla_todas_campanas == 1)
+							Alert.okLabel = "Aceptar";
+							Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+					}
+						
+				}
+							
+				numero_cambios = numero_cambios -1;
+			}
+			
+			protected function resultHandlerdeleteCampanaInbound(event:ResultEvent):void{
+				trace("resultHandlerdeleteCampanaInbound, NumCam "+numero_cambios)
+				
+				if(numero_cambios == 0){
+					if(event.result == 1){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+					}
+					else{			
+						if(fla_todas_campanas == 1){
+							Alert.okLabel = "Aceptar";
+							Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+						}
+						Alert.okLabel = "Aceptar";
+						Alert.show("Ha ocurrido un error al eliminarr el resultado ","Error");
+					}					
+				}
+				
+				numero_cambios = numero_cambios -1;
+			}
+			
+			protected function resultHandlerdelete_Todas(event:ResultEvent):void{		
+				if(event.result == -1){						
+					Alert.okLabel = "Aceptar";
+					Alert.show("Ha ocurrido un error al eliminar el resultado ","Error");
+				}					
+			}
+					
+			protected function resultHandlerupdateCampanaInbound(event:ResultEvent):void{
+				trace("resultHandlerupdateCampanaInbound, NumCam "+numero_cambios)
+				
+				if(numero_cambios == 0){
+					if(event.result == 1){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+					}
+					else{
+						Alert.okLabel = "Aceptar";
+						Alert.show("Ha ocurrido un error al modificar el resultado ","Error");		
+						if(fla_todas_campanas == 1){
+							Alert.okLabel = "Aceptar";
+							Alert.show("Se ha realizado la modificación exitosamente.","Tarea realizada");
+						}
+					}					
+				}
+				
+				numero_cambios = numero_cambios -1;
+			}
+			
+			public function cambioEstatus(resultado_campana:ResultadosInbound_Campana):void{
+					ModificarResultadoACampana(resultado_campana);
+			}
+			
+			protected function resultHandlerdeleteResultadoCampanaInbound(event:ResultEvent):void{
+				if(event.result == 1){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Se ha eliminado con éxito");
+					return;
+				}
+				Alert.okLabel = "Aceptar";
+				Alert.show("Ha ocurrido un error al eliminar el resultado ","Error");
+				
+			}
+			protected function bt_eliminarResultado_clickHandler():void
+			{
+				try{
+					
+					if(fla_camp_modif==1 ){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Se han realizado cambios\nDebe guardar o cancelar los cambios antes de conitnuar.");
+						return;
+					}
+					
+					if ( dg_result.selectedItem.id_res_in == 1 ||  dg_result.selectedItem.id_res_in == 2 || dg_result.selectedItem.id_res_in == 3 || dg_result.selectedItem.id_res_in == 4 || dg_result.selectedItem.id_res_in == 5  ){
+						Alert.okLabel = "Aceptar";
+						Alert.show("Has seleccionado un resultado que no se puede eliminar");
+						return;
+					}
+					
+					try{
+						Alert.yesLabel = "Si";
+						Alert.cancelLabel="Cancelar";
+						Alert.noLabel = "No";				
+						Alert.show("¿Desea elimiar el resultado?", "Aviso", Alert.YES |Alert.NO, this, eliminarResultado, null, Alert.YES);
+					
+					}catch(error:Error){
+						Alert.show(""+error);
+					}
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";
+					Alert.show("Debe seleccionar un resultado.");
+					//exception_message(error);
+				}
+			}
+			
+			private function eliminarResultado(eventObj:CloseEvent):void{
+				
+					if (eventObj.detail==Alert.YES){
+						roResultadosInbound.deleteResultadoCampanaInbound(dg_result.selectedItem.id_res_in);
+						cancelar();
+					}
+					
+					if (eventObj.detail==Alert.NO) 
+						return;			
+			}
+				
+			private function p_cerrar():void
+			{
+				try{
+					Alert.yesLabel = "Si";
+					Alert.cancelLabel="Cancelar";
+					Alert.noLabel = "No";
+					
+					
+					if(fla_camp_modif==1)
+						Alert.show("¿Desea guardar los cambios?", "Cerrar", Alert.YES |Alert.NO, this, alertListener, null, Alert.YES);
+					else
+						parent.removeChild(this);
+					
+				}catch(error:Error){
+					Alert.okLabel = "Aceptar";
+					Alert.show(""+error);
+				}
+			}
+			
+			private function cerrar():void{
+				guardar();
+				parent.removeChild(this);
+			
+			}
+			
+			private function alertListener(eventObj:CloseEvent):void {
+				if (eventObj.detail==Alert.YES) 
+					cerrar();
+
+				if (eventObj.detail==Alert.NO) 
+					parent.removeChild(this);
+			}
+			
+			protected function chb_todas_campanas_clickHandler(event:MouseEvent):void
+			{
+				
+				var estatus_inicial:Boolean = chb_todas_campanas.selected;
+				if(fla_camp_modif==1){
+					Alert.show("Se han realizado cambios\nDebe guardar o cancelar los cambios antes de conitnuar.");
+					chb_todas_campanas.selected = ! estatus_inicial;
+					return;
+				}
+				
+				if(datosCMBXCampana.length == 0)
+					roResultadosInbound.findAllcampanas();
+					
+				
+				if (chb_todas_campanas.selected){ // Checkbox en true - Selecciona todas las campanas 
+					cb_campanas.selectedIndex =-1; //Se quita cualquier campana anteriormente seleccionada				
+					roResultadosInbound.findEnNingunaCampanaInbound();//Se hace la llamada a la funcion que llena el DataGrid izquierdo
+					roResultadosInbound.findEnAlgunaCampanaInbound();// Se hace la llamada a la funcion que llena el DataGrid derecho
+					fla_todas_campanas=1; //Se da aviso a la bandera de que se han seleccionado todas las campanas
+					
+					cb_campanas.enabled=false; // Se desactiva el combobox de seleccion de campana
+					id_campana = 0;
+				}
+				else{
+					dg_result.dataProvider.removeAll();
+					dg_res_campana.dataProvider.removeAll();
+					fla_todas_campanas=0;
+					cb_campanas.enabled=true;
+					sub_sec_cancelar();
+				}
+			}
+			/*
+			 *Llena los DataGrid  cuando se usan todas las campanas 
+			*/
+			private function resultHandlerfindEnNingunaCampanaInbound(event:ResultEvent):void{
+				datosGrid = ArrayCollection(event.result)
+				dg_result.dataProvider = datosGrid
+			}
+			
+			private function resultHandlerfindEnAlgunaCampanaInbound(event:ResultEvent):void{
+				dg_res_campana.dataProvider =  ArrayCollection(event.result);
+			}
+			
+			private function resultHandlercountResultadoCampanaInbound(event:ResultEvent):void{
+				//
+			}
+		]]>
+	</fx:Script>
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="alta_modificacion"/>
+	</mx:states>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roResultadosInbound" destination="ResultadosInboundService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			
+			<s:method name="findAllcampanas" result="resultHandlerFindAllcampanas(event)" fault="faultHandler(event)" />
+			<s:method name="findByIdCampanasInbound" result="resultHandlerFindByIdcampanasInbound(event)" fault="faultHandler(event)" />
+			<s:method name="findNoEnUnaCampana" result="resultHandlerfindNoEnUnaCampana(event)" fault="faultHandler(event)" />
+
+			<s:method name="findEnNingunaCampanaInbound" result="resultHandlerfindEnNingunaCampanaInbound(event)" fault="faultHandler(event)" />
+			<s:method name="findEnAlgunaCampanaInbound" result="resultHandlerfindEnAlgunaCampanaInbound(event)" fault="faultHandler(event)" />
+
+			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+			
+			<s:method name="createCampanaInbound" result="resultHandlercreateCampanaInbound(event)" fault="faultHandler(event)" />
+			<s:method name="deleteCampanaInbound" result="resultHandlerdeleteCampanaInbound(event)" fault="faultHandler(event)" />
+			<s:method name="deleteCampanaInbound_Todas" result="resultHandlerdelete_Todas(event)" fault="faultHandler(event)" />
+			<s:method name="updateCampanaInbound" result="resultHandlerupdateCampanaInbound(event)" fault="faultHandler(event)" />
+			<s:method name="deleteResultadoCampanaInbound" result="resultHandlerdeleteResultadoCampanaInbound(event) " fault="faultHandler(event)" />
+			<s:method name="countResultadoCampanaInbound" result="resultHandlercountResultadoCampanaInbound(event)" fault="faultHandler(event)" />
+
+			<s:method name="create" result="resultHandlerCreate(event)" fault="faultHandler(event)" />
+			<s:method name="update" result="resultHandlerUpdate(event)" fault="faultHandler(event)" />
+			<s:method name="remove" result="resultHandlerRemove(event)" fault="faultHandler(event)" />
+			
+
+		</s:RemoteObject>
+
+		<!-- -->
+		<mx:StringValidator id="validator_resultado" source="{te_resultado}" property="text" required="true"  minLength="2" requiredFieldError="Es necesario capturar el nombre del resultado." />
+		
+		<!--
+		<mx:StringValidator id="validator_descripcion" source="{te_descripcion}" property="text"  required="true" />
+		-->
+	
+	</fx:Declarations>
+	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
+		
+		<s:Button label="Close" />
+	</s:HGroup>
+	
+	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" right="319" height="325" >
+		<s:layout>
+			<s:FormLayout paddingTop="-10" paddingLeft="0" gap="0" rowHeight="35" requestedRowCount="10" />
+		</s:layout>
+		<s:FormItem width="265" label="ID Resultados Inbound" required="true">
+			<s:TextInput id="id_res_in" text="{resultados.id_res_in}" editable="false"/>
+		</s:FormItem>
+		<s:FormItem width="265" label="Resultado" required="false">
+			<s:TextInput id="resultado" text="{resultados.resultado}"/>
+		</s:FormItem>
+		<s:FormItem left="2" top="0" width="265" label="Descripcion" >
+			<s:TextInput id="descripcion" editable="true" text="{resultados.descripcion}"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Group includeIn="grid" x="0" y="0" width="762" height="360">
+		<s:TextInput id="te_resultado" x="88" y="21" width="166" enabled="false"/>
+		<s:Label x="21" y="31" text="Resultado: "/>
+		<s:Button id="bt_agregar" x="188" y="55" label="Agregar"
+				  click="bt_agregar_clickHandler()" enabled="false"/>
+		
+		<s:ComboBox id="cb_campanas" x="429" y="21" change="cb_campanas_changeHandler(event)"
+					dataProvider="{datosCMBXCampana}" labelField="nombre_camp"/>
+		
+		
+		<s:Label x="360" y="31" text="Campaña: "/>
+		<s:CheckBox id="chb_todas_campanas" x="570" y="57"
+					click="chb_todas_campanas_clickHandler(event)" enabled="false"/>
+
+	
+		
+		<s:DataGrid id="dg_result" x="71" y="87" width="183" height="210" enabled="false"
+					requestedRowCount="4" >
+			<s:columns>
+				<s:ArrayList>
+					<s:GridColumn dataField="resultado" headerText="Resultado"></s:GridColumn>
+				</s:ArrayList>
+			</s:columns>
+			<s:typicalItem>
+				<fx:Object dataField1="Sample Data" dataField2="Sample Data" ></fx:Object>
+			</s:typicalItem>
+			<s:ArrayList>
+				<fx:Object dataField1="data1"></fx:Object>
+				<fx:Object dataField1="data2"></fx:Object>
+				<fx:Object dataField1="data3"></fx:Object>
+				<fx:Object dataField1="data4"></fx:Object>
+			</s:ArrayList>
+		</s:DataGrid>
+		
+		<s:VGroup x="263" y="121" width="59" height="138">
+			<s:Button id="bt_a1" width="59"  click="bt_a1_clickHandler()" label="-&gt;" enabled="false"/>
+			<s:Button id="bt_q1" width="59"  click="bt_q1_clickHandler()" label="&lt;-" enabled="false"/>
+			<s:Button id="bt_at" width="59"  click="bt_at_clickHandler()" label="&gt;&gt;" enabled="false"/>
+			<s:Button id="bt_qt" width="59"  click="bt_qt_clickHandler()" label="&lt;&lt;" enabled="false"/>
+		</s:VGroup>
+		
+		
+		<s:DataGrid id="dg_res_campana" x="330" y="87" width="301" height="210" enabled="false"
+					requestedRowCount="4">
+			<s:columns>
+				<s:ArrayList>
+					<s:GridColumn dataField="resultado" headerText="Resultado"></s:GridColumn>
+					<s:GridColumn width="71" dataField="estatus" headerText="Estado">
+						<s:itemRenderer>
+							<fx:Component>
+								<s:GridItemRenderer>
+									<fx:Script >
+										<![CDATA[
+											import formas.catalogoResultadosInbound;
+											
+											import mx.controls.Alert;
+											import mx.core.FlexGlobals;
+											
+											import objectosJava.ResultadosInbound_Campana;
+											
+											private var _myData:Object;
+											
+											private function init():void {
+												
+											}
+											
+											override public function set data(o:Object):void{
+												_myData = o;
+												if(o != null)
+												cb_estatus.selected = o.estatus ;
+											}
+											
+											private function onChange(evt:Event):void {
+												_myData.estatus = cb_estatus.selected; //Se obtiene el estatus actual
+												_myData.var_control = 3; //Se notifica que se trata de un cambio de estatus
+												outerDocument.cambioEstatus(ResultadosInbound_Campana(_myData)); //Se manda a llamar a la funcion del flujo de arriba
+											}
+										]]>
+									</fx:Script>
+									<s:CheckBox id="cb_estatus" horizontalCenter="0"  selected="{data.estatus}" change="onChange(event) "  />
+
+								</s:GridItemRenderer>
+							</fx:Component>
+						</s:itemRenderer>
+						
+					</s:GridColumn>
+			
+				</s:ArrayList>
+			</s:columns>
+			
+			<s:ArrayList>
+				<fx:Object dataField1="data1" dataField2="data1" dataField3="data1"></fx:Object>
+			</s:ArrayList>
+		</s:DataGrid>
+		
+		<s:Button id="bt_editar" x="676" y="122" width="74" label="Editar" click="editar()"
+				  enabled="true"/>
+		<s:Button id="bt_guardar" x="676" y="153" width="74" label="Guardar" click="guardar()"
+				  enabled="false"/>
+		<s:Button id="bt_cancelar" x="676" y="185" width="74" label="Cancelar" click="cancelar()"
+				  enabled="false"/>
+		<s:Button id="bt_eliminarResultado" x="192" y="314" label="Eliminar"
+				  click="bt_eliminarResultado_clickHandler()" enabled="false"/>
+		<s:Button x="676" y="314" width="74" label="Cerrar" click="p_cerrar()"/>
+		<s:Label x="526" y="62" text="Todas"/>
+		
+		
+	</s:Group>
+</mx:Canvas>
+

@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="95%" height="95%"
+		   label="{nombreCatalogo}"
+		   creationComplete="CargaDatos()">
+	<fx:Script>
+		<![CDATA[
+			import formas.Agentes;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.messaging.Consumer;
+			import mx.messaging.Producer;
+			import mx.messaging.events.MessageAckEvent;
+			import mx.messaging.events.MessageEvent;
+			import mx.messaging.events.MessageFaultEvent;
+			import mx.messaging.messages.AsyncMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.xml.SimpleXMLEncoder;
+			
+			import objectosJava.*;
+			
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var chanel:String;
+			[Bindable] public var message:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var llamada:Llamada = new Llamada();
+			[Bindable] public var supervisores:ArrayCollection;
+			[Bindable] public var estado:int;
+			[Bindable] public var evento:Evento = new Evento();
+			[Bindable] public var resultadosin:ArrayCollection;
+			[Bindable] public var resultadosout:ArrayCollection;
+			[Bindable] public var campanaagente:ArrayCollection;
+			[Bindable] public var hora_pausa:String;
+			[Bindable] public var fecha:Date = new Date();
+			
+			[Bindable] public var msg:AsyncMessage = new AsyncMessage();
+			var temporizador:Timer=new Timer(30000,1);
+			
+			[Bindable] public var ComboPausa:ArrayCollection = new ArrayCollection(
+			[{label:"Junta", data:1}, 
+			{label:"Baño", data:2},
+			{label:"Comida", data:3},
+			{label:"Break Descanso", data:4},
+			{label:"Capacitación", data:5},
+			{label:"Otros", data:6},
+			{label:"Inicio Sesión", data:7}]);
+			
+			[Bindable] public var ComboInicio:ArrayCollection = new ArrayCollection(
+			[{label:"Pausa", data:2}, 
+			{label:"Disponible", data:3}]); 
+			
+			[Bindable] public var ComboPost:ArrayCollection = new ArrayCollection(
+			[{label:"Post-Llamada", data:6},
+			{label:"Disponible", data:3}]); 
+			
+			[Bindable] public var ComboRecibiendo:ArrayCollection = new ArrayCollection(
+			[{label:"Recibiendo", data:5},
+			{label:"Post-Llamada", data:6}]); 
+			
+			[Bindable] public var ComboRealizando:ArrayCollection = new ArrayCollection(
+			[{label:"Realizando", data:4},
+			{label:"Post-Llamada", data:6}]);
+			
+			
+			protected function CargaDatos():void{
+				this.folio.editable = false;
+				this.Clave.editable = false;
+				this.Cliente.editable = false;
+				this.Telefono.editable = false;
+				this.Campana.editable = false;
+				this.Tipo.editable = false;
+				this.Folio_Grabacion.editable = false;
+				this.id_actividad_pausa.textInput.editable = false;
+				this.ComboResultado.textInput.editable = false;
+				this.ComboResultado.enabled = false;				
+				this.id_estado.textInput.editable = false;
+				this.btnFinalizar.visible = false;
+				
+				temporizador.addEventListener(TimerEvent.TIMER, Tiempo_Postllamada);				
+				id_estado.dataProvider = ComboInicio;
+				estado = 2;
+				id_estado.selectedIndex = 0;
+				id_actividad_pausa.selectedIndex = 6;
+				hora_pausa = fecha.hours + ":"+fecha.minutes +":"+fecha.seconds;
+				subscribir();
+				roagentecampana.Find_CampanaAgente(usuariologeado.id_usr);
+				
+			}
+			protected function subscribir():void
+			{				
+				var selector:String= "usuario = "+usuariologeado.id_usr;
+				messageConsumerAgentes.selector = "usuario = "+usuariologeado.id_usr;
+				messageConsumerAgentes.subscribe();					
+			}
+			
+			private function Tiempo_Postllamada(e:TimerEvent):void{
+				trace("Se termino el tiempo Post-Llamada");
+				Alert.show("Alert Se termino el tiempo Post-Llamada");
+				roevento.Finaliza_EventoOutbound(14,evento.id_evento);
+				roevento.Actualiza_Fechas(3,evento.id_evento);
+				roevento.Update_Estado(usuariologeado.id_usr,3);
+				id_estado.dataProvider = ComboInicio;
+				id_estado.selectedIndex = 1;
+				estado = 3;
+				btnFinalizar.visible = false;
+				ComboResultado.enabled = false;
+				ComboResultado.selectedIndex = -1;
+				id_estado.enabled = true;
+				llamada = new Llamada();
+				temporizador.reset();			
+			}
+			
+			private function Realizar_Llamada():void{
+				if(estado == 3){
+					var VentanaAlarma:Llamada_Dialer;
+					VentanaAlarma = Llamada_Dialer(PopUpManager.createPopUp(this, Llamada_Dialer, false));
+					VentanaAlarma.endpoint = endpoint;
+					VentanaAlarma.campanaagente = campanaagente;
+					VentanaAlarma.usuariologeado = usuariologeado;
+					VentanaAlarma.setStyle("borderAlpha", 0.9);
+					VentanaAlarma.closeButton.visible = false;	
+					PopUpManager.centerPopUp(VentanaAlarma);
+					PopUpManager.bringToFront(VentanaAlarma);
+					estado = 4;
+					Cambia_Estado();
+					VentanaAlarma.addEventListener(MouseEvent.CLICK,myEventHandler);					
+				}
+				else
+					Alert.show("Debe de cambiar su estado a 'Disponible' para realizar una llamada ");
+			}
+			
+			private function myEventHandler(event:MouseEvent):void {
+				if(event.target.id == "Cancelar"){
+					estado = 3
+					id_estado.dataProvider = ComboInicio;
+					id_estado.selectedIndex = 1;
+					llamada = new Llamada();
+				}
+			}
+		
+			public function Cambia_Estado():void{
+				if (estado == 4){
+					id_estado.dataProvider = ComboRealizando;
+					id_estado.selectedIndex = 0;
+					if(folio.text != "0" ){
+						roevento.Actualiza_Fechas(1,evento.id_evento);
+					}
+				}
+				if (estado == 5){
+					id_estado.dataProvider = ComboRecibiendo;
+					id_estado.selectedIndex = 0;
+					roevento.Actualiza_Fechas(1,evento.id_evento);
+				}
+				roevento.Update_Estado(usuariologeado.id_usr,estado);
+				rosupervisor.Find_ConectSupervisor(usuariologeado.id_usr);
+			}
+			
+			public function Verifica_Resultado():void{
+				if(ComboResultado.selectedIndex == -1)
+					Alert.show("Para Finalizar un evento se debe seleccionar un resultado. ¿Desea finalizar el evento sin resultado? "
+								,"Información",Alert.OK| Alert.NO,this,Finaliza_Evento,null,Alert.OK);			
+				else{
+					var resultado:int;
+					if (llamada.tipo_evento == "Inbound" ||llamada.tipo_evento == "Mensaje" ){
+						resultado = ComboResultado.selectedItem.id_res_in;	
+						roevento.Finaliza_EventoInbound(resultado,evento.id_evento);
+					}
+					else{
+						resultado = ComboResultado.selectedItem.id_res_out;	
+						roevento.Finaliza_EventoOutbound(resultado,evento.id_evento);
+					}
+					roevento.Actualiza_Fechas(3,evento.id_evento);
+					roevento.Update_Estado(usuariologeado.id_usr,3);
+					id_estado.dataProvider = ComboInicio;
+					id_estado.selectedIndex = 1;
+					btnFinalizar.visible = false;
+					ComboResultado.enabled = false;
+					ComboResultado.selectedIndex = -1;
+					id_estado.enabled = true;
+					estado = 3;
+					llamada = new Llamada();
+					temporizador.reset();
+				}
+			}
+			
+			public function Finaliza_Evento(eventObj:CloseEvent):void{			
+				if(eventObj.detail==Alert.OK){		
+					if (llamada.tipo_evento == "Inbound" ||llamada.tipo_evento == "Mensaje" ){
+						roevento.Finaliza_EventoInbound(6,evento.id_evento);
+					}
+					else{
+						roevento.Finaliza_EventoOutbound(14,evento.id_evento);
+					}
+					roevento.Actualiza_Fechas(3,evento.id_evento);
+					roevento.Update_Estado(usuariologeado.id_usr,3);
+					id_estado.dataProvider = ComboInicio;
+					id_estado.selectedIndex = 1;
+					estado = 3;
+					btnFinalizar.visible = false;
+					ComboResultado.enabled = false;
+					ComboResultado.selectedIndex = -1;
+					id_estado.enabled = true;
+					llamada = new Llamada();
+					temporizador.reset();
+				}
+			}
+			
+			
+			public function Change_HandlerEstado(event:Event):void{
+				var estado_anterior:int = estado;
+				estado = ComboBox(event.target).selectedItem.data;
+				
+				if (estado_anterior == 2){
+					roevento.Actualiza_AcumuladoPausa(hora_pausa,usuariologeado.id_usr);
+					//Alert.show("La hora que se envio  es " + hora_pausa);
+				}
+					
+				
+				if (estado == 3){
+					id_estado.dataProvider = ComboInicio;
+					id_estado.selectedIndex = 1;
+					llamada = new Llamada();
+				}	
+				if (estado == 6){
+					temporizador.start();
+					id_estado.enabled = false;
+					id_estado.dataProvider = ComboPost;
+					id_estado.selectedIndex = 0;
+					roevento.Actualiza_Fechas(2,evento.id_evento);
+					
+					ComboResultado.enabled = true;
+					btnFinalizar.visible = true;
+			
+				}else{
+					//id_estado.enabled = true;
+					ComboResultado.enabled = false;
+					ComboResultado.selectedIndex = -1;
+					btnFinalizar.visible = false;
+				}	
+				if (estado == 2){
+					id_actividad_pausa.enabled = true;
+					fecha = new Date();
+					hora_pausa = fecha.hours + ":"+fecha.minutes +":"+fecha.seconds;
+				//	Alert.show("La fecha es " + hora_pausa);
+					
+				}else{
+					id_actividad_pausa.enabled = false;
+					id_actividad_pausa.selectedIndex = -1;
+				}
+				roevento.Update_Estado(usuariologeado.id_usr,estado);
+				rosupervisor.Find_ConectSupervisor(usuariologeado.id_usr);
+			}
+			
+			private function Message_handleResponse(event:MessageEvent):void
+			{
+				//var id_evento:int;
+				var id_notificacion:int;
+				estado = int(event.message.headers["id_estado"]);
+				evento.id_evento = int(event.message.headers["id_evento"]);
+				id_notificacion = int(event.message.headers["id_notificacion"]);
+				if (id_notificacion == 1){
+					roevento.Find_Evento(evento.id_evento);
+					
+				}
+				else{
+					estado = 3
+					id_estado.dataProvider = ComboInicio;
+					id_estado.selectedIndex = 1;
+					llamada = new Llamada();
+					roevento.Actualiza_Fechas(3,evento.id_evento);
+					roevento.Finaliza_EventoOutbound(2,evento.id_evento);
+					Alert.show("La Llamada no pudo ser enlazada");
+					
+				}
+			}
+			
+			protected function messageProducer_faultHandler(event:MessageFaultEvent):void
+			{
+				Alert.show(event.message.faultString+'\n '+event.message.faultDetail+event.message.faultCode,"Error");
+			}
+			
+			private function result_UpdateEstado(event:ResultEvent):void{
+				var ok:int = int(event.result);
+				if(!ok)
+					Alert.show("Error en el cambio de estado");	
+			}
+			
+			private function result_FinalizaEvento(event:ResultEvent):void{
+				var ok:int = int(event.result);
+				if(!ok)
+					Alert.show("Error al asignar resultado");	
+			}
+			
+			private function result_ActualizaFechas(event:ResultEvent):void{
+				var ok:int = int(event.result);
+				if(!ok)
+					Alert.show("Error al registrar Fecha");	
+			}
+			
+			private function result_ActualizaAcumulado(event:ResultEvent):void{
+				var ok:int = int(event.result);
+				if(!ok)
+					Alert.show("Error al registrar Fecha");	
+			}
+			
+			
+			private function result_FindCampanaAgente(event:ResultEvent):void{
+				campanaagente = ArrayCollection(event.result);	
+			}
+			
+			private function result_FindEvento(event:ResultEvent):void{
+				llamada = Llamada(event.result);	
+				if (llamada.tipo_evento == "Inbound" ||llamada.tipo_evento == "Mensaje" )
+					roresultadosin.findAll();
+				if (llamada.tipo_evento == "Outbound"||llamada.tipo_evento == "Dialer")
+					roresultadosout.findAll();
+				Cambia_Estado();
+			}
+			
+			private function result_findAllInbound(event:ResultEvent):void{
+				resultadosin = ArrayCollection(event.result);	
+				ComboResultado.dataProvider = resultadosin;
+				
+			}
+			
+			private function result_findAllOutbound(event:ResultEvent):void{
+				resultadosout = ArrayCollection(event.result);	
+				ComboResultado.dataProvider = resultadosout;
+			}
+			
+			public function result_ConectSupervisor(event:ResultEvent):void{
+				supervisores = ArrayCollection(event.result);
+				for (var id_super:int=0; id_super<supervisores.length; id_super++){
+					var obj:Object = new Object();
+					obj["usuario"] = supervisores.getItemAt(id_super).id_usr;
+					obj["id_estado"] = estado;		
+					msg.headers = obj;
+					messageProducer.send(msg);
+				}
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			protected function messageConsumerAgentes_acknowledgeHandler(event:MessageAckEvent):void
+			{
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations> 
+		
+		<s:RemoteObject id="roevento" destination="EventoService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Update_Estado" result="result_UpdateEstado(event)" fault="faultHandler(event)" />
+			<s:method name="Find_Evento" result="result_FindEvento(event)" fault="faultHandler(event)" />
+			<s:method name="Finaliza_EventoInbound" result="result_FinalizaEvento(event)" fault="faultHandler(event)" />
+			<s:method name="Finaliza_EventoOutbound" result="result_FinalizaEvento(event)" fault="faultHandler(event)" />
+			<s:method name="Actualiza_Fechas" result="result_ActualizaFechas(event)" fault="faultHandler(event)" />
+			<s:method name="Actualiza_AcumuladoPausa" result="result_ActualizaAcumulado(event)" fault="faultHandler(event)" />
+			
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="rosupervisor" destination="SupervisorService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Find_ConectSupervisor" result="result_ConectSupervisor(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roresultadosout" destination="ResultadosOutboundService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="result_findAllOutbound(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roresultadosin" destination="ResultadosInboundService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="result_findAllInbound(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roagentecampana" destination="AgenteCampanaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Find_CampanaAgente" result="result_FindCampanaAgente(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:Consumer id="messageConsumerAgentes" destination="agentes" 	
+					message="Message_handleResponse(event)" 
+					channelSet="{msjChannel}" 
+					fault="messageProducer_faultHandler(event)"
+					acknowledge="messageConsumerAgentes_acknowledgeHandler(event)"/>
+	
+		<s:Producer id="messageProducer" destination="agentes" channelSet="{msjChannelEstado}" 
+					fault="messageProducer_faultHandler(event)" />
+		
+		
+		<s:ChannelSet  id="msjChannel" > 
+			<s:channels>
+				<s:AMFChannel uri= "{chanel}"/>
+			</s:channels>
+		</s:ChannelSet>
+		
+		<s:ChannelSet  id="msjChannelEstado" > 
+			<s:channels>
+				<s:AMFChannel uri= "{message}"/>
+			</s:channels>
+		</s:ChannelSet>
+		
+	</fx:Declarations>
+	<s:Form x="10" y="10" width="508" height="305">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		<s:FormHeading label="Información del Evento" />
+		<s:FormItem x="0" y="54" width="110" height="57">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Folio"/>
+			<s:TextInput id="folio" width="70" text="{llamada.folio_evento}"/>
+		</s:FormItem>
+		<s:FormItem x="130" y="54" width="110" height="57">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Clave"/>
+			<s:TextInput id="Clave" width="70"/>
+		</s:FormItem>
+		<s:FormItem x="258" y="54" width="220" height="57">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label   text="Campaña"/>
+			<s:TextInput id="Campana" width="180" text="{llamada.nombre_camp}"/>
+		</s:FormItem>
+		<s:FormItem x="0" y="133" width="239" height="57">
+			<s:Label text="Cliente"/>
+			<s:TextInput  id="Cliente" x="69" y="173" width="200" text="{llamada.nombre}"/>
+		</s:FormItem>
+		<s:FormItem x="258" y="133" width="220" height="57">
+			<s:Label  text="Teléfono"/>
+			<s:TextInput id="Telefono" x="258" y="79"  text="{llamada.num_telefono}"/>
+		</s:FormItem>
+		<s:FormItem x="0" y="207" height="57">
+			<s:Label   text="Tipo"/>
+			<s:TextInput id="Tipo" x="0" y="144" text="{llamada.tipo_evento}"/>
+		</s:FormItem>
+		<s:FormItem x="184" y="207" height="57">
+			<s:Label   text="Folio de Grabación" />
+			<s:TextInput id="Folio_Grabacion" x="184" y="179"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Form x="526" y="10" width="183" height="305">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		<s:FormHeading label="Panel de Control" />
+		<s:FormItem x="0" y="56" width="170" height="57">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Estado"/>
+			<s:ComboBox id="id_estado" change="Change_HandlerEstado(event)"/>
+		</s:FormItem>
+		<s:FormItem x="0" y="133" width="170" height="57">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Actividad"/>
+			<s:ComboBox id="id_actividad_pausa" dataProvider="{ComboPausa}"/>
+		</s:FormItem>
+		<s:FormItem x="0" y="208" width="170" height="89">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Resultado"/>
+			<s:ComboBox id="ComboResultado" labelField="resultado"/>
+			<s:Button id="btnFinalizar" label="Finalizar" click="Verifica_Resultado()"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Group x="10" y="323" width="508" height="49">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		<s:Button x="10" y="15" width="114" label="Llamar" click="Realizar_Llamada()"/>
+		<s:Button x="186" y="14" width="116" label="Grabar"/>
+		<s:Button x="362" y="15" width="125" label="Mandar Mensaje"/>
+	</s:Group>
+</mx:Canvas>

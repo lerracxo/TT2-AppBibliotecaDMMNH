@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300"
+		 label="{nombreCatalogo}" creationComplete="cargaDatos()">
+	
+	<fx:Metadata>
+		[Event(name="desplegarCreated", type="DesplegarAlEvent")]
+		[Event(name="desplegarUpdated", type="DesplegarAlEvent")]
+		[Event(name="desplegarDeleted", type="DesplegarAlEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import flashx.textLayout.formats.Float;
+			
+			import formas.VentanaPopUp;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;	
+			import objectosJava.Campana;
+			import objectosJava.Indicadores;
+			
+			import spark.components.TitleWindow;
+			
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var ventanaPop:VentanaPopUp;
+			[Bindable] public var tituloAlarma:String;
+			[Bindable] public var contenidoAlarma:String;
+			[Bindable] public var numMinimoAgentes:int;
+			[Bindable] public var numAgentesConectados:int;
+			[Bindable] public var numLlamadasFila:int;
+			[Bindable] public var numMaximoLlamadasFila:int;
+			[Bindable] public var numMaximoTiempoPausa:int;
+			[Bindable] public var numMensajesEnFila:int;
+			[Bindable] public var numMaximoMensajesFila:int;
+			[Bindable] public var listaAgentesTiempoAcumulado:ArrayCollection;
+			[Bindable] public var listaCampaniasOutbound:ArrayCollection;
+			[Bindable] public var numTotalTelefonos:int;
+			[Bindable] public var numTelefonosPorCampanias:int;
+			[Bindable] public var nombre_campania:String;
+			
+			private function cargaDatos():void{
+				//Inicializacion de variables
+				numTelefonosPorCampanias = 0;
+				numTotalTelefonos = 0;
+			}
+			
+			// Open the pop-up window.
+			
+			
+			private function faultHandler(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			private function result_llamadasAbandonadas(event:ResultEvent):void{
+				var numeroLlamAbandonadas:int;
+				if (event.result != null)
+					numeroLlamAbandonadas = int(event.result);
+			}
+			
+			private function mostrarTodasAlarmas():void{
+				Alert.show("Cadena","Información");
+			}
+
+			private function result_llamadasAtendidas(event:ResultEvent):void{
+				
+			}
+
+			private function result_buscaNumeroAgentesMaxTiempo(event:ResultEvent):void{
+				
+			}
+			
+			private function result_buscaNumeroLlamadasMaxTiempo(event:ResultEvent):void{
+				if (event.result != null){
+					var numLlamadasMaxTiempo:int;
+					numLlamadasMaxTiempo = int(event.result);
+					
+					//Alert.show("numLlamadasMaxTiempo = "+numLlamadasMaxTiempo.toString(),"Alarma Tiempo máximo en fila");
+					if (numLlamadasMaxTiempo > 0){
+						tituloAlarma = "Tiempo máximo en fila";
+						contenidoAlarma = "Hay "+String(numLlamadasMaxTiempo)+" llamadas que han llegado al tiempo máximo de espera en fila";
+						muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+					}
+				}
+			}
+			
+			private function result_alarmaTodosAgentes(event:ResultEvent):void{
+				var numAgentesConectados:int;
+				if (event!= null){
+					numAgentesConectados = int(event.result);
+				}
+			}
+			
+			private function result_indicadorAgentesConectados(event:ResultEvent):void{
+				
+			}
+			
+			private function result_indicadorPausaAcumulado(event:ResultEvent):void{
+				
+			}
+			
+			private function result_indicadorLlamAtendidas(event:ResultEvent):void{
+				
+			}
+			
+			private function muestraVentanaPopUp(tituloVentana:String, contenidoMensaje:String):void{
+				ventanaPop = VentanaPopUp(PopUpManager.createPopUp(this, VentanaPopUp, false));
+				ventanaPop.title = tituloVentana
+				//ventanaPop.lblMensajeAlarma.text = "Esta es una prueba.........."
+				ventanaPop.taMensajeAlarma.text  = contenidoMensaje
+				// Make title bar slightly transparent.
+				ventanaPop.setStyle("borderAlpha", 0.9);
+				
+				// Hide the close button.
+				ventanaPop.closeButton.visible = false;
+				
+				PopUpManager.centerPopUp(ventanaPop);
+				PopUpManager.bringToFront(ventanaPop);
+			}
+			
+			private function despliegaAlarmasInternas():void{
+				//Las alaramas internas indican al usuario
+				// - Número mínimo de agentes conectados en horario laboral
+				// - Límite de tiempo en llamadas
+				// - Tiempo máximo en pausa
+				// - Cantidad máxima de cambios entre estados de agente
+				roDespliegaAlarmas.regresaMinAgentesConectados();
+				roDespliegaAlarmas.regresaAgentesTiempoMaxLlamada();
+				roDespliegaAlarmas.regresaMaxTiempoPausa();
+			}
+			
+			private function despliegaAlarmasExternas():void{
+				var condicion:String;
+				//Las alaramas externas indican al usuario
+				// - Número máximo de llamadas en fila
+				// - Número máximo de mensajes en fila
+				// - Tiempo máximo en fila
+
+				//2 Llamadas en Fila
+				condicion = "2";
+				roIndicadorLlamEnFila.buscaIndicador(condicion);
+
+				// 16  - Mensaje en espera (Mensaje en Fila)
+				condicion = "16";
+				roIndicadorMensajeEnFila.buscaIndicador(condicion);
+				
+				//Llamadas en fila que sobrepasan el tiempo limite
+				roIndicadorLlamadasMaxTiempo.buscaNumeroLlamadasMaxTiempo();
+			}
+			
+			private function despliegaAlarmasCampanias():void{
+				//Las alaramas de las campañas
+				// - Porcentaje bajo
+				// - Porcentaje medio
+				roDespliegaAlarmas.regresaTotalNumerosTelefonicos();
+			}
+			
+			private function result_regresaMinAgentesConectados(event:ResultEvent):void{
+				if (event.result != null){
+					numMinimoAgentes = int(event.result);
+					roDespliegaAlarmas.regresaNumAgentesConectados();
+				}
+			}
+			
+			private function result_regresaNumAgentesConectados(event:ResultEvent):void{
+				if (event.result != null){
+					numAgentesConectados = int(event.result);
+					
+					//Alert.show("numMinimoAgentes = "+String(numMinimoAgentes),"numAgentesConectados = "+String(numAgentesConectados));
+					if (numAgentesConectados < numMinimoAgentes ){
+						tituloAlarma = "Mínimo de agentes conectados"
+						contenidoAlarma = "No existe el número mínimo de agentes conectados para laborar"
+						muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+					}
+				}
+			}
+			
+			private function result_llamadasEnFila(event:ResultEvent):void{
+				if (event.result != null){
+					numLlamadasFila = int(event.result);
+					
+					//Alert.show("numLlamadasFila = "+String(numLlamadasFila),"Info");
+					if (numLlamadasFila>0)
+						roDespliegaAlarmas.regresaMaxLlamadasFila();
+				}
+			}
+			
+			private function result_regresaMaxLlamadasFila(event:ResultEvent):void{
+				if (event.result != null){
+					numMaximoLlamadasFila = int(event.result);
+					
+					//Alert.show("Numero de llamadas en fila"+String(numLlamadasFila),"Maximo = "+String(numMaximoLlamadasFila));
+					if (numLlamadasFila>= numMaximoLlamadasFila){
+						tituloAlarma = "Número de llamadas en fila";
+						contenidoAlarma = "Se ha alcanzado el número máximo de llamadas en fila";
+						muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+					}
+				}
+			}
+			
+			private function result_regresaMaxTiempoFila(event:ResultEvent):void{
+				
+			}
+			
+			private function result_regresaAgentesTiempoMaxLlamada(event:ResultEvent):void{
+				if (event.result  != null){
+					var listaNombres:ArrayCollection;
+					listaNombres = ArrayCollection(event.result);
+					
+					if (listaNombres!= null && listaNombres.length!=0){
+						tituloAlarma = "Límite de tiempo en llamada";
+						for(var indice:int=0; indice<listaNombres.length; indice++){
+							contenidoAlarma = "El agente "+listaNombres.getItemAt(indice)+" ha llegado al límite de tiempo en llamada";
+							muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+						}
+					}
+				}
+			}
+			
+			private function result_regresaMaxTiempoPausa(event:ResultEvent):void{
+				if (event.result != null){
+					numMaximoTiempoPausa = int(event.result);
+					
+					if (numMaximoTiempoPausa> 0)
+						roGraficaPausa.buscaTiempoAcumulado();
+				}
+			}
+			
+			private function result_buscaTiempoAcumulado(event:ResultEvent):void{
+				if (event.result != null){
+					listaAgentesTiempoAcumulado= ArrayCollection(event.result);
+					
+					if (listaAgentesTiempoAcumulado.length != 0){
+						var indicador:Indicadores;
+						tituloAlarma = "Tiempo máximo en pausa";
+						for(var indice:int = 0; indice< listaAgentesTiempoAcumulado.length; indice++){
+							indicador = new Indicadores();
+							indicador = Indicadores(listaAgentesTiempoAcumulado.getItemAt(indice));
+							if (indicador.cantidad >=  numMaximoTiempoPausa){
+								//Mostrar alarma
+								contenidoAlarma = "El agente "+indicador.nombre+" ha llegado al límite de tiempo en pausa";
+								muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+							}
+						}
+					}
+				}
+			}
+			
+			private function result_mensajesEnFila(event:ResultEvent):void{
+				if (event.result != null){
+					numMensajesEnFila = int(event.result);
+					
+					//Alert.show("numMensajesEnFila = "+String(numMensajesEnFila),"Info");
+					if (numMensajesEnFila != 0)
+						roDespliegaAlarmas.regresaMaxMensajesFila();     
+				}
+			}
+
+			private function result_regresaMaxMensajesFila(event:ResultEvent):void{
+				if (event.result != null){
+					numMaximoMensajesFila = int(event.result);
+					
+					//Alert.show("numMaximoMensajesFila = "+String(numMaximoMensajesFila),"numMaximoMensajesFila");
+					if (numMaximoMensajesFila != 0){
+						if (numMensajesEnFila >= numMaximoMensajesFila) {
+							tituloAlarma = "Número máximo de mensajes en fila";
+							contenidoAlarma = "Se ha alcanzado el número máximo de mensajes en fila"
+							muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+						}
+					}
+				}
+			}
+
+			private function result_regresaTotalNumerosTelefonicos(event:ResultEvent):void{
+				if (event.result != null){
+					numTotalTelefonos = int(event.result);
+					
+					//Alert.show("numTotalTelefonos = "+String(numTotalTelefonos),"result_regresaTotalNumerosTelefonicos()");
+					if (numTotalTelefonos != 0)
+						roCampanias.buscaCampanasPorTipo(0);   	// 0 Campaña outbound
+																// 1 Campaña inbound
+				}
+			}
+			
+			private function result_buscaCampanasPorTipo(event:ResultEvent):void{
+				if (event.result != null){
+					listaCampaniasOutbound = ArrayCollection(event.result);
+					var localCampaniasOutboud:ArrayCollection = new ArrayCollection();
+					
+					
+					localCampaniasOutboud = listaCampaniasOutbound;
+					if (localCampaniasOutboud != null && localCampaniasOutboud.length != 0){
+						var campania:Campana;
+						for (var indice:int= 0; indice<localCampaniasOutboud.length; indice++){
+							campania = new Campana();
+							campania.id_camp     = int(localCampaniasOutboud.getItemAt(indice).id_camp);
+							campania.nombre_camp = String(localCampaniasOutboud.getItemAt(indice).nombre_camp);
+							//Alert.show("Nombre Campaña = "+campania.nombre_camp,"ID_CAMPANIA= "+String(campania.id_camp));
+							nombre_campania = new String();
+							nombre_campania = campania.nombre_camp;
+
+							roDespliegaAlarmas.regresaNumeroLlamadasPorCampania(campania.id_camp, campania.nombre_camp, numTotalTelefonos );
+						}
+					}
+				}
+			}
+			
+			private function result_regresaNumeroLlamadasPorCampania(event:ResultEvent):void{
+				if (event.result != null){
+					var listaCadenas:ArrayCollection = ArrayCollection(event.result);
+					
+					if (listaCadenas.length != 0){
+						tituloAlarma = String(listaCadenas.getItemAt(0));
+						contenidoAlarma = String(listaCadenas.getItemAt(1));
+						muestraVentanaPopUp(tituloAlarma, contenidoAlarma);
+					}
+					//Inicializacion de variables
+					numTelefonosPorCampanias = 0;
+					numTotalTelefonos = 0;
+				}
+			}
+			
+			private function regresaPorcentaje(numTelefonosPorCampaniasLocal:int, numTotalTelefonosLocal:int):Number{
+				var porcentaje:Number = 0;
+				
+				if (numTotalTelefonosLocal != 0 && numTelefonosPorCampaniasLocal <= numTotalTelefonosLocal )
+					porcentaje = (numTelefonosPorCampaniasLocal / numTotalTelefonosLocal)*100;
+				
+				return porcentaje;
+			}
+
+			//Botón SALIR
+			private function finPopUp():void {
+				//Cierra la ventana
+				parent.removeChild(this)
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="300" height="300">  
+		<s:Label text="Label"/>
+		<s:TextInput/>
+		<s:CheckBox label="CheckBox"/>
+		<s:Button width="135" label="Alarmas Internas" click="despliegaAlarmasInternas();"/>
+		<s:Button width="135" label="Alarmas Externas" click="despliegaAlarmasExternas();"/>
+		<s:Button width="135" label="Alarmas Campañas" click="despliegaAlarmasCampanias();"/>
+		<s:Button id="btnCerrar" label="Cerrar" click="this.finPopUp()"/>
+	</s:VGroup>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roIndicadorLlamAbandonadas" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaIndicador" result="result_llamadasAbandonadas(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorLlamAtendidas" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaIndicador" result="result_llamadasAtendidas(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorLlamEnFila" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaIndicador" result="result_llamadasEnFila(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorMensajeEnFila" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaIndicador" result="result_mensajesEnFila(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorAgentesMaxTiempo" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaNumeroAgentesMaxTiempo" result="result_buscaNumeroAgentesMaxTiempo(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorLlamadasMaxTiempo" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaNumeroLlamadasMaxTiempo" result="result_buscaNumeroLlamadasMaxTiempo(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorTodosAgentes" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaEstatusAgentes" result="result_alarmaTodosAgentes(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roIndicadorAgentesConectados" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaEstatusAgentes" result="result_indicadorAgentesConectados(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roGraficaPausa" destination="IndicadoresService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaTiempoAcumulado" result="result_buscaTiempoAcumulado(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roDespliegaAlarmas" destination="DesplegarAlarmasService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="regresaMinAgentesConectados" result="result_regresaMinAgentesConectados(event)" fault="faultHandler(event)" />
+			<s:method name="regresaNumAgentesConectados" result="result_regresaNumAgentesConectados(event)" fault="faultHandler(event)" />
+			<s:method name="regresaMaxTiempoFila" result="result_regresaMaxTiempoFila(event)" fault="faultHandler(event)" />
+			<s:method name="regresaMaxLlamadasFila" result="result_regresaMaxLlamadasFila(event)" fault="faultHandler(event)" />
+			<s:method name="regresaAgentesTiempoMaxLlamada" result="result_regresaAgentesTiempoMaxLlamada(event)" fault="faultHandler(event)" />
+			<s:method name="regresaMaxTiempoPausa" result="result_regresaMaxTiempoPausa(event)" fault="faultHandler(event)" />
+			<s:method name="regresaMaxMensajesFila" result="result_regresaMaxMensajesFila(event)" fault="faultHandler(event)" />
+			<s:method name="regresaTotalNumerosTelefonicos" result="result_regresaTotalNumerosTelefonicos(event)" fault="faultHandler(event)" />
+			<s:method name="regresaNumeroLlamadasPorCampania" result="result_regresaNumeroLlamadasPorCampania(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+
+		<s:RemoteObject id="roCampanias" destination="CampanaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="buscaCampanasPorTipo" result="result_buscaCampanasPorTipo(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+	</fx:Declarations>
+</mx:Canvas>

@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="100%" height="800"  creationComplete="oninit()"
+			   currentState="login" pageTitle="DCPRO : DESA"
+			   width.Inicio="100%" height.Inicio="800" minWidth.Inicio="1024" minHeight.Inicio="800"
+			   backgroundColor.Inicio="#040000" 
+			   width.login="100%" height.login="800" minWidth.login="1024" minHeight.login="600">
+	<fx:Style source="dcpro.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			
+			import formas.*;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.messaging.ChannelSet;
+			import mx.messaging.events.MessageAckEvent;
+			import mx.messaging.events.MessageEvent;
+			import mx.messaging.events.MessageFaultEvent;
+			import mx.messaging.messages.AsyncMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.xml.SimpleXMLEncoder;
+			import mx.utils.ArrayUtil;
+			
+			import objectosJava.*;
+			
+			import spark.components.List;
+			import spark.events.TextOperationEvent;
+			import spark.utils.LabelUtil;
+			
+			// Se añaden las clases de las formas que se llaman en el menu dinamico
+			catalogoUsuarios;catalogoResultadosInbound;
+			CatalogoResultadosOutbound;ConfigurarSistema;
+			CatalogoCampanas;monitorearAgentes;
+			VisualizarIndicadores;Alarmas;Agentes;
+			Voces;Atender_Evento;catalogoCalendario;
+			integracionCRM;DesplegarAlarmas;PosicionAgentes;
+			VistaCallCenter;DatosPosicion;enviarMensaje;
+			
+			
+			[Bindable] private var menuAC:ArrayCollection;
+			[Bindable] private var endpoint:String;
+			[Bindable] private var chanel:String;
+			[Bindable] private var crossdomain:String;
+			[Bindable] private var reportesJasper:String;
+			[Bindable] private var message:String;
+			[Bindable] private var acceso:String;
+			[Bindable] private var cambiaContra:String;
+			[Bindable] private var id_usuario:int;
+			[Bindable] private var blaze_clientid:String;
+			[Bindable] private var usuario:Usuario;
+			
+			var ventana_mensaje:enviarMensaje;
+			
+			
+			private function oninit():void{
+				
+				// Toda esta configuracion de variables la obtiene de un archivo de configuracion.
+				endpoint = FlexGlobals.topLevelApplication.parameters.endpoint;
+				chanel = FlexGlobals.topLevelApplication.parameters.chanel;
+				crossdomain = FlexGlobals.topLevelApplication.parameters.crossdomain;
+				reportesJasper = FlexGlobals.topLevelApplication.parameters.reportesJasper;
+				message = FlexGlobals.topLevelApplication.parameters.message;
+				
+			
+				// los dominios de peticion se configuran en * (todos)
+				Security.allowDomain( "*" );
+				Security.loadPolicyFile( crossdomain );
+				
+				
+				
+				var loader2:URLLoader = new URLLoader()
+				loader2.load( new URLRequest( crossdomain ))
+				//Alert.show("Loader2: "+loader2.data);
+				/*Security.loadPolicyFile( "http://localhost:8080/crossdomain.xml" );
+				
+				var request:URLRequest = 
+				new URLRequest( "http://localhost:8080/crossdomain.xml" );
+				var loader:URLLoader = new URLLoader();
+				loader.load( request );
+				*/
+				
+				//currentState = "Inicio"
+				Abre_mensajero();
+				
+			}
+			
+			// Funcion que crea el menu de arbol de acuerdo a lo recibido desde la base de datos.
+			private function creaMenu(event:ResultEvent):void			
+			{
+				var menu:String
+				menu = String(event.result)
+				//Alert.show(menu,'menudb');
+				var menuXml:XML = XML(menu);
+				mytree.showRoot = false;
+				//mytree.data = "@forma"
+				mytree.labelField = "@label";
+				mytree.dataProvider = menuXml;
+				
+			}
+			
+			private function resultHandler(event:ResultEvent):void
+			{
+				Alert.show(event.result.toString(),"Resultado Generico");
+			}
+			
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				//Alert.show("Favor de verificar su conexión"+event.message,"Error");
+				pnDebugErrores.setVisible(true)
+				ta_debugErrores.text = String(event.message)
+			}
+			
+			protected function f_ocultaDebugErrores(event:Event):void
+			{
+				pnDebugErrores.setVisible(false)
+			}
+			
+			
+			
+			protected function login(event:Event):void
+			{
+				/*
+				var mensaje2:String = "Valores: \nendopoint: "+endpoint +"\n chanel: "+chanel+"\n Crossdomain"
+					+crossdomain+" \nreportesJasper: "+reportesJasper+"\nmessage: "+message
+				Alert.show(mensaje2)
+				*/
+				if(txtUser.text != '' && txtPasswd.text != '' ){
+					roLogin.validaUsuario(txtUser.text,SHA1.hash(txtPasswd.text),blaze_clientid)
+					txtPasswd.text = ''
+				}
+			}
+		
+			protected function cambioContrasenaPrimeraVez(event:Event):void
+			{
+				if(txtNvoPassword.text == txtNvoPasswordcomprobar.text )
+				{
+					roUsuarios.actualizaContrasenaUsuario(id_usuario,SHA1.hash(txtNvoPassword.text),null)
+				}else{
+					Alert.show("Favor de verificar la información",'Error')
+					lbrPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.text='';
+					txtNvoPassword.text='';
+					txtOLDPassword.text='';
+				}
+				
+			}
+			
+			protected function cambioContrasenUsr(event:Event):void
+			{
+				
+				if(txtOLDPassword.text != null){
+					if (txtOLDPassword.text == txtPassword.text)
+						Alert.show("La contraseña ingresada es identica a la actual, favor de ingresar una distinta ",'Información');
+					else{	
+						if(txtPassword.text == txtPasswordcomprobar.text )
+						{
+							roUsuarios.actualizaContrasenaUsuario(id_usuario,SHA1.hash(txtPassword.text),SHA1.hash(txtOLDPassword.text));	
+						}else{
+							Alert.show("Favor de verificar la información",'Error')
+							lbPasswordcomprobar.visible = false;
+							txtPasswordcomprobar.visible = false;
+							txtPasswordcomprobar.text='';
+							txtPassword.text='';
+						}
+					}
+				}
+				else{
+					Alert.show("Favor de verificar la información",'Error')
+					lbrPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.text='';
+					txtNvoPassword.text='';
+					txtOLDPassword.text='';
+					
+				}
+				
+			}
+			
+			protected function cacelaCambioContra(event:Event):void
+			{
+				txtOLDPassword.text = '';
+				txtPassword.text = '';
+				txtPasswordcomprobar.text = ''
+				txtPasswordcomprobar.visible = false
+				pnNvopassUsuario.visible=false;
+				btCambiaPasswordUsr.enabled = false;
+				lbPasswordcomprobar.visible = false;
+				
+			}
+			
+			protected function resultactualizaContrasenaUsuario(event:ResultEvent):void
+			{
+				cambiaContra = String(event.result)
+				
+				if(cambiaContra == '1'){
+					txtNvoPassword.text = ''
+					txtNvoPasswordcomprobar.text = ''
+					txtNvoPasswordcomprobar.visible = false
+					currentState="Inicio"
+					pnNvopass.visible=false
+					pnLogin.visible=true
+				}
+				
+				if(cambiaContra == '2'){ 
+					txtOLDPassword.text = '';
+					txtPassword.text = ''
+					txtPasswordcomprobar.text = ''
+					txtPasswordcomprobar.visible = false
+					pnNvopassUsuario.visible=false;
+					btCambiaPasswordUsr.enabled = false;		
+					lbPasswordcomprobar.visible = false;
+					Alert.show('El cambio de contraseña se realizó con éxito','Información')
+				}
+				
+				if(cambiaContra == '0'){
+					Alert.show('Usuario y/o contraseña inválidos, favor de verificar e internar nuevamente','Información')
+				}	
+				
+			}
+			
+			protected function validaUsuarioResult(event:ResultEvent):void
+			{	
+				var acceso:int = int(String(event.result))
+				//Alert.show("Resultado: "+acceso)
+					
+				if (acceso > 1){ // Cuando esta condicion se cumple el id_del usuario se tiene en la varible acceso
+					id_usuario = acceso
+					roUsuarios.findById(id_usuario);
+					currentState = "Inicio"
+				}else
+				switch(acceso){
+					case -10:
+						roLogin.obtenIdUsuario(txtUser.text)
+						pnNvopass.visible=true
+						pnLogin.visible=false
+						break
+					case -5:
+						Alert.show('Usuario bloqueado, favor de avisar al administrador','Información')
+						break
+					default :
+						Alert.show('Usuario y/o contraseña inválidos, favor de verificar e intentar nuevamente','Información')
+				}
+			}
+			
+			protected function obtenIdUsuarioResult(event:ResultEvent):void
+			{
+				//id_usuario = int(event.result);
+				subscribir(id_usuario);
+				
+			}
+			
+			public function resultFindUsuario(event:ResultEvent):void
+			{
+				usuario = Usuario(event.result);	
+			}
+			
+			protected function subscribir(id_usuario:int):void
+			{		
+				var selector:String= "usuario = "+id_usuario;
+				messageConsumerAgentes.selector = "usuario = "+id_usuario;
+				messageConsumerAgentes.subscribe();
+			}
+			
+			public function openCatalogo(titulo:String, nombreFormaBD:String):void
+			{
+				var children:Array = tn.getChildren();
+				
+				for (var i:int = 0; i<children.length; i++)
+				{
+					
+					if (children[i].nombreCatalogo == titulo)
+					{
+						tn.selectedChild = children[i];
+						return;
+					}
+				}
+				
+				if (titulo == 'Cambiar Contraseña' || (titulo == 'Enviar Mensaje') ){
+					if (titulo == 'Cambiar Contraseña'){
+						pnNvopassUsuario.move(387,129);
+						pnNvopassUsuario.visible = true;
+					}
+					
+					if (titulo == 'Enviar Mensaje'){
+						ventana_mensaje.Inicializar(endpoint,usuario,message);
+						ventana_mensaje.setVisible(true);
+					}
+				}else{
+					//Implementación de la creación de menus dinámicos
+					try{	
+						
+						if (nombreFormaBD != null && nombreFormaBD != ""){
+							// Creacion dinamica del objeto para crear la forma que se selccione del menu.
+							// Una vez se obtenga el valor de la clase a llamar desde el arbol.
+							
+							//
+							//var forma:String= 'formas.catalogoUsuarios';
+							var forma:String= 'formas.'+nombreFormaBD;
+							var DynamicClass:Class = this.loaderInfo.applicationDomain.getDefinition(forma) as Class;
+							var pestana:* = new DynamicClass();
+							tn.addChild(pestana); 
+							pestana.endpoint = endpoint;
+							pestana.nombreCatalogo = titulo;
+							pestana.chanel = chanel;
+							pestana.message = message;
+							pestana.usuariologeado = usuario;
+							tn.selectedChild = pestana;
+						} 
+					}catch(errObject:Error){
+						Alert.show("Favor de verificar su conexión","Error");
+					}
+				}
+				
+				/////////Se elimina el switch, 
+				/////////debido a que se implementa 
+				/////////la creación de menus dinámicos
+			}
+			
+			
+			protected function txtNvoPassword_changeHandler(event:TextOperationEvent):void
+			{
+				//Documentar
+				var regExp:RegExp=/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,12}$/
+				
+				//trace(txtNvoPassword.text.match(regExp))
+				
+				if(txtNvoPassword.text.match(regExp) )
+				{
+					lbrPasswordcomprobar.visible = true;
+					txtNvoPasswordcomprobar.visible = true;
+					
+					if(txtNvoPasswordcomprobar.text !=null){
+						if(txtNvoPassword.text != txtNvoPasswordcomprobar.text){
+							btCambiaPassword.enabled= false;	
+						}else{
+							btCambiaPassword.enabled= true;	
+						}
+					}
+				}else
+				{
+					lbrPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.visible = false;
+					txtNvoPasswordcomprobar.text='';
+				}
+				
+			}
+			
+			protected function txtNvoPasswordcomprobar_changeHandler(event:TextOperationEvent):void
+			{
+				// Documentar
+				if(txtNvoPassword.text == txtNvoPasswordcomprobar.text )
+				{
+					btCambiaPassword.enabled= true;	
+				}else{
+					btCambiaPassword.enabled= false;	
+				}
+			}
+			
+			// Funciones para cambio de contraseña desde el menu de opciones	
+			protected function txtPassword_changeHandler(event:TextOperationEvent):void
+			{
+				// Documentar
+				var regExp:RegExp=/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,12}$/
+				
+				//trace(txtPassword.text.match(regExp))
+				
+				if(txtPassword.text.match(regExp) )
+				{
+					lbPasswordcomprobar.visible = true;
+					txtPasswordcomprobar.visible = true;
+					
+					if(txtPasswordcomprobar.text !=null){
+						if(txtPassword.text != txtPasswordcomprobar.text){
+							btCambiaPasswordUsr.enabled= false;	
+						}else{
+							btCambiaPasswordUsr.enabled= true;	
+						}
+					}
+					
+					
+				}else
+				{
+					lbPasswordcomprobar.visible = false;
+					txtPasswordcomprobar.visible = false;
+					txtPasswordcomprobar.text='';
+				}
+				
+			}
+			
+			protected function txtPasswordcomprobar_changeHandler(event:TextOperationEvent):void
+			{
+				//Documentar
+				if(txtPassword.text == txtPasswordcomprobar.text )
+				{
+					btCambiaPasswordUsr.enabled= true;	
+				}else{
+					btCambiaPasswordUsr.enabled= false;	
+				}
+			}
+			
+			protected function salirDCPro(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				currentState="login";
+				messageConsumerAgentes.unsubscribe(false);
+				//Mensajero
+				ventana_mensaje.setVisible(false);
+				ventana_mensaje.Desconexion();		
+			}
+			
+			public function cerrarSesionDCPro():void{
+				currentState="login";
+				messageConsumerAgentes.unsubscribe(false);
+				
+				//Mensajero
+				ventana_mensaje.setVisible(false);
+				ventana_mensaje.Desconexion();
+			}
+			
+			protected function llamaReportes():void{
+				navigateToURL(new URLRequest(reportesJasper+"report1.pdf?dato="+txtdato.text),"_blank");
+			}
+			
+			private function addMessageToArea(message:String):void
+			{
+				txtdato.text = txtdato.text + " " + message;
+			}
+			
+			private function handleResponse(event:MessageEvent):void
+			{
+				var message:String = null;
+				message = event.message.headers["usuario"] + ": " + event.message.body;
+				//addMessageToArea(message);	
+			}
+			
+			protected function messageProducer_faultHandler(event:MessageFaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				Alert.show("Favor de verificar su conexión","Error");
+			}
+			
+			private function Abre_mensajero():void{
+				ventana_mensaje = PopUpManager.createPopUp(this, enviarMensaje, false) as enviarMensaje;
+				ventana_mensaje.setVisible(false);
+				ventana_mensaje.endpoint = endpoint;
+				ventana_mensaje.usuariologeado = usuario;
+				ventana_mensaje.message= message;				
+			}
+			
+			private function Mostrar_mensajero(event:Event):void{
+				ventana_mensaje.Inicializar(endpoint,usuario,message);
+				ventana_mensaje.setVisible(true);
+			}
+			
+			public function CreaConversacion_mensajero(contacto:Contacto):void{
+				ventana_mensaje.CreaUnaConversacion(contacto);
+				ventana_mensaje.setVisible(true);
+			}
+			
+			private function Ocultar_mensajero(event:Event):void{
+				ventana_mensaje.setVisible(false);
+			}
+			
+			private function Desconectar_mensajer():void{
+				ventana_mensaje.Desconexion();
+			}
+	
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="Inicio"/>
+		<s:State name="login"/>
+	</s:states>
+	
+	<fx:Declarations>
+		
+		<s:RemoteObject id="roLogin" destination="loginService" fault="faultHandler(event)" endpoint="{endpoint}" >
+			<s:method name="validaUsuario" result="validaUsuarioResult(event)" fault="faultHandler(event)" />
+			<s:method name="obtenIdUsuario" result="obtenIdUsuarioResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roUsuarios" destination="UsuarioService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="actualizaContrasenaUsuario" result="resultactualizaContrasenaUsuario(event)" fault="faultHandler(event)" />
+			<s:method name="findById" result="resultFindUsuario(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roMenus" destination="menuService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="creaMenu(event)" fault="faultHandler(event)" />
+			<s:method name="findById" fault="faultHandler(event)" />
+			<s:method name="creaMenu" result="creaMenu(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:Producer id="messageProducer" destination="agentes" channelSet="{msjChannel}" 
+					fault="messageProducer_faultHandler(event)" />
+			
+		<s:Consumer id="messageConsumerAgentes" destination="agentes" 	
+					message="handleResponse(event)" 
+					channelSet="{msjChannel}" 
+					fault="messageProducer_faultHandler(event)"/>
+		
+		<s:ChannelSet  id="msjChannel" > 
+			<s:channels>
+				<s:AMFChannel uri= "{chanel}"/>
+			</s:channels>
+		</s:ChannelSet>	
+			
+	</fx:Declarations>
+	
+	<s:controlBarContent>
+		<s:Button includeIn="Inicio" label="Reportes" click="llamaReportes()"/>
+		<s:TextInput id="txtdato" includeIn="Inicio" />
+		<s:Button id="button" includeIn="Inicio"  label="Salir" click="salirDCPro(event)"  />
+		<s:Button includeIn="Inicio" visible="false" label="Subscribe" click="subscribir(id_usuario);"/>
+		<s:Image includeIn="Inicio"/>
+	</s:controlBarContent>
+	
+	<s:HGroup includeIn="Inicio" y="10" left="10" right="10" height="600" horizontalAlign="left"
+			  horizontalCenter="0" verticalAlign="justify">
+		<mx:HDividedBox width="100%" height="100%">
+
+		<mx:Accordion width="200" height="100%" selectedIndex="0" >
+			<s:NavigatorContent width="100%" height="100%" label="Menú">
+				<mx:Tree id="mytree" x="0" y="0" width="100%" height="100%"
+						 enabled="true" creationComplete="roMenus.creaMenu(id_usuario)" doubleClick="openCatalogo(mytree.selectedItem.@label, mytree.selectedItem.@forma)" doubleClickEnabled="true" > </mx:Tree>
+			</s:NavigatorContent>
+		</mx:Accordion>
+		<mx:VDividedBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+			
+			<mx:Canvas label="Canvas 1" width="100%" height="100%">
+				<mx:TabNavigator id="tn" y="8" left="10" right="10" height="95%"
+								 dropShadowVisible="true" horizontalCenter="0">
+				</mx:TabNavigator>
+			</mx:Canvas>
+			
+			<mx:Canvas label="Canvas 2" width="100%" height="30%" >
+				<mx:DataGrid id="dg" left="10" right="10" height="85%" dropShadowVisible="true"
+							 enabled="true" horizontalCenter="0" verticalCenter="0">
+					
+				</mx:DataGrid>
+			</mx:Canvas>	
+		</mx:VDividedBox>
+		</mx:HDividedBox>
+	</s:HGroup>
+	
+	<s:Panel id="pnNvopass" visible="false" x="387" y="129" width="250" height="214"
+			 title="Reinicio de contraseña">
+		<s:Label y="11" left="6" right="14" height="47"
+				 text="La contraseña debe ser actualizada por seguridad, favor de indicar su nueva contraseña :"/>
+		<s:Label id="lbrPasswordcomprobar" y="92" left="10" right="10" height="15" visible="false"
+				 text="Ingresar nuevamente:"/>
+		<s:TextInput id="txtNvoPassword" y="61" left="10" right="10"  change="txtNvoPassword_changeHandler(event)" displayAsPassword="true"
+					 maxChars="12" toolTip="La contraseña debe contener entre 8 y 12 caracteres con al menos 1 número, 1 mayúscula y 1 minúscula."  />
+		<s:TextInput id="txtNvoPasswordcomprobar" visible="false" y="114" left="10" right="10"
+					 change="txtNvoPasswordcomprobar_changeHandler(event)" displayAsPassword="true"
+					 maxChars="12"/>
+		<s:Button id="btCambiaPassword" x="69" y="146" enabled="false" label="Guardar y acceder" click="cambioContrasenaPrimeraVez(event)"/>
+	</s:Panel>
+	
+	<s:Panel id="pnNvopassUsuario" includeIn="Inicio" visible="false" x="387" y="129" width="250"
+			 height="222" title="Actualización de contraseña"
+			 x.login="27" y.login="198">
+		<s:Label visible="true" y="8" left="10" right="10" height="15" text="Contraseña actual:"
+				 toolTip="Se validara la contraseña actual para realizar el cambio"
+				 y.login="10" left.login="10" right.login="10"/>
+		<s:TextInput id="txtOLDPassword" visible="true" y="28" left="10" right="10" 
+					 displayAsPassword="true" maxChars="12"
+					 y.login="24" left.login="10" right.login="10"/>
+		<s:Label y="56" left="10" right="10" height="19" text="Nueva contraseña:"
+				 y.login="49" left.login="10" right.login="10" height.login="14"/>
+		<s:Label id="lbPasswordcomprobar" visible="false" y="100" left="11" right="9" height="15" text="Ingresar nuevamente:"
+				 y.login="91" left.login="10" right.login="10"/>
+		<s:TextInput id="txtPassword" y="73" left="10" right="10"
+					 change="txtPassword_changeHandler(event)" displayAsPassword="true"
+					 maxChars="12" toolTip="La contraseña debe contener entre 8 y 12 caracteres con al menos 1 número, 1 mayúscula y 1 minúscula" />
+		<s:TextInput id="txtPasswordcomprobar" visible="false" y="118" left="10" right="10"
+					 change="txtPasswordcomprobar_changeHandler(event)" displayAsPassword="true"
+					 maxChars="12"	 />
+		<s:Button id="btCambiaPasswordUsr" x="139" y="154" label="Aceptar"
+				  click="cambioContrasenUsr(event)" enabled="false"/>
+		<s:Button id="btCancelarPasswordUsr" includeIn="Inicio" x="43" y="154" label="Cancelar"
+				  click="cacelaCambioContra(event)" enabled="true"/>
+	</s:Panel>
+	
+	
+	<s:Panel id="pnDebugErrores" includeIn="Inicio" visible="true" x="122" y="129" width="515"
+			 height="322" title="Panel de debug"
+			 x.login="27" y.login="198">
+		<s:Button  x="443" y="254" label="Ocultar"
+				  click="f_ocultaDebugErrores(event)" enabled="true"/>
+		<s:TextArea id="ta_debugErrores" x="10" y="10" width="495" height="236"/>
+	</s:Panel>
+	
+	<s:Panel id="pnLogin" includeIn="login" width="500" height="127" horizontalCenter="0"
+			 title="Acceso" verticalCenter="-155">
+		<s:layout>
+			<s:HorizontalLayout gap="18" paddingLeft="10" paddingRight="10" verticalAlign="middle"/>
+		</s:layout>
+		<s:Label x="53" y="18" height="20" text="Usuario:" verticalAlign="middle"/>
+		<s:TextInput id="txtUser" x="89" y="22"/>
+		<s:Label height="23" horizontalCenter="-71" text="Contraseña:" verticalAlign="middle"
+				 verticalCenter="-21"/>
+		<s:TextInput id="txtPasswd" x="110" y="63" displayAsPassword="true" enter="login(event)"/>
+		<s:Button x="110" y="91" label="Entrar" click="login(event)"/>
+	</s:Panel>	
+	
+	
+</s:Application>

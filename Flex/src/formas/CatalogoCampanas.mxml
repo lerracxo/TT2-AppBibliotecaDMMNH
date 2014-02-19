@@ -1,0 +1,871 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="cargaDatos()"
+		   width.alta_modificacion="933" height.alta_modificacion="406"
+		   width.grid="957" height.grid="95%" locale="en_ES">
+	<fx:Metadata>
+		[Event(name="usarioCreated", type="UsuarioEvent")]
+		[Event(name="usuarioUpdated", type="UsuarioEvent")]
+		[Event(name="usuarioDeleted", type="UsuarioEvent")]
+	</fx:Metadata> 
+
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;		
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.data.ItemReference;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			
+			import objectosJava.Campana;
+			import objectosJava.Campana_In;
+			import objectosJava.Campana_Out;
+			import objectosJava.Configurador;
+			import objectosJava.PosicionAgente;
+			import objectosJava.TipoUsuario;
+			import objectosJava.Usuario;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var chanel:String;
+			[Bindable] public var message:String;
+			[Bindable] public var datosGrid:ArrayCollection;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var supervisores:ArrayCollection;
+			[Bindable] public var integraciones:ArrayCollection;			
+			[Bindable] public var campana:Campana;
+			[Bindable] public var campana_in:Campana_In;
+			[Bindable] public var campana_out:Campana_Out;
+			[Bindable] public var configurador:Configurador;
+			[Bindable] public var validatorArr:Array;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var VentanaBusqueda:Buscar_Campana;
+			
+			[Bindable]public var tipos:ArrayCollection = new ArrayCollection(
+				[{label:"Campaña Outbound", data:0}, 
+			    {label:"Campaña Inbound", data:1}]);	
+			
+			[Bindable]public var comboterminacion:ArrayCollection = new ArrayCollection(
+				[{label:"no", data:0}, 
+				{label:"si", data:1}]);	
+			
+			[Bindable]public var comboprioridad:ArrayCollection = new ArrayCollection(
+				[{label:"Calle", data:0}, 
+				{label:"Agente", data:1}]);	
+			
+			[Bindable]public var combomarcacion:ArrayCollection = new ArrayCollection(
+				[{label:"no", data:0}, 
+				{label:"si", data:1}]);
+			
+			[Bindable]public var combodesborde:ArrayCollection = new ArrayCollection(
+				[{label:"Finalizar Llamada", data:1}, 
+				{label:"Dejar un Mensaje", data:2},
+				{label:"Transferir a una extensión", data:3}]);
+			
+			
+			private function cargaDatos():void
+			{
+				rocampana.findAll();
+				rosupervisor.Find_ComboSupervisor();
+				rointegracion.Find_Integraciones();
+			}
+			
+			public function CargaConfiguracion():void{
+				configurador = new Configurador();
+				roconfigurador.Find_Configuracion(1);			
+			}
+			
+			private function Carga_Validaciones():void
+			{
+				validatorArr = new Array();
+				validatorArr.push(SV_nombre_camp);
+				validatorArr.push(SV_Tipo_Campana);
+				validatorArr.push(SV_Supervisor);
+				if (fimarcacion.visible == true)
+					validatorArr.push(SV_marcacion_salida);
+				if (fiterminacion.visible == true)
+					validatorArr.push(SV_terminacion);	
+				if (fiprioridad.visible ==true)	
+					validatorArr.push(SV_Prioridad);
+				if (ficrm.visible == true)	
+					validatorArr.push(SV_Integracion);
+				if (ficiclos.visible == true)
+					validatorArr.push(NV_max_ciclos);
+				if (fitonos.visible == true)
+					validatorArr.push(NV_max_tonos);
+				if (fidesborde.visible == true)
+					validatorArr.push(SV_desborde);
+				if (fiextension.visible == true)
+					validatorArr.push(SV_extension);
+			}
+			
+			//Funcion que recibe el objeto de configuracion
+			public function Configuracion_Sistema(event:ResultEvent):void{				
+				this.tipo_camp.textInput.editable = false;
+				this.nom_supervisor.textInput.editable = false;
+				this.id_desborde.textInput.editable = false;
+				this.term_llamada.textInput.editable = false;
+				this.marcacion_salida.textInput.editable = false;
+				this.id_crm.textInput.editable = false;
+				this.id_prioridad.textInput.editable = false;
+				configurador = Configurador(event.result);
+				if (configurador.crm == 1){
+					ficrm.visible = true;
+				}else ficrm.visible = false
+					
+				if(configurador.terminacion_llamada == 1 ){
+					fiterminacion.visible =  true;
+				}else fiterminacion.visible = false
+					
+				if(configurador.prioridad_ag_calle == 1 ){
+					fiprioridad.visible =  true;
+				}else fiprioridad.visible = false
+					
+				if(configurador.marcacion_salida == 1 ){
+					fimarcacion.visible =  true;
+				}else fimarcacion.visible = false
+					
+				if(configurador.desborde == 1 ){
+					fidesborde.visible =  true;
+				}else fidesborde.visible = false
+					
+			}
+			
+			//Funcion que recibe a los supervisores
+			public function Combo_Supervisor(event:ResultEvent):void{
+				supervisores=ArrayCollection(event.result);					
+			}
+			
+			//Funcion que recibe las integraciones CRM
+			public function Combo_Integracion(event:ResultEvent):void{
+				integraciones=ArrayCollection(event.result);
+			}
+					
+			//Funcion para el cambio en el combo de tipo campaña
+			private function changeHandler(event:Event):void {
+				var tipo_camp:int = ComboBox(event.target).selectedItem.data;
+				if(idi.text != ""){
+					Alert.show("No puede ser modificado el tipo de campaña, consulte su manual de usuario");
+					if (tipo_camp == 1){
+						this.tipo_camp.selectedIndex = 0;
+						fitonos.visible = true;
+						ficiclos.visible = false;
+						fiprioridad.visible = true;
+						max_tonos.text = String(campana_out.max_tonos);	
+					}
+					else{
+						this.tipo_camp.selectedIndex = 1;	
+						fiprioridad.visible = false;
+						ficiclos.visible = true;
+						fitonos.visible = false;
+						max_ciclos.text = String(campana_in.max_ciclos);
+					}
+				}else{
+					if (tipo_camp == 1){
+						fitonos.visible=false;
+						ficiclos.visible=true;
+						fiprioridad.visible = false;
+						max_ciclos.text = "";
+						lblselecciona.visible = false;
+					}else if(tipo_camp == 0){
+						if(configurador.prioridad_ag_calle == 1)
+							fiprioridad.visible = true;
+						fitonos.visible=true;
+						max_tonos.text = "";
+						ficiclos.visible=false;
+						lblselecciona.visible = false;
+					}		
+				}
+			}
+			
+			private function changeHandler_Desborde(event:Event):void {
+				var tipo_desborde:int = ComboBox(event.target).selectedItem.data;
+				if (tipo_desborde == 3)
+					fiextension.visible = true;
+				else
+					fiextension.visible = false;
+			}
+			
+			
+			private function resultHandlerFindAll(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result)
+				dg.dataProvider = datosGrid			
+			}
+			
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			//Funciones de Botones
+			private function nuevo():void
+			{
+				currentState="alta_modificacion";
+				CargaConfiguracion();
+				Prepara_Form_Nuevo();
+				campana = new Campana();
+				campana_in = new Campana_In();
+				campana_out = new Campana_Out;
+			}
+			
+			private function eliminar():void{
+				if(dg.selectedItem != null){			
+					Alert.show("¿Está seguro de eliminar la campaña?","Información",Alert.OK| Alert.NO,this,remove,null,Alert.OK);								
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+				}		
+			}
+			
+			private function modificar():void {
+				if(dg.selectedItem != null){		
+					CargaConfiguracion();			
+					currentState="alta_modificacion";
+					campana = new Campana();
+					rocampana.FindById(dg.selectedItem.id_camp);
+					if(dg.selectedItem.tipo_campana == "Campaña Inbound"){	
+						campana_in = new Campana_In();
+						rocampana.FindById_In(dg.selectedItem.id_camp);
+						fiprioridad.visible = false;
+					}else{
+						campana_out = new Campana_Out();
+						rocampana.FindById_Out(dg.selectedItem.id_camp);					
+					}
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+				}
+			}
+			
+			private function Buscar():void
+			{
+				VentanaBusqueda = Buscar_Campana(PopUpManager.createPopUp(this, Buscar_Campana, false));
+				VentanaBusqueda.endpoint = endpoint;
+				VentanaBusqueda.usuariologeado = usuariologeado;
+				VentanaBusqueda.setStyle("borderAlpha", 0.9);
+				VentanaBusqueda.closeButton.visible = false;	
+				PopUpManager.centerPopUp(VentanaBusqueda);
+				PopUpManager.bringToFront(VentanaBusqueda);
+				VentanaBusqueda.addEventListener(MouseEvent.CLICK,myEventHandler);			
+			}
+			
+			private function myEventHandler(event:MouseEvent):void {
+				if(event.target.id == "btnmodificar"){
+					if (this.VentanaBusqueda.modificar_ok == 1){
+						CargaConfiguracion();			
+						currentState="alta_modificacion";
+						campana = new Campana();
+						rocampana.FindById(this.VentanaBusqueda.DgCampanas.selectedItem.id_camp);
+						if(this.VentanaBusqueda.DgCampanas.selectedItem.tipo_campana == "Campaña Inbound"){	
+							campana_in = new Campana_In();
+							rocampana.FindById_In(this.VentanaBusqueda.DgCampanas.selectedItem.id_camp);
+							fiprioridad.visible = false;
+						}else{
+							campana_out = new Campana_Out();
+							rocampana.FindById_Out(this.VentanaBusqueda.DgCampanas.selectedItem.id_camp);					
+						}
+						
+					}
+				}
+				if(event.target.id == "btnsalir"){
+					if(usuariologeado.id_tipo_usr == 3)
+						rocampana.findAll();
+					else 
+						rocampana.Find_UsuariosSupervisor(usuariologeado.id_usr);				
+				}
+			}
+			
+			
+			private function Prepara_Form_Nuevo():void{
+				idi.text = "";
+				nombre_camp.text = "";
+				nombre_camp.errorString = "";
+				max_ciclos.errorString = "";
+				tipo_camp.errorString = "";
+				max_tonos.errorString = "";
+				nom_supervisor.errorString = "";
+				id_crm.errorString = "";
+				term_llamada.errorString = "";
+				marcacion_salida.errorString = "";
+				id_prioridad.errorString = "";
+				tipo_camp.selectedIndex = -1;
+				max_ciclos.text = "";
+				max_tonos.text = "";
+				num_extension.text = "";
+				nom_supervisor.selectedIndex = -1;
+				id_crm.selectedIndex = -1;
+				term_llamada.selectedIndex = -1;
+				marcacion_salida.selectedIndex = -1;
+				id_prioridad.selectedIndex = -1;
+				id_desborde.selectedIndex = -1;
+				fitonos.visible = false;
+				ficiclos.visible = false;
+				fiextension.visible = false;
+				//lblselecciona.visible = true;				
+			}
+			
+			private function save():void
+			{
+				try{
+				var validatorErrorArray:Array;
+				var isValidForm:Boolean;
+				Carga_Validaciones();
+				validatorErrorArray= Validator.validateAll(validatorArr);
+				isValidForm = validatorErrorArray.length == 0;
+				if(isValidForm){
+					if(idi.text != "")
+						update();
+					else{
+						campana.nombre_camp = nombre_camp.text;
+						campana.id_usr = nom_supervisor.selectedItem.id_usr;
+						campana.tipo_camp = tipo_camp.selectedItem.data;
+						
+						if (ficrm.visible == false)
+							campana.id_int_crm = 0;							
+						else	
+							campana.id_int_crm = int(id_crm.selectedItem.id_int_crm);
+						
+						if (fiterminacion.visible == false)
+							campana.term_llamada = 0;
+						else
+							campana.term_llamada = term_llamada.selectedItem.data;
+						
+						if (fimarcacion.visible == false)
+							campana.marcacion_salida = 0;					
+						else
+							campana.marcacion_salida = int(marcacion_salida.selectedItem.data);
+						
+						if (fidesborde.visible == false)
+							campana.id_desborde = 2;					
+						else{
+							campana.id_desborde = int(id_desborde.selectedItem.data);
+							if(id_desborde.selectedItem == 3)
+								campana.num_extension = String(num_extension.text);
+						}
+						rocampana.create(campana);
+					}
+				}else 
+					Alert.show("Favor de capturar los datos requeridos * ", 'Información',Alert.OK);	
+				}catch(errObject:Error){
+					//Alert.show("Favor de capturar los datos requeridos * ", 'Información',Alert.OK);
+					Alert.show(errObject.message +' '+ errObject.name,"Error save");
+				}
+			}
+			
+			private function update():void{
+				campana = new Campana();
+				campana_in = new Campana_In();
+				campana_out = new Campana_Out();
+				
+				//Se toman los valores actualizados de la campaña
+				campana.id_camp = int(idi.text);
+				campana.nombre_camp = nombre_camp.text;
+				campana.id_usr = nom_supervisor.selectedItem.id_usr;
+				campana.tipo_camp = tipo_camp.selectedItem.data;
+				campana.num_extension = String(num_extension.text);
+				
+				if (ficrm.visible == false){
+					campana.id_int_crm = 0;						
+				}else					
+					campana.id_int_crm = id_crm.selectedItem.id_int_crm;
+				
+				if (fiterminacion.visible == false){
+					campana.term_llamada = 0;
+				}else
+					campana.term_llamada = term_llamada.selectedItem.data;
+				
+				if (fimarcacion.visible == false){
+					campana.marcacion_salida = 0;					
+				}else
+					campana.marcacion_salida = marcacion_salida.selectedItem.data;
+				
+				if (fidesborde.visible == false){
+					campana.id_desborde = 2;					
+				}else
+					campana.id_desborde = id_desborde.selectedItem.data;
+				
+				//Se toman los valores modificados de la campaña outbound
+				if (tipo_camp.selectedItem.data == 0){
+					campana_out.id_camp = campana.id_camp;
+					if (fiprioridad.visible == false){
+						campana_out.prioridad_ag_calle = 1;
+					}else{
+						campana_out.prioridad_ag_calle = int(id_prioridad.selectedItem.data);	
+					}				
+					campana_out.max_tonos = int(max_tonos.text);
+					rocampana.Update_Campana(campana);
+					rocampana.Update_Campana_Out(campana_out);
+				//Se toman los valores modificados de la campaña inbound
+				}else if(tipo_camp.selectedItem.data == 1){
+					campana_in.id_camp= campana.id_camp;
+					campana_in.max_ciclos = int(max_ciclos.text);
+					rocampana.Update_Campana(campana);
+					rocampana.Update_Campana_In(campana_in);					
+				}						
+			}
+			
+			
+			private function remove(eventObj:CloseEvent):void{
+				if(eventObj.detail==Alert.OK){
+					campana = dg.selectedItem as Campana;
+					rocampana.Remove_Campana(campana);
+				}
+				
+			}
+			
+			private function CreaCampana(event:ResultEvent):void{
+				campana = Campana(event.result);				
+				if (tipo_camp.selectedItem.data == 0){
+					campana_out.id_camp = campana.id_camp;
+					if (fiprioridad.visible == false){
+						campana_out.prioridad_ag_calle = 1;
+					}else{
+						campana_out.prioridad_ag_calle = int(id_prioridad.selectedItem.data);	
+					}
+					
+					campana_out.max_tonos = int(max_tonos.text);	
+					rocampana.create_out(campana_out);
+					
+				}else if(tipo_camp.selectedItem.data == 1){
+					campana_in.id_camp= campana.id_camp;
+					campana_in.max_ciclos = int(max_ciclos.text);
+					rocampana.create_in(campana_in);					
+				}
+				
+				roagenda.Create_Agenda(campana.id_camp);
+				rocatalogos.Create_Campana_Integracion(campana.id_camp);
+				rocatalogos.Create_Campana_ResultadosIn(campana.id_camp);
+				rocatalogos.Create_Campana_ResultadosOut(campana.id_camp);
+				rovoces.Create_Voces(campana.id_camp);
+				
+				Alert.show('La campaña '+campana.nombre_camp+' se creó exitosamente con id: '+campana.id_camp ,"Información")
+				rocampana.findAll();
+				currentState='grid';
+				
+			}
+			
+			private function CreaCampanain(event:ResultEvent):void{
+				campana_in = Campana_In(event.result);
+				roalarmas.Create_Alarmas_Internas(campana_in.id_camp_in,0);
+				roalarmas.Create_Alarmas_Externas(campana_in.id_camp_in,0);			
+			}
+			
+			private function CreaCampanaout(event:ResultEvent):void{
+				campana_out = Campana_Out(event.result);
+				roalarmas.Create_Alarmas_Internas(0,campana_out.id_camp_out);
+				roalarmas.Create_Alarmas_Externas(0,campana_out.id_camp_out);
+				roalarmas.Create_Alarmas_Outbound(campana_out.id_camp_out);			
+			}
+			
+			private function cerrar():void
+			{
+				currentState="grid";
+			}
+				
+			
+			private function result_FindById(event:ResultEvent):void{
+				campana = Campana(event.result);	
+			}
+			
+			private function result_FindById_In(event:ResultEvent):void{
+				campana_in = Campana_In(event.result);	
+				Prepara_Form_Modificar(campana.tipo_camp);
+			}
+			
+			private function result_FindById_Out(event:ResultEvent):void{
+				campana_out = Campana_Out(event.result);	
+				Prepara_Form_Modificar(campana.tipo_camp);
+			}
+			private function result_ActualizaCampana(event:ResultEvent):void{
+				var ok:int = int(event.result);	
+			}
+			
+			private function result_ActualizaCampanain(event:ResultEvent):void{
+				var ok:int = int(event.result);	
+				if (ok == 1)
+					Alert.show("La campaña " + campana.nombre_camp + " ha sido actualizada");
+				rocampana.findAll();
+				currentState='grid';
+			}
+			
+			private function result_ActualizaCampanaout(event:ResultEvent):void{
+				var ok:int = int(event.result);	
+				if (ok == 1)
+					Alert.show("La campaña " + campana.nombre_camp + " ha sido actualizada");
+				rocampana.findAll();
+				currentState='grid';
+			}
+			
+			private function result_RemoveCampana(event:ResultEvent):void
+			{
+				var ok:int = event.result as int
+				if(ok == 1){
+					Alert.show('La Campaña '+campana.nombre_camp+' se eliminó exitosamente' ,"Información")
+					rocampana.findAll();
+					currentState='grid';
+				}else{
+					Alert.show('La Campaña '+campana.nombre_camp+' no se eliminó ' ,"Información")
+				}
+			}
+			
+			
+			private function Prepara_Form_Modificar(tipo_campana:int):void
+			{
+				nombre_camp.errorString = "";
+				max_ciclos.errorString = "";
+				tipo_camp.errorString = "";
+				max_tonos.errorString = "";
+				nom_supervisor.errorString = "";
+				id_crm.errorString = "";
+				term_llamada.errorString = "";
+				marcacion_salida.errorString = "";
+				id_prioridad.errorString = "";
+				id_desborde.errorString = "";
+				
+				idi.text = String(campana.id_camp);
+				nombre_camp.text = campana.nombre_camp;
+				id_desborde.selectedIndex = campana.id_desborde -1;
+				if (campana.id_desborde == 3){
+					fiextension.visible = true;
+					num_extension.text = campana.num_extension;
+				}
+				else
+					fiextension.visible = false;
+					
+				if(campana.tipo_camp == 1)
+					tipo_camp.selectedIndex = 1;
+				else if(campana.tipo_camp == 0){
+					tipo_camp.selectedIndex = 0;
+				}else
+					tipo_camp.selectedIndex = -1;
+				
+				lblselecciona.visible = false;
+				if(tipo_campana == 1){
+					fiprioridad.visible = false;
+					fitonos.visible = false;
+					ficiclos.visible = true;
+					max_ciclos.text = String(campana_in.max_ciclos);					
+				}else{
+					fitonos.visible = true;
+					ficiclos.visible = false;
+					max_tonos.text = String(campana_out.max_tonos);	
+					
+					if(campana_out.prioridad_ag_calle == 1)
+						id_prioridad.selectedIndex = 1;
+					else if(campana_out.prioridad_ag_calle == 0){
+						id_prioridad.selectedIndex = 0;
+					}else
+						id_prioridad.selectedIndex = -1;
+				}
+				
+				if(campana.marcacion_salida == 1)
+					marcacion_salida.selectedIndex = 1;
+				else if(campana.marcacion_salida == 0){
+					marcacion_salida.selectedIndex = 0;
+				}else
+					marcacion_salida.selectedIndex = -1;
+				
+				if(campana.term_llamada == 1)
+					term_llamada.selectedIndex = 1;
+				else if(campana.term_llamada == 0){
+					term_llamada.selectedIndex = 0;
+				}else
+					term_llamada.selectedIndex = -1;
+				
+				var index:Number = -1;
+				for (var i:int = 0; i<supervisores.length; i++){		
+					nom_supervisor.selectedIndex = i;
+					var item:int = nom_supervisor.selectedItem.id_usr;
+					if(item == campana.id_usr){
+						index = i;
+					}
+				}					
+				nom_supervisor.selectedIndex = index
+				
+				index = -1;
+				for (var x:int = 0; x<integraciones.length; x++){		
+					id_crm.selectedIndex = x;
+					item = id_crm.selectedItem.id_int_crm;
+					if(item == campana.id_int_crm){
+						index = x;
+					}
+				}					
+				id_crm.selectedIndex = index	
+					
+			}
+			
+			private function Abre_Agenda():void{
+				if(dg.selectedItem != null){			
+					var ventana:Agenda = PopUpManager.createPopUp(this, Agenda, true) as Agenda;
+					campana = dg.selectedItem as Campana;
+					ventana.endpoint = endpoint;
+					ventana.id_camp = campana.id_camp;
+				}else
+					Alert.show("Favor de seleccionar un registro","Información");			
+			}
+			
+			private function Abre_Agentes():void{
+				if(dg.selectedItem != null){			
+					var ventana_agentes:Agentes = PopUpManager.createPopUp(this, Agentes, true) as Agentes;
+					campana = dg.selectedItem as Campana;
+					ventana_agentes.endpoint = endpoint;
+					ventana_agentes.id_camp = campana.id_camp;
+				}else
+					Alert.show("Favor de seleccionar un registro","Información");			
+			}
+			
+			private function Abre_Alarmas():void{;
+				var ventana_alarma:Alarmas
+				if(dg.selectedItem != null){
+					if(dg.selectedItem.tipo_campana == "Campaña Inbound"){
+						ventana_alarma = PopUpManager.createPopUp(this, Alarmas, true) as Alarmas;
+						campana = dg.selectedItem as Campana;
+						ventana_alarma.endpoint = endpoint;
+						ventana_alarma.id_camp = campana.id_camp;
+						ventana_alarma.tipo_camp = campana.tipo_campana
+					}else{
+						var ventana_alarmaout:AlarmasOutbound = PopUpManager.createPopUp(this, AlarmasOutbound, true) as AlarmasOutbound;
+						campana = dg.selectedItem as Campana;
+						ventana_alarmaout.endpoint = endpoint;
+						ventana_alarmaout.id_camp =  campana.id_camp;
+						ventana_alarmaout.tipo_camp = campana.tipo_campana;
+						
+						ventana_alarma = PopUpManager.createPopUp(this, Alarmas, true) as Alarmas;
+						campana = dg.selectedItem as Campana;
+						ventana_alarma.endpoint = endpoint;
+						ventana_alarma.id_camp = campana.id_camp;
+						ventana_alarma.tipo_camp = campana.tipo_campana
+							
+						
+					}
+				}else
+					Alert.show("Favor de seleccionar un registro","Información");			
+			}
+			
+			private function Abre_Voces():void{
+				if(dg.selectedItem != null){			
+					var ventana_voces:Voces = PopUpManager.createPopUp(this, Voces, true) as Voces;
+					campana = dg.selectedItem as Campana;
+					ventana_voces.endpoint = endpoint;
+					ventana_voces.id_camp = campana.id_camp;
+				}else
+					Alert.show("Favor de seleccionar un registro","Información");			
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="alta_modificacion"/>
+	</mx:states>
+	
+	<fx:Declarations>
+		
+		<s:RemoteObject id="rocampana" destination="CampanaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+			<s:method name="FindById" result="result_FindById(event)" fault="faultHandler(event)" />
+			<s:method name="FindById_In" result="result_FindById_In(event)" fault="faultHandler(event)" />
+			<s:method name="FindById_Out" result="result_FindById_Out(event)" fault="faultHandler(event)" />
+			<s:method name="create" result="CreaCampana(event)" fault="faultHandler(event)" />
+			<s:method name="create_in"  result="CreaCampanain(event)" fault="faultHandler(event)" />
+			<s:method name="create_out"  result="CreaCampanaout(event)" fault="faultHandler(event)" />
+			<s:method name="Update_Campana"  result="result_ActualizaCampana(event)" fault="faultHandler(event)" />
+			<s:method name="Update_Campana_In"  result="result_ActualizaCampanain(event)" fault="faultHandler(event)" />
+			<s:method name="Update_Campana_Out"  result="result_ActualizaCampanaout(event)" fault="faultHandler(event)" />
+			<s:method name="Remove_Campana"  result="result_RemoveCampana(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roconfigurador" destination="ConfiguradorService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Find_Configuracion" result="Configuracion_Sistema(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="rosupervisor" destination="SupervisorService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Find_ComboSupervisor" result="Combo_Supervisor(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="rointegracion" destination="C_Integracion_CRMService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Find_Integraciones" result="Combo_Integracion(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roagenda" destination="AgendaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Create_Agenda" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roalarmas" destination="AlarmasService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Create_Alarmas_Internas" fault="faultHandler(event)" />
+			<s:method name="Create_Alarmas_Externas" fault="faultHandler(event)" />
+			<s:method name="Create_Alarmas_Outbound" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="rocatalogos" destination="C_CampanaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Create_Campana_Integracion" fault="faultHandler(event)" />
+			<s:method name="Create_Campana_ResultadosIn" fault="faultHandler(event)" />
+			<s:method name="Create_Campana_ResultadosOut" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="rovoces" destination="VocesService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="Create_Voces" fault="faultHandler(event)"/>
+		</s:RemoteObject>
+
+		<mx:StringValidator id="SV_nombre_camp" source="{nombre_camp}" property="text" required="true"  minLength="2" maxLength="100" trigger="{btnGuardar}" triggerEvent="click" requiredFieldError="Ingrese un nombre de Campaña"/>			
+		<s:NumberValidator  id="NV_max_ciclos" source="{max_ciclos}" trigger="{btnGuardar}" property="text"  domain="int"  negativeError="Ingresa un numero de Ciclos" />
+		<s:NumberValidator  id="NV_max_tonos" source="{max_tonos}" trigger="{btnGuardar}" property="text"  domain="int"  negativeError="Ingresa un numero de Tonos"/>
+		<mx:StringValidator id="SV_marcacion_salida" source="{marcacion_salida}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona la Modalidad de Marcación de Salida" />
+		<mx:StringValidator id="SV_terminacion" source="{term_llamada}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona el tipo de terminación" />
+		<mx:StringValidator id="SV_Integracion" source="{id_crm}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona un CRM" />
+		<mx:StringValidator id="SV_Tipo_Campana" source="{tipo_camp}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona un tipo de Campaña "/>
+		<mx:StringValidator id="SV_Supervisor" source="{nom_supervisor}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona un Supervisor" />
+		<mx:StringValidator id="SV_Prioridad" source="{id_prioridad}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona un tipo de Prioridad" />
+		<mx:StringValidator id="SV_desborde" source="{id_desborde}" trigger="{btnGuardar}" triggerEvent="click" property = "selectedItem"  required="true" requiredFieldError ="Selecciona un tipo de Desborde" />
+		<mx:StringValidator id="SV_extension" source="{num_extension}" trigger="{btnGuardar}" triggerEvent="click" property = "text"  required="true" requiredFieldError ="Ingresa una extension" />
+		
+		
+		</fx:Declarations>
+	
+	<fx:Style>
+
+	</fx:Style>
+	
+	<s:DataGrid id="dg" includeIn="grid" left="10" right="138" height="83%" editable="false"
+				enabled="true" horizontalCenter="-64" verticalCenter="22">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn width="80" dataField="id_camp" headerText="ID" resizable="false"></s:GridColumn>
+				<s:GridColumn dataField="nombre_camp" headerText="Nombre de Campaña"></s:GridColumn>
+				<s:GridColumn width="200" dataField="tipo_campana" headerText="Tipo de Campaña"
+							  resizable="false"></s:GridColumn>
+				<s:GridColumn dataField="nom_supervisor" headerText="Supervisor"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	
+	
+	<s:HGroup includeIn="grid" left="10" right="144" top="10" bottom="287" horizontalCenter="-67"
+			  verticalCenter="-139">
+		<s:Button id="btnNuevo" width="80" label="Nuevo" click="nuevo()"/>
+		<s:Button width="80" label="Modificar" click="modificar()"/>
+		<s:Button width="80" label="Eliminar" click="eliminar()"/>
+		<s:Button width="80" label="Buscar" click="Buscar()"/>
+		<s:Button width="80" label="Cerrar" click="parent.removeChild(this)"/>
+	</s:HGroup>
+	
+	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
+		<s:Button id = "btnGuardar" x="374" y="37" label="Guardar" click="save()"/>
+		<s:Button width="67" label="Cerrar" click="cerrar()"/>
+	</s:HGroup>
+	
+	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" width="590"
+			height="358">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		<s:FormItem left="0" top="10" width="317" label="Id" >
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:TextInput id="idi" width="74" editable="false" />
+		</s:FormItem>
+		
+		<s:FormItem x="0" y="59" width="475" label="Nombre de Campaña" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="40"/>
+			</s:layout>
+			<s:TextInput id="nombre_camp" x="16" y="0" width="145" height="20"/>
+		</s:FormItem>
+		<s:FormItem x="0" y="107" width="475" label="Tipo de Campaña" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="62"/>
+			</s:layout>
+			<s:ComboBox id="tipo_camp" x="38" y="-2" width="145" change="changeHandler(event)" dataProvider="{tipos}"  />
+		</s:FormItem>
+		<s:FormItem id="fitonos" visible="true" x="0" y="153" width="475" height="45"
+					label="Número máximo de Tonos:" blendMode="layer" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="26"/>
+			</s:layout>
+			<s:TextInput id="max_tonos" x="0" y="14" width="120" restrict="0-9"/>
+		</s:FormItem>
+		<s:FormItem id="ficiclos" visible="true" x="0" y="153" width="475"
+					label="Número máximo de Ciclos:" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="26"/>
+			</s:layout>
+			<s:TextInput id="max_ciclos" x="-2" y="-1" width="122" restrict="0-9" />
+		</s:FormItem>
+		<s:FormItem x="0" y="198" width="489" label="Supervisor" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="102"/>
+			</s:layout>
+			<s:ComboBox id="nom_supervisor" x="77" y="-3" width="145"  dataProvider="{supervisores}" labelField="nombre_usr" />
+		</s:FormItem>
+		<s:FormItem id="fidesborde" x="0" y="250" width="475" label="Desborde" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="110"/>
+			</s:layout>
+			<s:ComboBox id="id_desborde" x="86" y="0" width="145" dataProvider="{combodesborde}" change="changeHandler_Desborde(event)"/>
+		</s:FormItem>
+		<s:FormItem id="fiextension" x="0" y="302" width="489" height="41"
+					label="Extensión de Emergencia" required="true">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="10" paddingRight="0" requestedColumnCount="10"
+									verticalAlign="justify"/>
+			</s:layout>
+			<s:TextInput id="num_extension" x="10" y="300" width="145" restrict="0-9"/>
+		</s:FormItem>
+				
+		<s:Label id="lblselecciona" x="0" y="166" width="265" height="17" fontSize="12"
+				 fontWeight="bold" text="Selecciona un tipo de Campaña" textAlign="center"
+				 verticalAlign="middle" visible="false"/>
+		
+	</s:Form>
+
+	<s:Form id="formDatosCC" includeIn="alta_modificacion" y="37" left="447" width="480" height="358">
+		
+		<s:FormItem  id ="fimarcacion" x="104" y="0" width="431" label="Marcación Salida:" visible="true" required="true">
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:ComboBox id="marcacion_salida" x="31" y="0" width="125" dataProvider="{combomarcacion}"/>
+		</s:FormItem>
+		
+		<s:FormItem id ="fiprioridad" x="104" y="110" width="431" label="Prioridad Ag/Calle:" required="true" visible = "true">
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:ComboBox id="id_prioridad" x="21" y="0" width="125" dataProvider="{comboprioridad}"/>
+		</s:FormItem>
+		
+		<s:FormItem id="fiterminacion" x="104" y="55" width="431" label="Terminación Llamada:" required="true" visible="true" >
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:ComboBox id="term_llamada" x="2" y="0" width="125" dataProvider="{comboterminacion}"/>
+		</s:FormItem>	
+		<s:FormItem id = "ficrm" x="104" y="161" width="431" label="CRM" required="true" visible="true">
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:ComboBox id="id_crm" x="94" y="0" width="125"  dataProvider="{integraciones}" labelField="nombre"/>
+		</s:FormItem>
+	</s:Form>
+	<s:VGroup includeIn="grid" x="853" y="95" width="98" height="269" gap="20"
+			  horizontalAlign="center" requestedRowCount="4" rowHeight="25"
+			  variableRowHeight="false" verticalAlign="middle">
+		<s:Button width="75" label="Alarmas" click="Abre_Alarmas()"/>
+		<s:Button width="75" label="Agenda" click="Abre_Agenda()"/>
+		<s:Button width="75" label="Agentes" click="Abre_Agentes()"/>
+		<s:Button x="15" width="75" label="Voces" click="Abre_Voces()"/>
+	</s:VGroup>
+
+	
+</mx:Canvas>

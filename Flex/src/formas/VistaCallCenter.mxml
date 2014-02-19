@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   
+		   creationComplete="inicio()" 
+		   width="100%" height="100%"	> 
+	<!-- Simple example to demonstrate the Spark Group component. -->
+	<fx:Declarations>
+		<fx:Array id="orientArray">
+			<fx:String>Rows</fx:String>
+			<fx:String>Columns</fx:String>
+		</fx:Array>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import flash.display.Sprite;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import formas.DatosPosicion;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+						
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.controls.ColorPicker;
+			import mx.controls.Image;
+			
+			import mx.charts.Legend;
+			import mx.containers.Panel;
+			import objectosJava.*;
+			
+			[Bindable] public var chanel:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var message:String;			 
+			[Bindable] private var legend:Legend;
+			[Bindable] private var panel:Panel;
+			//import skins.TDFPanelSkin;	
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var numfilas:int;
+			[Bindable] public var numcolumnas:int;	
+			[Bindable] public var yborder:int;
+			[Bindable] public var xborder:int;
+			[Bindable] public var idUsuario:int;
+			[Bindable] public var modificar:int;
+			[Bindable] public var arrDatosAgentes:ArrayCollection;
+			[Bindable] public var arrCambioPosicion:ArrayCollection;
+			[Bindable] public var datoPosicion:int;
+			[Bindable] public var contador:int;
+			[Bindable] public var posicion1:int;
+			[Bindable] public var Agente1:int;
+			[Bindable] public var posicion2:int;
+			[Bindable] public var Agente2:int;
+			[Bindable] public var bandEntrada:int;
+			
+			private function  inicio():void{
+				//Alert.show(endpoint);
+				//roUsuarios.findAll();
+				enviaMsj.enabled=false;
+				desconectaAg.enabled=false;
+				
+				contador=0;
+				modificar=0;
+				btnMuestraPosicion();
+				
+			}
+			private function handleImageClick(event:Event):void
+			{
+				
+				// al seleccionar una posicion
+				if (modificar==0){
+					
+					
+				}else
+				{	contador=contador+1;
+					
+					if (contador== 1){
+						Agente1=0;
+						//Alert.show(String(event.currentTarget.id));
+						for (var datAgpos:int=0;datAgpos<arrDatosAgentes.length; datAgpos++)
+						{
+							if (arrDatosAgentes.getItemAt(datAgpos).id_posicion==int(event.currentTarget.id)+1 )
+							{
+								posicion1= arrDatosAgentes.getItemAt(datAgpos).id_posicion
+								Agente1	=arrDatosAgentes.getItemAt(datAgpos).id_usr
+								/*Alert.show(  arrDatosAgentes.getItemAt(datAgpos).nombre_usr +
+									arrDatosAgentes.getItemAt(datAgpos).id_usr +          
+									arrDatosAgentes.getItemAt(datAgpos).id_posicion);    */
+
+							}
+						}
+						if (Agente1==0){
+							Alert.show("Seleccione una posición que esté asignada a un agente.");
+							contador=0;
+							modificar=1;
+						}
+						
+						
+					}
+					
+					if (contador== 2){
+						Agente2=0;
+						for (var datAgpos2:int=0;datAgpos2<arrDatosAgentes.length; datAgpos2++)
+						{
+							if (arrDatosAgentes.getItemAt(datAgpos2).id_posicion==int(event.currentTarget.id)+1 )
+							{
+								posicion2= arrDatosAgentes.getItemAt(datAgpos2).id_posicion
+								Agente2	=arrDatosAgentes.getItemAt(datAgpos2).id_usr
+							}
+						}
+						//Alert.show("se cambia " + Agente1+" en pos. "+ posicion1 + " por Agente " + Agente2+ " en  "+posicion2);
+						
+						
+						if (Agente2==0){
+							EdAgente.ActualizaPosicion( Agente1,int(event.currentTarget.id)+1); 
+							 
+						}
+						
+						if (Agente2 != 0 && Agente1 != 0){
+							EdAgente.ActualizaPosicion( Agente2,1000);
+							EdAgente.ActualizaPosicion( Agente1,2000);
+							EdAgente.ActualizaPosicion( Agente1,posicion2);
+							EdAgente.ActualizaPosicion( Agente2,posicion1);
+							contador=0;
+							}
+						
+						 
+						ActualizaPosiciones();
+						modificar=1;
+					}
+					 					
+				}
+			}
+			
+
+			private function pintaPosiciones():void
+			{
+				
+				var total:int;		
+				datoPosicion=1;
+				total=(numcolumnas * numfilas );
+				//Alert.show("Tamaño:"+arrDatosAgentes.length);
+				//Alert.show("total:"+total);
+				for (var i:int=1;i<=total;i++){
+					 			 
+					var hijoCatalogo:DatosPosicion = new DatosPosicion();
+					//Alert.show("i:"+i);
+					hijoCatalogo.endpoint=endpoint;					 
+					hijoCatalogo.addEventListener(MouseEvent.CLICK, handleImageClick);
+					var asignado:int=0;
+					for (var datAg:int=0;datAg<arrDatosAgentes.length; datAg++)
+					{
+						if (arrDatosAgentes.getItemAt(datAg).id_posicion==i){
+							//posicion asignada
+							  asignado = 1;
+							
+							if (arrDatosAgentes.getItemAt(datAg).color == null)
+							{
+								hijoCatalogo.colorFondo="0x666666"
+							}else{
+								hijoCatalogo.colorFondo=arrDatosAgentes.getItemAt(datAg).color;
+							}
+							hijoCatalogo.nombreAgente=arrDatosAgentes.getItemAt(datAg).nombre_usr;
+							hijoCatalogo.extensionAgente="Ext."+arrDatosAgentes.getItemAt(datAg).extension;
+							//Alert.show("Asignado"+datAg);
+						}
+					}
+					if(asignado==0){
+						//Posicion  no  asignada
+						//Alert.show("Pos:"+i+", vacio") ;
+						hijoCatalogo.colorFondo="0x000000"
+						hijoCatalogo.nombreAgente="No asignado"
+						hijoCatalogo.extensionAgente="";
+					}
+					
+					 
+					//posiciones.tabIndex=datoPosicion;
+					//posiciones.baselinePositionElement=String(datoPosicion);
+				//	hijoCatalogo.id=String(datoPosicion);
+					//Alert.show(String(posiciones.numChildren));
+					hijoCatalogo.id=String(posiciones.numChildren);
+					hijoCatalogo.addEventListener(MouseEvent.CLICK, handleImageClick);
+					posiciones.addElement(hijoCatalogo);
+					datoPosicion=datoPosicion+1;
+					
+					
+					//hijoCatalogo.nombre=String(idUsuario);	
+					//hijoCatalogo.nombre=datosAgente.getItemAt(i+1).nombre_usr;
+					
+					//Alert.show(String(arrDatosAgentes.getItemAt(i).color));
+					
+				}
+				
+			}
+			
+			private function ModificaPosiciones():void{
+				Alert.show("Seleccione el agente que desea cambiar de posición  y posteriormente  seleccione la nueva posición. ");
+				modificar=1;
+				modDistribu.enabled=false;
+				guarda.enabled=true;
+				
+			}
+			
+			private function ActualizaPosiciones():void{
+				
+				//modificar=0;
+				//posiciones.initialized;
+				posiciones.removeAllElements();
+				inicio();
+				
+			}
+			
+			private function ConfirmaGuardar(event:CloseEvent):void{				
+				
+				if (event.detail == Alert.YES){
+					//posiciones.removeAllElements(); 				
+					modificar=0;
+					//posiciones.initialized;
+					arrCambioPosicion=arrDatosAgentes;
+					//inicio();
+					Alert.show("Cambios Guardados correctamente");
+				}
+				else 
+				{
+					//Alert.show("NO"+arrCambioPosicion.length);
+					//arrCambioPosicion  
+					for (var cancelpos:int=0;cancelpos<arrCambioPosicion.length; cancelpos++)
+					{
+						// if (arrCambioPosicion.getItemAt(cancelpos).id_posicion != 0)
+						// {
+							EdAgente.ActualizaPosicion( arrCambioPosicion.getItemAt(cancelpos).id_usr,arrCambioPosicion.getItemAt(cancelpos).id_posicion);
+						// }
+							
+					 }
+					 
+				}
+				modificar=0;
+				//posiciones.initialized;
+				posiciones.removeAllElements();
+				inicio();
+				modDistribu.enabled=true;
+				guarda.enabled=false;
+			}
+			
+			private function GuardarPosiciones():void{
+				
+				modificar=0;
+				//posiciones.initialized;
+				posiciones.removeAllElements();
+				inicio();
+				
+			}
+			
+			protected function btnMuestraPosicion( ):void
+			{
+				yborder=numfilas*100;
+				xborder=numcolumnas*115;
+				
+				// TODO Auto-generated method stub
+				this.aplicarPropiedades()
+				//pintaPosiciones();
+					EdAgente.DatosTodosAgentes();
+					
+			
+			}
+			
+			private function aplicarPropiedades():void
+			{
+				//this.mainGroup.orientation = this.orientation.selectedItem;
+				this.posiciones.horizontalGap = 3;
+				this.posiciones.verticalGap = 3;
+				this.posiciones.requestedColumnCount =  numcolumnas ;// this.colCount.value;
+				this.posiciones.requestedRowCount =  numfilas;//this.rowCount.value;
+				
+			}
+			
+			private function faultHandlerDatos(event:FaultEvent):void
+			{				 
+				Alert.show(event.fault.faultString,"Error al obtener datos de Agente");
+			}
+			
+			private function result_DatosTodosAgentes(event:ResultEvent):void{
+				arrDatosAgentes=ArrayCollection(event.result);
+				//Alert.show("bandEntrada="+bandEntrada);
+				if (bandEntrada==1){
+				arrCambioPosicion=arrDatosAgentes;
+				bandEntrada=0;
+				guarda.enabled=false;
+				
+				}
+				
+				pintaPosiciones();
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>		
+		<s:RemoteObject id="EdAgente" destination="datosAgenteService" endpoint="{endpoint}" fault="faultHandlerDatos(event)">
+			 
+			<s:method fault="faultHandlerDatos(event)" name="DatosTodosAgentes" result="result_DatosTodosAgentes(event)"/>	
+			<s:method fault="faultHandlerDatos(event)" name="ActualizaPosicion"  />	
+			
+		</s:RemoteObject>
+	</fx:Declarations>
+	
+	 
+	<s:Group x="17" y="2"  width="{xborder}" height="100%">	
+	 
+		
+		<s:TileGroup id="posiciones"     x="1" y="3" width="76" height="58"
+					 contentBackgroundColor="#D3B4B4"   horizontalGap="2" orientation="rows"
+					 verticalGap="2">
+		</s:TileGroup>
+		
+		<s:BorderContainer x="23" y="{yborder}" width="400" height="76">
+			<s:Button id="guarda" x="12" y="40" label="Guardar" click='Alert.show("¿Está seguro de guardar los cambios?", "Aviso",3,this,ConfirmaGuardar);'/>
+			<s:Button id="modDistribu" x="10" y="9" label="Modificar Distribución" click ="ModificaPosiciones()" />
+			<s:Button id="enviaMsj" x="180" y="9" label="Enviar mensaje a todos"/>
+			<s:Button id="desconectaAg" x="192" y="40" label="Desconectar Agentes"/>
+			<s:Button x="112" y="42" label="Salir" click="parent.removeChild(this)"/>
+		</s:BorderContainer>
+		
+		 
+	</s:Group>
+	 
+	
+</mx:Canvas>
+

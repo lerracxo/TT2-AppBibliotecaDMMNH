@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="452"
+		 label="{nombreCatalogo}" layout="absolute" 
+		 creationComplete="doInit()" title="DCPro Messasge Manager"
+		
+		 >
+	<fx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+		import mx.core.FlexGlobals;
+		import mx.events.CloseEvent;
+		import mx.events.ListEvent;
+		import mx.managers.PopUpManager;
+		import mx.rpc.events.FaultEvent;
+		import mx.rpc.events.ResultEvent;
+		
+		import objectosJava.*;
+		
+		import spark.events.GridEvent;
+		import spark.events.TextOperationEvent;
+		
+		[Bindable] public var endpoint:String;
+		[Bindable] public var nombreCatalogo:String;
+		[Bindable] public var usuariologeado:Usuario;
+		[Bindable] public var message:String;
+		
+		private var timer:Timer; 
+		private var AvisoMinuto:Timer;
+		
+		
+		import mx.messaging.events.MessageEvent;
+		import mx.messaging.events.MessageFaultEvent;
+		import mx.messaging.messages.AsyncMessage;
+		import mx.messaging.messages.ErrorMessage;
+		import mx.rpc.events.FaultEvent;
+		import mx.rpc.events.ResultEvent;
+	
+		private function doInit():void {
+			PopUpManager.centerPopUp(this);
+			dg_contactos.doubleClickEnabled = true;
+			dg_contactos.addEventListener(GridEvent.GRID_DOUBLE_CLICK, SeleccionaContacto);
+
+		}
+		
+		public function Inicializar(endpoint:String, usuariologeado:Usuario, message:String):void{
+			this.endpoint = endpoint;
+			//this.nombreCatalogo = nombreCatalogo;
+			this.usuariologeado = usuariologeado;
+			this.message = message;
+			
+			roEnviarMensaje.findAll_Contactos(usuariologeado.id_usr,usuariologeado.id_tipo_usr);
+		
+			subscribir();
+		}
+	
+		private function finPopUp():void {
+			PopUpManager.removePopUp(this);
+		}
+	
+	
+		private function result_findAll_Contactos(event:ResultEvent):void{
+			dg_contactos.dataProvider = ArrayCollection( event.result );
+			
+		}
+	
+		
+		private function faultHandler(event:FaultEvent):void
+		{
+			Alert.show(event.fault.faultString,"Error");
+		}
+		
+		private function SeleccionaContacto(event:GridEvent):void{
+			CreaUnaConversacion(event.item);
+		}
+		
+		public function CreaUnaConversacion(contacto:Object):void{			
+			try{	
+				var children:Array = tb_mensajes.getChildren();
+				
+				for (var i:int = 0; i<children.length; i++)
+				{
+					
+					if (children[i].nombreCatalogo == contacto.nombre_usr )
+					{
+						tb_mensajes.selectedChild = children[i];
+						return;
+					}
+				}
+					
+				var pestana:Mensaje_Mensajero = new Mensaje_Mensajero();
+				tb_mensajes.addChild(pestana); 
+				pestana.endpoint = endpoint;
+				pestana.nombreCatalogo = contacto.nombre_usr;
+				pestana.id_usr=contacto.id_usr;
+				pestana.usuariologeado=usuariologeado;
+				pestana.message= message;
+				tb_mensajes.selectedChild = pestana;
+				
+			}catch(errObject:Error){
+				Alert.show(errObject.message +' '+ errObject.name,"Error")
+			}
+			
+		}
+		
+		public function Desconexion():void{
+			messageConsumerAgentes.unsubscribe(false);
+		}
+		
+		protected function messageProducer_faultHandler(event:MessageFaultEvent):void
+		{
+			Alert.show(event.message.faultString+'\n '+event.message.faultDetail+event.message.faultCode,"Error");
+		}
+		
+		
+		private function Message_handleResponse(event:MessageEvent):void
+		{
+			//estado = int(event.message.headers["id_estado"]);
+			//Cambia_Estado();
+			var tipo_mensaje:String="";
+			
+			tipo_mensaje = event.message.headers["type"];
+			
+			if((tipo_mensaje == "messenger_message") || (tipo_mensaje == "disconect-message")){
+				
+				var contacto:Contacto = new Contacto();
+				contacto.id_usr=event.message.headers["f_id_usr"] ;
+				contacto.nombre_usr = event.message.headers["f_nombre"];
+				
+				var mensaje:String = event.message.headers["message"];
+				
+				
+				var children:Array = tb_mensajes.getChildren();
+				var i:int = 0;
+				for (i = 0; i<children.length; i++)
+				{
+					
+					if (children[i].id_usr == contacto.id_usr )
+					{
+						
+						//tb_mensajes.selectedChild = children[i];
+						if(tipo_mensaje== "disconect-message" ){
+							var minutos:int = int (event.message.headers["time"]);
+							minutos = minutos * 60000;
+							
+							//Alert.show(":( me van a desconectar en: "+event.message.headers["time"]+" minutos");
+							AvisoMinuto = new Timer( (minutos - 59999) , 1);
+							timer = new Timer(minutos,1);
+							timer.addEventListener(TimerEvent.TIMER,CerrarSesion);
+							AvisoMinuto.addEventListener(TimerEvent.TIMER, 
+								function ():void {
+									Alert.show("Le queda un minuto antes de cerrar su sesión.","Aviso");
+								}
+							);
+							
+							timer.start();
+							AvisoMinuto.start();
+							
+						}
+						children[i].llegoMensaje(mensaje);
+						this.setVisible(true);
+						return;
+					}
+					
+			
+				}
+				CreaUnaConversacion(contacto);
+				Message_handleResponse(event);
+			}
+			
+		}
+		
+		private function CerrarSesion(event:TimerEvent):void{
+			FlexGlobals.topLevelApplication.cerrarSesionDCPro();
+		}
+		
+		protected function subscribir():void
+		{				
+			messageConsumerAgentes.selector = "usuario = "+usuariologeado.id_usr;
+			messageConsumerAgentes.subscribe();					
+		}
+		
+		
+	]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roEnviarMensaje" destination="EnviarMensajeService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			
+			<s:method name="findAll_Contactos" result="result_findAll_Contactos(event)" fault="faultHandler(event)" />
+			
+		</s:RemoteObject>
+		
+		
+		
+		<s:Consumer id="messageConsumerAgentes" destination="agentes" 	
+					message="Message_handleResponse(event)" 
+					channelSet="{msjChannelEstado}" 
+					fault="messageProducer_faultHandler(event)"/>
+		
+		<s:ChannelSet  id="msjChannelEstado" > 
+			<s:channels>
+				<s:AMFChannel uri= "{message}"/>
+			</s:channels>
+		</s:ChannelSet>
+		
+	</fx:Declarations>
+	<s:Button id="btnSalir" x="288" y="353" width="81" label="Ocultar" click="this.setVisible(false)"/>
+	
+	<s:DataGrid id="dg_contactos" x="10" y="15" width="106" height="330" requestedRowCount="4" >
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="nombre_usr" headerText="Contactos" ></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	
+	<mx:TabNavigator id="tb_mensajes" x="124" y="15" width="264" height="330">
+	</mx:TabNavigator>
+	
+</mx:TitleWindow>

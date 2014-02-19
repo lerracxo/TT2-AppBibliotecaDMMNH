@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="980" height="484"
+		 layout="absolute" creationComplete="doInit()" title="DCPro Editar Voces">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.EventPriority;
+			import mx.events.CloseEvent;
+			import mx.events.EventListenerRequest;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			import mx.utils.ObjectUtil;
+			import mx.utils.StringUtil;
+
+			import objectosJava.*;
+				
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var id_camp:int;
+			[Bindable] public var path:String;
+			[Bindable] public var boton:String;
+			[Bindable] public var voces:Voz;
+			[Bindable] public var validatorArr:Array;
+			[Bindable] private var fileRef:FileReference;
+			[Bindable] private var urlRequest:URLRequest;
+			
+			private const FILE_UPLOAD_URL:String = "http://192.168.2.157/dcpro_qa";
+
+
+
+			private function doInit():void {
+				fileRef= new FileReference;
+				urlRequest= new URLRequest;
+				fileRef.addEventListener(Event.SELECT, fileRef_select);
+				fileRef.addEventListener(Event.COMPLETE,fileRef_complete);
+				fileRef.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, fileRef_uploadCompleteData);
+
+				rovoces.Find_Voces(id_camp);
+				PopUpManager.bringToFront(this);
+				Prepara_Form();
+			}
+	
+			//funcion que cierra el popup
+			private function finPopUp():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function subirFichero(event:MouseEvent):void{
+				fileRef.browse();
+				//Si queremos utilizar un filtro por imagenes
+				//var imagesFilter:FileFilter = new FileFilter("*.jpg,*.gif,*.png", "*.jpg;*.gif;*.png;*.jpeg");
+				//fileRef.browse([imagesFilter]);	
+			}
+			
+			
+			private function fileRef_select(evt:Event):void {
+				try {
+					var request:URLRequest = new URLRequest();
+					request.url = FILE_UPLOAD_URL;
+					fileRef.upload(request);
+					
+					//fileRef.upload(new URLRequest(FILE_UPLOAD_URL));
+					Alert.show("size (bytes): " + numberFormatter.format(fileRef.size));
+					
+				} catch (err:Error) {
+					Alert.show("ERROR: zero-byte file");
+				}
+				
+				//urlRequest.url=RUTA_SERVLET+"?directorio="+directorio;
+				//urlRequest.method=URLRequestMethod.GET;
+				//urlRequest.method="POST";
+				//etiqueta.text="Subiendo "+fileRef.name+"...";
+				//fileRef.upload(urlRequest);
+				//bt.enabled=false;
+			}
+			//el fichero se subio correctamente
+			private function fileRef_complete(evt:Event):void {
+				//img.source = fileRef.data;
+				Alert.show(ObjectUtil.toString(fileRef));
+				
+			}  
+			
+			private function fileRef_uploadCompleteData(evt:DataEvent):void {
+				var strData:String = StringUtil.trim(evt.data);
+				var vars:URLVariables = new URLVariables(strData);
+				Alert.show(vars.fileName, "fileName");
+			}
+			
+			private function Carga_Validaciones():void
+			{
+				validatorArr = new Array();
+				validatorArr.push(SV_bvn_laboral);
+				validatorArr.push(SV_bvn_semana);
+				validatorArr.push(SV_bvn_especial);
+				validatorArr.push(SV_bvn_cerrado);
+				validatorArr.push(SV_buzon_diurno);
+				validatorArr.push(SV_buzon_nocturno);
+				validatorArr.push(SV_transferencia);
+				validatorArr.push(SV_invalida);
+				validatorArr.push(SV_disponibles);
+				validatorArr.push(SV_despedida);
+				validatorArr.push(SV_espera);
+				validatorArr.push(SV_indice);
+				validatorArr.push(SV_mensaje);
+				validatorArr.push(SV_disuasion);
+			}
+			
+			private function Prepara_Form():void{
+				btnlaboral.enabled = false;
+				btncerrado.enabled = false;
+				btnespecial.enabled = false;
+				btnsemana.enabled = false;
+				btndiurno.enabled = false;
+				btnnocturno.enabled = false;
+				btninvalida.enabled = false;
+				btnnodisponibles.enabled = false;
+				btndespedida.enabled = false;
+				btndisuasion.enabled = false;
+				btnmensaje.enabled = false;
+				btntransferencia.enabled = false;
+				btnespera.enabled = false;
+				btnespera2.enabled = false;
+				btnespera3.enabled = false;
+				btnindice.enabled = false;
+				btnindice2.enabled = false;
+				btnindice3.enabled = false;	
+				btnGuardar.enabled = false;
+				btnCancelar.enabled = false;
+			}
+			
+			private function Activa_Edicion():void{
+				btnlaboral.enabled = true;
+				btncerrado.enabled = true;
+				btnespecial.enabled = true;
+				btnsemana.enabled = true;
+				btndiurno.enabled = true;
+				btnnocturno.enabled = true;
+				btninvalida.enabled = true;
+				btnnodisponibles.enabled = true;
+				btndespedida.enabled = true;
+				btndisuasion.enabled = true;
+				btnmensaje.enabled = true;
+				btntransferencia.enabled = true;
+				btnespera.enabled = true;
+				btnespera2.enabled = true;
+				btnespera3.enabled = true;
+				btnindice.enabled = true;
+				btnindice2.enabled = true;
+				btnindice3.enabled = true;	
+				btnGuardar.enabled = true;
+				btnCancelar.enabled = true;
+			}
+			
+			private function Browse_Sound(event:MouseEvent):void{
+				boton = String(event.target.id);
+				rovoces.SoundChooser();
+			}
+			
+			private function Asigna_Path(boton:String):void{
+				switch(boton){
+					case "btnlaboral":
+						bvn_hro_laboral.text = path;
+						break;
+					case "btncerrado":
+						bvn_hro_cerrado.text = path;
+						break;
+					case "btnespecial":
+						bvn_hro_especial.text = path;
+						break;
+					case "btnsemana":
+						bvn_fin_semana.text = path;
+						break;
+					case "btndiurno":
+						bvn_buzon_diurno.text = path;
+						break;
+					case "btnnocturno":
+						bvn_buzon_nocturno.text= path;
+						break;
+					case "btninvalida":
+						opcion_invalida.text = path;
+						break;
+					case "btnnodisponibles":
+						agentes_no_disp.text = path;
+						break;
+					case "btndespedida":
+						despedida.text = path;
+						break;
+					case "btndisuasion":
+						disuasion.text = path;
+						break;
+					case "btnmensaje":
+						mensaje.text = path;
+						break;
+					case "btntransferencia":
+						transferencia.text = path;
+						break;
+					case "btnespera":
+						espera1.text = path;
+						break;
+					case "btnespera2":
+						espera2.text = path;
+						break;
+					case "btnespera3":
+						espera3.text = path;
+						break;
+					case "btnindice":
+						ind_musica1.text = path;
+						break;
+					case "btnindice2":
+						ind_musica2.text = path;
+						break;
+					case "btnindice3":
+						ind_musica3.text = path;
+						break;
+					path = "";
+				}	
+			}
+			
+			private function Guarda_Cambios():void{
+				var validatorErrorArray:Array;
+				var isValidForm:Boolean;
+				Carga_Validaciones();
+				validatorErrorArray= Validator.validateAll(validatorArr);
+				isValidForm = validatorErrorArray.length == 0;
+				if(isValidForm)
+					Alert.show("¿Esta seguro de Modificar las voces de la Campaña? ","Información",Alert.OK| Alert.NO,this,Update,null,Alert.OK);	
+				else 
+					Alert.show("Favor de capturar los datos requeridos * ", 'Información',Alert.OK);		
+			}
+			
+			private function Update(eventObj:CloseEvent):void{
+				if(eventObj.detail==Alert.OK){					
+					voces.bvn_hro_laboral =bvn_hro_laboral.text;
+					voces.bvn_hro_cerrado =bvn_hro_cerrado.text;					
+					voces.bvn_hro_especial = bvn_hro_especial.text;
+					voces.bvn_fin_semana = bvn_fin_semana.text;					
+					voces.bvn_buzon_diurno = bvn_buzon_diurno.text;
+					voces.bvn_buzon_nocturno= bvn_buzon_nocturno.text;
+					voces.opcion_invalida = opcion_invalida.text;					
+					voces.agentes_no_disp = agentes_no_disp.text;
+					voces.despedida = despedida.text;
+					voces.disuasion = disuasion.text;
+					voces.mensaje = mensaje.text;
+					voces.transferencia = transferencia.text;
+					voces.espera1 = espera1.text;
+					voces.espera2 = espera2.text;
+					voces.espera3 = espera3.text;
+					voces.ind_musica1 = ind_musica1.text;
+					voces.ind_musica2 = ind_musica2.text;
+					voces.ind_musica3 = ind_musica3.text;	
+					rovoces.Update_Voces(voces);
+					Prepara_Form();	
+				}
+			}
+			
+			private function Cancela_Voces():void{
+				rovoces.Find_Voces(id_camp);
+				Prepara_Form();
+			}
+			
+			private function result_FindVoces(event:ResultEvent):void{	
+					voces = Voz(event.result);				
+			}
+			
+			private function result_UpdateVoces(event:ResultEvent):void{	
+				var ok:int = int(event.result);	
+				if(ok)
+					Alert.show("Las voces han sido modificadas", "Información");
+			}
+			
+			private function result_FullPath(event:ResultEvent):void{
+				path = String(event.result);
+				Asigna_Path(boton);
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RemoteObject id="rovoces" destination="VocesService"  fault="faultHandler(event)" endpoint="{endpoint}">
+			<s:method name="SoundChooser" result="result_FullPath(event)"/>
+			<s:method name="Find_Voces" result="result_FindVoces(event)" fault="faultHandler(event)" />
+			<s:method name="Update_Voces" result="result_UpdateVoces(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<mx:StringValidator id="SV_bvn_laboral" source="{bvn_hro_laboral}" property="text" required="true"/>
+		<mx:StringValidator id="SV_bvn_semana" source="{bvn_fin_semana}" property="text" required="true"/>
+		<mx:StringValidator id="SV_bvn_especial" source="{bvn_hro_especial}" property="text" required="true"/>
+		<mx:StringValidator id="SV_bvn_cerrado" source="{bvn_hro_cerrado}" property="text" required="true"/>
+		<mx:StringValidator id="SV_buzon_diurno" source="{bvn_buzon_diurno}" property="text" required="true"/>
+		<mx:StringValidator id="SV_buzon_nocturno" source="{bvn_buzon_nocturno}" property="text" required="true"/>
+		<mx:StringValidator id="SV_transferencia" source="{transferencia}" property="text" required="true"/>
+		<mx:StringValidator id="SV_invalida" source="{opcion_invalida}" property="text" required="true"/>
+		<mx:StringValidator id="SV_despedida" source="{despedida}" property="text" required="true"/>
+		<mx:StringValidator id="SV_disponibles" source="{agentes_no_disp}" property="text" required="true"/>
+		<mx:StringValidator id="SV_espera" source="{espera1}" property="text" required="true"/>
+		<mx:StringValidator id="SV_indice" source="{ind_musica1}" property="text" required="true"/>
+		<mx:StringValidator id="SV_disuasion" source="{disuasion}" property="text" required="true"/>
+		<mx:StringValidator id="SV_mensaje" source="{mensaje}" property="text" required="true"/>
+
+		<mx:NumberFormatter id="numberFormatter" />
+	</fx:Declarations>
+	
+	<s:Form x="10" y="10" width="958" height="403" color="#FFFFFF">
+		<s:layout>
+			<s:TileLayout/>
+		</s:layout>
+		<s:FormItem width="416" height="35" label="Bienvenida horario laboral" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_hro_laboral" x="1" y="5" width="215" text="{voces.bvn_hro_laboral}" editable="false"/>
+			<s:Button id="btnlaboral" x="228" y="1" label="..." click="subirFichero(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Disuasión" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="disuasion" x="33" y="0" width="215" text="{voces.disuasion}" editable="false"/>
+			<s:Button id="btndisuasion" x="273" y="-5" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="447" height="35" label="Bienvenida horario cerrado" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_hro_cerrado" x="0" y="0" width="215" text="{voces.bvn_hro_cerrado}" editable="false"/>
+			<s:Button id="btncerrado" x="225" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Mensaje" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="mensaje" x="43" y="0" width="215" text="{voces.mensaje}" editable="false"/>
+			<s:Button id="btnmensaje" x="283" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="424" height="35" label="Bienvenida horario especial" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_hro_especial" x="-4" y="0" width="215"
+						 text="{voces.bvn_hro_especial}" editable="false"/>
+			<s:Button id="btnespecial" x="221" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Transferencia" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="transferencia" x="12" y="0" width="215" text="{voces.transferencia}" editable="false"/>
+			<s:Button id="btntransferencia" x="250" y="-4" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem height="35" label="Bienvenida Fin de Semana" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_fin_semana" x="4" y="0" width="215" text="{voces.bvn_fin_semana}" editable="false"/>
+			<s:Button id="btnsemana" x="228" y="-4" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Espera" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="espera1" x="51" y="-1" width="215" text="{voces.espera1}" editable="false"/>
+			<s:Button id="btnespera" x="292" y="-4" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="350" height="35" label="Bienvenida buzón diurno" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_buzon_diurno" x="14" y="0" width="215"
+						 text="{voces.bvn_buzon_diurno}" editable="false"/>
+			<s:Button id="btndiurno" x="238" y="-2" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Espera 2" fontSize="10">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="espera2" x="41" y="0" width="215" text="{voces.espera2}" editable="false"/>
+			<s:Button id="btnespera2" x="281" y="-1" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="350" height="35" label="Bienvenida buzón nocturno" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="bvn_buzon_nocturno" x="1" y="1" width="215"
+						 text="{voces.bvn_buzon_nocturno}" editable="false"/>
+			<s:Button id="btnnocturno" x="226" y="-1" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Espera 3" fontSize="10">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="espera3" text="{voces.espera3}" x="41" y="0" width="215" editable="false"/>
+			<s:Button id="btnespera3" x="280" y="-3" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="350" height="35" label="Opción Inválida" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="opcion_invalida" x="61" y="0" width="215" text="{voces.opcion_invalida}" editable="false"/>
+			<s:Button id="btninvalida" x="286" y="-3" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Indice música" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="ind_musica1" y="0" left="10" width="215" editable="false"
+						 text="{voces.ind_musica1}"/>
+			<s:Button id="btnindice" x="250" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="350" height="35" label="Agentes no disponibles" fontSize="10">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="agentes_no_disp" x="23" y="0" width="215" text="{voces.agentes_no_disp}" editable="false"/>
+			<s:Button id="btnnodisponibles" x="248" y="-2" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Indice música 2" fontSize="10">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="ind_musica2" x="0" y="0" width="215" editable="false"
+						 text="{voces.ind_musica2}"/>
+			<s:Button id="btnindice2" x="240" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem height="35" label="Despedida" fontSize="10" required="true">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="despedida" x="92" y="0" width="215" text="{voces.despedida}" editable="false"/>
+			<s:Button id="btndespedida" x="317" y="-4" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+		<s:FormItem width="200" height="35" label="Indice música3" fontSize="10">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<s:TextInput id="ind_musica3" x="4" y="0" width="215" text="{voces.ind_musica3}" editable="false"/>
+			<s:Button id="btnindice3" x="244" y="0" label="..." click="Browse_Sound(event)"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Button x="871" y="419" width="59" label="Salir" click="this.finPopUp()"/>
+	<s:HGroup x="11" y="410" width="426" height="33">
+		<s:Button id="btnEditar" label="Editar" click="Activa_Edicion()"/>
+		<s:Button id="btnGuardar" label="Guardar" click="Guarda_Cambios()"/>
+		<s:Button id="btnCancelar" label="Cancelar" click="Cancela_Voces()"/>
+	</s:HGroup>
+</mx:TitleWindow>

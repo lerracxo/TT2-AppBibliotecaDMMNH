@@ -1,0 +1,14 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+
+global
+{
+	vertical-align: top;
+	text-align: left;
+	font-style: italic;
+	font-size: 11;
+	font-family: Verdana;
+}
+	

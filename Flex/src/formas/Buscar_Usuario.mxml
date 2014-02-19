@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="552" height="368"
+		 creationComplete="doInit()" title="DCPro Buscar Usuario">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.fiber.core.model_public;
+			
+			import flash.events.Event;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			
+			import objectosJava.*;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var endpoint:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var datosGrid:ArrayCollection;
+			[Bindable] public var usuario:Usuario = new Usuario();
+			[Bindable] public var nombre:String = "";
+			[Bindable] public var apellido_paterno:String = "";
+			[Bindable] public var apellido_materno:String = "";
+			[Bindable] public var modificar_ok:int;
+			
+			private function doInit():void
+			{
+				roUsuarios.FindAllbyName(nombre,apellido_paterno,apellido_materno);		
+			}
+			
+			private function finPopUp():void {
+				PopUpManager.removePopUp(this);
+				
+			}
+			
+			private function Buscar():void{
+				nombre = nombre_usr.text;
+				apellido_paterno = apellido_paterno_usr.text;
+				apellido_materno = apellido_materno_usr.text;
+				roUsuarios.FindUsuariobyName(nombre,apellido_paterno,apellido_materno);		
+			}
+			
+			private function eliminar():void
+			{
+				if(DgUsuarios.selectedItem != null){
+					usuario = DgUsuarios.selectedItem as Usuario;
+					if(usuariologeado.id_tipo_usr == 1 && usuario.id_tipo_usr != 2)
+						Alert.show("Este registro no puede ser eliminado por un Supervisor","Información");
+					else
+						Alert.show("¿Está seguro de inactivar al usuario? ","Información",Alert.OK| Alert.NO,this,remove,null,Alert.OK);	
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+				}
+			}
+			
+			private function remove(eventObj:CloseEvent):void
+			{
+				if(eventObj.detail==Alert.OK){
+					usuario = DgUsuarios.selectedItem as Usuario;
+					roUsuarios.remove(usuario);
+				}
+			}
+			
+			private function modificar():void
+			{
+				if(DgUsuarios.selectedItem != null){
+					if(usuariologeado.id_tipo_usr == 1 && usuario.id_tipo_usr != 2){
+						Alert.show("Este registro no puede ser modificado por un Supervisor","Información");
+						modificar_ok = 0;
+					}
+					else{
+						this.finPopUp();
+						modificar_ok = 1;
+					}
+					
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+					modificar_ok = 0;
+				}
+				
+			}
+			
+			private function resultFindName(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result)
+				DgUsuarios.dataProvider = datosGrid	
+			}
+			
+			private function resultFindName_Usuario(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result);
+				DgUsuarios.dataProvider = datosGrid;
+				if (datosGrid.length == 0)
+					Alert.show("El usuario especificado no se encuentra en el sistema","Información");
+					
+			}
+						
+			private function ChangeHandler_Busqueda(event:TextOperationEvent):void{
+				nombre = nombre_usr.text;
+				apellido_paterno = apellido_paterno_usr.text;
+				apellido_materno = apellido_materno_usr.text;
+				roUsuarios.FindAllbyName(nombre,apellido_paterno,apellido_materno);				
+			}
+			
+			private function resultHandlerEliminaUsuario(event:ResultEvent):void
+			{
+				var ok:int = event.result as int
+				if(ok == 1){
+					Alert.show('El usuario '+usuario.usr+' se eliminó exitosamente' ,"Información");
+					roUsuarios.FindAllbyName(nombre,apellido_paterno,apellido_materno);			
+				}else{
+					Alert.show('El usuario '+usuario.usr+' no se eliminó ' ,"Información")
+				}
+			}
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			private function faultHandler_Usuario(event:FaultEvent):void
+			{
+				Alert.show("El usuario especificado no se encuentra en el sistema","Información");
+			}
+			
+		
+			protected function DgUsuarios_itemClickHandler(event:ListEvent):void
+			{
+				usuario = DgUsuarios.selectedItem as Usuario;
+		
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roUsuarios" destination="UsuarioService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="FindAllbyName" result="resultFindName(event)" fault="faultHandler(event)" />
+			<s:method name="FindUsuariobyName" result="resultFindName_Usuario(event)" fault="faultHandler_Usuario(event)" />
+			<s:method name="remove" result="resultHandlerEliminaUsuario(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+	</fx:Declarations>
+	<mx:DataGrid id="DgUsuarios" x="35" y="158" width="476" height="121" itemClick="DgUsuarios_itemClickHandler(event)">
+		<mx:columns>
+				<mx:DataGridColumn dataField="nombre_usr" headerText="Nombre"></mx:DataGridColumn>
+				<mx:DataGridColumn dataField="apellido_paterno_usr" headerText="Apellido Paterno"></mx:DataGridColumn>
+				<mx:DataGridColumn dataField="apellido_materno_usr" headerText="Apellido Materno"></mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<s:Form y="10" left="10" width="311" height="140">
+		<s:FormItem width="264" label="Nombre:">
+			<s:TextInput id="nombre_usr" text="{nombre}" change="ChangeHandler_Busqueda(event)"/>
+		</s:FormItem>
+		<s:FormItem label="Apellido Paterno:">
+			<s:TextInput id="apellido_paterno_usr" text="{apellido_paterno}" change="ChangeHandler_Busqueda(event)"/>
+		</s:FormItem>
+		<s:FormItem label="Apellido Materno:">
+			<s:TextInput id="apellido_materno_usr" text="{apellido_materno}"  change="ChangeHandler_Busqueda(event)"/>
+		</s:FormItem>
+	</s:Form>
+	<s:Button x="329" y="25" label="Buscar" click="Buscar()"/>
+	<s:HGroup y="287" left="10" right="39" height="36" horizontalAlign="right" textAlign="left"
+			  verticalAlign="middle">
+		<s:Button id="btneliminar" width="70" label="Eliminar" click="eliminar()"/>
+		<s:Button id="btnmodificar" width="70" label="Modificar" click="modificar()"/>
+		<s:Button id="btnsalir" width="70" label="Salir" click="this.finPopUp()"/>
+	</s:HGroup>
+</s:TitleWindow>
