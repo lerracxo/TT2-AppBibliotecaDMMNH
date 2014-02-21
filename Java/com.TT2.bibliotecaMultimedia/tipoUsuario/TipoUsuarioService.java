@@ -40,9 +40,9 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 
 	@RemotingInclude
 	public List<TipoUsuario> findAll() {
-    	return	simpleJdbcTemplate.query("SELECT * FROM C_TIPO_USUARIO ", new RowMapper<TipoUsuario>() {
+    	return	simpleJdbcTemplate.query("SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM C_TIPO_USUARIO ", new RowMapper<TipoUsuario>() {
 	            public TipoUsuario mapRow( ResultSet rs,  int i) throws SQLException {
-	                    return new TipoUsuario( rs.getInt(1), rs.getInt(2),rs.getString(3),rs.getString(4));
+	                    return new TipoUsuario( rs.getInt("id_tipo_usr"),rs.getString("nombre_tipo"),rs.getString("descripcion_tipo"));
 	                }
 	            }        
 	    );
@@ -52,9 +52,9 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 	@RemotingInclude
 	public TipoUsuario findById(int id) {
     	return  simpleJdbcTemplate.queryForObject(
-	            "SELECT *  FROM C_TIPO_USUARIO WHERE id_tipo_usr = ?", new RowMapper<TipoUsuario>() {
+	            "SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM C_TIPO_USUARIO WHERE id_tipo_usr = ?", new RowMapper<TipoUsuario>() {
 	            public TipoUsuario mapRow( ResultSet rs,  int i) throws SQLException {
-	                    return new TipoUsuario( rs.getInt(1), rs.getInt(2), rs.getString(3),rs.getString(4));
+	                    return new TipoUsuario( rs.getInt("id_tipo_usr"), rs.getString("nombre_tipo"),rs.getString("descripcion_tipo"));
 	               
 	            }
 	            },
@@ -67,7 +67,6 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 	@RemotingInclude
 	public TipoUsuario create(TipoUsuario tipousuario) {
         Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("id_c_sistema", tipousuario.getId_c_sistema());
         parameters.put("nombre_tipo", tipousuario.getNombre_tipo());
         parameters.put("descripcion_tipo", tipousuario.getDescripcion_tipo());
         Number id_tipo_usr = this.insertTipoUsuario.executeAndReturnKey(parameters);
@@ -78,8 +77,8 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 	@RemotingInclude
 	public int update(TipoUsuario tipousuario) {
         int flag = this.simpleJdbcTemplate.update(
-                "UPDATE C_TIPO_USUARIO SET ID_C_SISTEMA= ?, NOMBRE_TIPO= ?, DESCRIPCION_TIPO= ? WHERE ID_TIPO_USR = ?", 
-                tipousuario.getId_c_sistema(),tipousuario.getNombre_tipo(),tipousuario.getDescripcion_tipo(),tipousuario.getId_tipo_usr());
+                "UPDATE C_TIPO_USUARIO SET NOMBRE_TIPO= ?, DESCRIPCION_TIPO= ? WHERE ID_TIPO_USR = ?", 
+                tipousuario.getNombre_tipo(),tipousuario.getDescripcion_tipo(),tipousuario.getId_tipo_usr());
         return flag;
 	}
 
