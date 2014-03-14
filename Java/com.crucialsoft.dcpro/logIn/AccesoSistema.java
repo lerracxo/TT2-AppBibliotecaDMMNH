@@ -56,7 +56,7 @@ public class AccesoSistema {
 		int logeoCorrecto = 0; // modf
 				
 		//simpleJdbcTemplate.query(sql, rm, args)
-		
+		//hjbhjggjjhghjg
 		id_usr = simpleJdbcTemplate
 				.queryForInt(
 						"SELECT IF(MAX(id_usr) IS NULL, 0, id_usr) fROM usuario WHERE usr = ? AND password = ?"+

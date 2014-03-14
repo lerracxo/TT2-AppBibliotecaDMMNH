@@ -7,7 +7,9 @@ INSERT INTO usuario VALUES(90,1,0,"revi",sha1('revi'),"Revisor","AP Revisor","AM
 SELECT IF(MAX(id_usr) IS NULL, 0, id_usr) fROM usuario WHERE id_usr = 3;
 
 SELECT * FROM usuario;
+SELECT * FROM c_tipo_usuario;
 
+-- update usuario set ID_TIPO_USR = 1;
 update usuario set password = sha1('admin')	 WHERE id_usr = 3;
 
 
@@ -45,3 +47,26 @@ SELECT creaMenuDB(1);
 
 
 SELECT SHA1('Password1') FROM usuario;
+
+SELECT * fROM Menus;
+
+SELECT * FROM c_tipo_usuario;
+
+
+INSERT INTO c_tipo_usuario VALUES (1,"Administrador","Administrador del sistema");
+
+SELECT * fROM c_sistema;
+
+
+SELECT * FROM seg_registroVisitante;
+
+
+DESCRIBE seg_registroVisitante;
+DESCRIBE cat_ocupaciones;
+DESCRIBE cat_razonVisita;
+
+SELECT * fROM cat_razonvisita;
+
+
+
+SELECT * FROM cat_ocupaciones;
