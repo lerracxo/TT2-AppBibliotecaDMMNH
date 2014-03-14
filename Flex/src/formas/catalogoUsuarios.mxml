@@ -55,18 +55,13 @@
 			
 			private function cargaValidaciones(tipo_usr:int,recepcion:int):void
 			{
-				if(tipo_usr==2){
+				if(tipo_usr==2){ // Tipo de usuario
 				validatorArr = new Array();
 				validatorArr.push(SV_nombre_usr);
 				validatorArr.push(SV_apellido_paterno_usr);
 				validatorArr.push(EV_email_usr);
 				validatorArr.push(SV_estatus_usuario);
 				validatorArr.push(NV_id_tipo_usr);
-				validatorArr.push(NV_id_posicion);
-				validatorArr.push(NV_extension);
-					if(recepcion==1){
-						validatorArr.push(PNV_extension_fuera_cc);
-				}
 				}else{
 					validatorArr = new Array();
 					validatorArr.push(SV_nombre_usr);
@@ -191,12 +186,14 @@
 			
 				if(id_tipo_usr.selectedItem != null)
 				{
+					
+				/* Se comenta por nuevo desarrollo
 				//Alert.show(id_tipo_usr.selectedItem.id_tipo_usr+' '+recepcion_fuera_cc.selected.toString(),'Variables de carga de validación')
 				validatorArr = new Array();
 				cargaValidaciones(id_tipo_usr.selectedItem.id_tipo_usr,int(recepcion_fuera_cc.selected));
 				var validatorErrorArray:Array = Validator.validateAll(validatorArr);;
 				var isValidForm:Boolean = validatorErrorArray.length == 0;
-				//Alert.show(isValidForm.toString()+' '+id_usr.text,'Variables de validación')
+				Alert.show(isValidForm.toString()+' '+id_usr.text,'Variables de validación')
 				if (isValidForm){
 					if(id_usr.text == '0' ){
 						create();
@@ -209,9 +206,10 @@
 					
 				   }
 			   }else{
-				   cargaValidaciones(0,0);
-				   var validatorErrorArray:Array = Validator.validateAll(validatorArr);
+				   //cargaValidaciones(0,0);
+				   //var validatorErrorArray:Array = Validator.validateAll(validatorArr);
 				   Alert.show("Favor de capturar los datos requeridos", 'Información',Alert.OK);  
+				*/
 			   }
 				   
 			}catch(errObject:Error){
@@ -371,27 +369,38 @@
 			
 			private function preparaFormaUsuario(uso:Usuario):void
 			{
-				roTipoUsuarios.findAll();
-				roPosicionAgente.findAll();
-				id_tipo_usr.selectedIndex = -1;
-				id_tipo_usr.selectedIndex = -1;
-				nombre_usr.text = ''; 
+				roTipoUsuarios.findAll(); // Obtiene los tipos de usuario
+				
+				// roPosicionAgente.findAll(); // Queda en desuso
+				id_tipo_usr.selectedIndex = -1; // tipo de usuario en nulo
+				
+				// Inicialización de las variables del usuario
+				nombre_usr.text = ''; 		
 				apellido_paterno_usr.text ='';
 				apellido_materno_usr.text = '';
 				email_usr.text ='';
-				callblending.selected = false;
-				extension.text = '';
-				recepcion_fuera_cc.selected = false;
-				grabacion_demanda.selected = false;
-				extension_fuera_cc.text = '';
 				estatus_usr.selected = false;
+				// Validadores
 				nombre_usr.errorString=''
 				apellido_paterno_usr.errorString=''
 				email_usr.errorString=''
 				id_tipo_usr.errorString='';
-				id_posicion.errorString='';
-				extension.errorString='';
+				
+				// Variables que caen en desuso
+				/*
+				callblending.selected = false; 
+				extension.text = '';
+				recepcion_fuera_cc.selected = false;
+				grabacion_demanda.selected = false;
+				extension_fuera_cc.text = '';
+				// Validadores en desuso
 				extension_fuera_cc.errorString='';
+				extension.errorString='';
+				*/
+
+
+				
+				/*
 				this.id_tipo_usr.textInput.editable = false;
 				this.finombre_usr.errorString = "";
 				this.fiapellido_paterno_usr.errorString = "";
@@ -407,6 +416,10 @@
 				fiextension_fuera_cc.required=false
 				fiid_posicion.required=false
 				fhDCall.visible=false;
+				*/
+				
+				// Para este caso todos van ser visibles, porque todos los usuarios son iguales, exceptuando por le rol
+				/*
 				if(usuariologeado.id_tipo_usr == 1){
 					cargaValidaciones(2,0);
 					fiid_posicion.visible=true
@@ -420,54 +433,25 @@
 					extension.errorString='';
 					extension_fuera_cc.errorString='';
 				}
+				*/
 					
 			}
 			
 			private function preparaModicicacion(usuario:Usuario):void
 			{
 				roTipoUsuarios.findAll();
-				roPosicionAgente.findAll();
-				roLogin.validaBloqueoUsuario(usuario.id_usr);
 				nombre_usr.text = usuario.nombre_usr;
 				apellido_paterno_usr.text = usuario.apellido_paterno_usr;
 				apellido_materno_usr.text = usuario.apellido_materno_usr;
 				email_usr.text = usuario.email_usr;
 				estatus_usr.selected = Boolean(usuario.estatus_usr);
-				fiid_posicion.visible=false
-				fiextension.visible=false
-				ficallblending.visible=false
-				figrabacion_demanda.visible=false
-				fiextension_fuera_cc.visible=false
-				fiextension_fuera_cc.required=false
-				fiid_posicion.required=false
-				fhDCall.visible=false;
+
 				this.id_tipo_usr.enabled = false;
 				this.finombre_usr.errorString = "";
 				this.fiapellido_paterno_usr.errorString = "";
 				this.fiemail_usr.errorString = "";
-				this.fiextension.errorString = "";
-				this.fiid_posicion.errorString = "";
+
 				this.fiid_tipo_usr.errorString =  "";
-				validatorArr = new Array();
-				if(usuario.id_tipo_usr == 2 ){
-					fiid_posicion.visible=true
-					fiid_posicion.required=true
-					fiextension.visible=true
-					ficallblending.visible=true
-					figrabacion_demanda.visible=true
-					fiextension_fuera_cc.visible=true
-					extension_fuera_cc.enabled=false
-					fhDCall.visible=true	
-					//extension.text = String(usuario.extension);
-					//recepcion_fuera_cc.selected = Boolean(usuario.recepcion_fuera_cc);
-					//extension_fuera_cc.text = String(usuario.extension_fuera_cc);
-					//grabacion_demanda.selected = Boolean(usuario.grabacion_demanda);
-					//callblending.selected = Boolean(usuario.callblending);
-					extension_fuera_cc.errorString=''
-					if(recepcion_fuera_cc.selected){
-						extension_fuera_cc.enabled=true
-					}
-				}
 			
 			}			
 			private function cerrar():void
@@ -476,24 +460,12 @@
 				//preparaFormaUsuario();
 			}
 			
-			protected function recepcion_fuera_cc_clickHandler(event:MouseEvent):void
-			{
-				// documentar
-				if(recepcion_fuera_cc.selected){
-				cargaValidaciones(id_tipo_usr.selectedItem.id_tipo_usr,int(recepcion_fuera_cc.selected));
-				extension_fuera_cc.enabled=true
-				extension_fuera_cc.text=''
-				extension_fuera_cc.errorString=''
-				}else{
-				cargaValidaciones(id_tipo_usr.selectedItem.id_tipo_usr,int(recepcion_fuera_cc.selected));
-				extension_fuera_cc.enabled=false
-				extension_fuera_cc.text=''
-				extension_fuera_cc.errorString=''
-				}
-			}
+			
+
 			
 			protected function id_tipo_usr_changeHandler(event:IndexChangeEvent):void
 			{
+				/*
 				// documentar
 				if(id_tipo_usr.selectedItem.id_tipo_usr==2){
 					cargaValidaciones(id_tipo_usr.selectedItem.id_tipo_usr,0);
@@ -523,6 +495,7 @@
 						recepcion_fuera_cc.selected=false
 						extension_fuera_cc.text=''
 				}
+				*/
 					
 			}
 			
@@ -577,12 +550,9 @@
 
 		<mx:StringValidator id="SV_nombre_usr" source="{nombre_usr}" trigger="{btnGuardar}" property="text" required="true" maxLength="30" />
 		<mx:StringValidator id="SV_apellido_paterno_usr" source="{apellido_paterno_usr}" trigger="{btnGuardar}" property="text"  required="true" minLength="2" maxLength="30" />
-		<s:NumberValidator  id="NV_extension" source="{extension}" trigger="{btnGuardar}" property="text"  minValue="0" maxValue="9999999" domain="int" />
-		<mx:PhoneNumberValidator id="PNV_extension_fuera_cc" source="{extension_fuera_cc}"  trigger="{btnGuardar}" property="text" minDigits="10"/>
 		<mx:EmailValidator  id="EV_email_usr" source="{email_usr}" trigger="{btnGuardar}" property="text" required="false" missingAtSignError="E-mail invalido, no se encuentra el caracter @ " invalidDomainError="E-mail invalido, dominio invalido" missingUsernameError="E-mail invalido, no se encuentra username" />
 		<mx:StringValidator id="SV_estatus_usuario" source="{estatus_usr}" trigger="{btnGuardar}" property="selected" required="true" maxLength="5" minLength="4" />
 		<mx:NumberValidator id="NV_id_tipo_usr" source="{id_tipo_usr}" trigger="{btnGuardar}" property = "selectedIndex" minValue="0" lowerThanMinError="Campo obligatorio"/>
-		<mx:NumberValidator id="NV_id_posicion" source="{id_posicion}" trigger="{btnGuardar}" property="selectedIndex" minValue="0" lowerThanMinError="Campo obligatorio" />
 
 	</fx:Declarations>
 	
@@ -647,26 +617,6 @@
 		</s:FormItem>
 		<s:FormItem  id="fiid_usr" visible="false" left="2" top="0" width="265" label="Id_usr">
 			<s:TextInput id="id_usr" editable="false" text="{usuario.id_usr}"/>
-		</s:FormItem>
-	</s:Form>
-
-	<s:Form id="formDatosCC" includeIn="alta_modificacion" y="38" left="411" width="467" height="364">
-		<s:FormHeading  id="fhDCall" label="Datos Call Center" visible="false"/>
-		<s:FormItem  id="fiid_posicion" width="265" label="Posición" visible="false" required="true">
-			<s:ComboBox id="id_posicion" dataProvider="{datosPosicion}" labelField="coordenada_pos"/>
-		</s:FormItem>
-		<s:FormItem  id="fiextension" width="265" label="Extensión" visible="false" required="true" >
-			<s:TextInput id="extension" maxChars="10" restrict="0-9"/>
-		</s:FormItem>
-		<s:FormItem id="fiextension_fuera_cc" visible="false" width="265" label="Recepción Fuera CC">
-			<s:CheckBox id="recepcion_fuera_cc" click="recepcion_fuera_cc_clickHandler(event)"/>
-			<s:TextInput id="extension_fuera_cc" enabled="false" text="" maxChars="10" />
-		</s:FormItem>
-		<s:FormItem id="figrabacion_demanda" width="265" label="Grabación en demanda" visible="false">
-			<s:CheckBox id="grabacion_demanda"/>
-		</s:FormItem>
-		<s:FormItem id="ficallblending" width="265" label="Callblending" visible="false">
-			<s:CheckBox id="callblending" />
 		</s:FormItem>
 	</s:Form>
 

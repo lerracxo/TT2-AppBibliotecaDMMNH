@@ -8,7 +8,7 @@
 			   backgroundColor.Inicio="#040000" 
 			   width.login="100%" height.login="800" minWidth.login="1024" minHeight.login="600">
 	<fx:Style source="dcpro.css"/>
-	
+	 
 	<fx:Script>
 		<![CDATA[
 			import com.adobe.crypto.SHA1;
@@ -288,17 +288,24 @@
 					}
 				}
 				
+				/* // Esta funcionalidad actualmente no aplica
+					// Funcionalidad para la suscripción de usuarios 
+					// Funcionalidad para la inicialización del menesajero
 				if (titulo == 'Cambiar Contraseña' || (titulo == 'Enviar Mensaje') ){
 					if (titulo == 'Cambiar Contraseña'){
 						pnNvopassUsuario.move(387,129);
 						pnNvopassUsuario.visible = true;
+						return;
 					}
 					
 					if (titulo == 'Enviar Mensaje'){
 						ventana_mensaje.Inicializar(endpoint,usuario,message);
 						ventana_mensaje.setVisible(true);
+						return;
 					}
-				}else{
+				
+				} */
+				//else{
 					//Implementación de la creación de menus dinámicos
 					try{	
 						
@@ -318,11 +325,13 @@
 							pestana.message = message;
 							pestana.usuariologeado = usuario;
 							tn.selectedChild = pestana;
+							
+							Alert.show("Forma que se abre: "+forma)
 						} 
 					}catch(errObject:Error){
 						Alert.show("Favor de verificar su conexión","Error");
 					}
-				}
+				//}
 				
 				/////////Se elimina el switch, 
 				/////////debido a que se implementa 
@@ -332,7 +341,8 @@
 			
 			protected function txtNvoPassword_changeHandler(event:TextOperationEvent):void
 			{
-				//Documentar
+				//Documentar 
+				// Espresión regular para validar el las caraterísticas minimas para la contraseña
 				var regExp:RegExp=/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,12}$/
 				
 				//trace(txtNvoPassword.text.match(regExp))
