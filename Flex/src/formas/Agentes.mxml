@@ -14,7 +14,7 @@
 		import mx.rpc.events.FaultEvent;
 		import mx.rpc.events.ResultEvent;
 		
-		import objectosJava.*;
+		import objetosJava.*;
 		
 		import spark.events.TextOperationEvent;
 		

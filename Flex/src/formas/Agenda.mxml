@@ -22,7 +22,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			
-			import objectosJava.*;
+			import objetosJava.*;
 		
 			[Bindable] public var endpoint:String;
 			[Bindable] public var horario:Horarios;
@@ -158,54 +158,54 @@
 				  horizontalScrollPolicy="on"  itemDoubleClick="Cambia_Horario(event)" >
 		<mx:columns>
 			
-			<mx:DataGridColumn dataField="hora0" headerText="00:00 - 00:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora1" headerText="00:30 - 00:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora2" headerText="01:00 - 01:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora3" headerText="01:30 - 01:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora4" headerText="02:00 - 02:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora5" headerText="02:30 - 02:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora6" headerText="03:00 - 03:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora7" headerText="03:30 - 03:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora8" headerText="04:00 - 04:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora9" headerText="04:30 - 04:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora10" headerText="05:00 - 05:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora11" headerText="05:30 - 05:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora12" headerText="06:00 - 06:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora13" headerText="06:30 - 06:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora14" headerText="07:00 - 07:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora15" headerText="07:30 - 07:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora16" headerText="08:00 - 08:39" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora17" headerText="08:30 - 08:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora18" headerText="09:00 - 09:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora19" headerText="09:30 - 09:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora20" headerText="10:00 - 10:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora21" headerText="10:30 - 10:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora22" headerText="11:00 - 11:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora23" headerText="11:30 - 11:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora24" headerText="12:00 - 12:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora25" headerText="12:30 - 12:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora26" headerText="13:00 - 13:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora27" headerText="13:30 - 13:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora28" headerText="14:00 - 14:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora29" headerText="14:30 - 14:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora30" headerText="15:00 - 15:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora31" headerText="15:30 - 15:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora32" headerText="16:00 - 16:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora33" headerText="16:30 - 16:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora34" headerText="17:00 - 17:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora35" headerText="17:30 - 17:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora36" headerText="18:00 - 18:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora37" headerText="18:30 - 18:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora38" headerText="19:00 - 19:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora39" headerText="19:30 - 19:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora40" headerText="20:00 - 20:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora41" headerText="20:30 - 20:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora42" headerText="21:00 - 21:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora43" headerText="21:30 - 21:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora44" headerText="22:00 - 22:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
-			<mx:DataGridColumn dataField="hora45" headerText="22:30 - 22:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora46" headerText="23:00 - 23:29" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>		
-			<mx:DataGridColumn dataField="hora47" headerText="23:30 - 23:59" rendererIsEditor="true" itemRenderer="objectosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora0" headerText="00:00 - 00:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora1" headerText="00:30 - 00:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora2" headerText="01:00 - 01:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora3" headerText="01:30 - 01:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora4" headerText="02:00 - 02:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora5" headerText="02:30 - 02:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora6" headerText="03:00 - 03:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora7" headerText="03:30 - 03:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora8" headerText="04:00 - 04:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora9" headerText="04:30 - 04:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora10" headerText="05:00 - 05:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora11" headerText="05:30 - 05:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora12" headerText="06:00 - 06:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora13" headerText="06:30 - 06:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora14" headerText="07:00 - 07:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora15" headerText="07:30 - 07:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora16" headerText="08:00 - 08:39" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora17" headerText="08:30 - 08:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora18" headerText="09:00 - 09:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora19" headerText="09:30 - 09:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora20" headerText="10:00 - 10:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora21" headerText="10:30 - 10:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora22" headerText="11:00 - 11:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora23" headerText="11:30 - 11:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora24" headerText="12:00 - 12:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora25" headerText="12:30 - 12:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora26" headerText="13:00 - 13:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora27" headerText="13:30 - 13:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora28" headerText="14:00 - 14:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora29" headerText="14:30 - 14:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora30" headerText="15:00 - 15:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora31" headerText="15:30 - 15:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora32" headerText="16:00 - 16:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora33" headerText="16:30 - 16:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora34" headerText="17:00 - 17:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora35" headerText="17:30 - 17:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora36" headerText="18:00 - 18:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora37" headerText="18:30 - 18:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora38" headerText="19:00 - 19:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora39" headerText="19:30 - 19:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora40" headerText="20:00 - 20:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora41" headerText="20:30 - 20:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora42" headerText="21:00 - 21:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora43" headerText="21:30 - 21:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora44" headerText="22:00 - 22:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="hora45" headerText="22:30 - 22:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora46" headerText="23:00 - 23:29" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>		
+			<mx:DataGridColumn dataField="hora47" headerText="23:30 - 23:59" rendererIsEditor="true" itemRenderer="objetosJava.CustomBackgroundComp"></mx:DataGridColumn>
 		</mx:columns>
 	</mx:DataGrid>
 	

@@ -70,3 +70,7 @@ SELECT * fROM cat_razonvisita;
 
 
 SELECT * FROM cat_ocupaciones;
+
+SELECT * fROM menus;
+
+DELETE fROM menus WHERE idmenu = 32;

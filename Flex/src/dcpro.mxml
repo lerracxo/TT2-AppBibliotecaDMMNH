@@ -32,7 +32,7 @@
 			import mx.rpc.xml.SimpleXMLEncoder;
 			import mx.utils.ArrayUtil;
 			
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			import spark.components.List;
 			import spark.events.TextOperationEvent;
@@ -46,6 +46,7 @@
 			Voces;Atender_Evento;catalogoCalendario;
 			integracionCRM;DesplegarAlarmas;PosicionAgentes;
 			VistaCallCenter;DatosPosicion;enviarMensaje;
+			administrarArchivos;
 			
 			
 			[Bindable] private var menuAC:ArrayCollection;
@@ -72,7 +73,7 @@
 				reportesJasper = FlexGlobals.topLevelApplication.parameters.reportesJasper;
 				message = FlexGlobals.topLevelApplication.parameters.message;
 				
-			
+				//Alert.show("valor: "+endpoint);
 				// los dominios de peticion se configuran en * (todos)
 				Security.allowDomain( "*" );
 				Security.loadPolicyFile( crossdomain );
@@ -326,10 +327,12 @@
 							pestana.usuariologeado = usuario;
 							tn.selectedChild = pestana;
 							
-							Alert.show("Forma que se abre: "+forma)
+							//Alert.show("Forma que se abre: "+forma)
 						} 
 					}catch(errObject:Error){
 						Alert.show("Favor de verificar su conexión","Error");
+						
+						Alert.show("Error: "+Error);
 					}
 				//}
 				
@@ -386,8 +389,7 @@
 				var regExp:RegExp=/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,12}$/
 				
 				//trace(txtPassword.text.match(regExp))
-				
-				if(txtPassword.text.match(regExp) )
+				if( txtPassword.text.match(regExp) )
 				{
 					lbPasswordcomprobar.visible = true;
 					txtPasswordcomprobar.visible = true;
@@ -603,7 +605,6 @@
 		<s:Button id="btCancelarPasswordUsr" includeIn="Inicio" x="43" y="154" label="Cancelar"
 				  click="cacelaCambioContra(event)" enabled="true"/>
 	</s:Panel>
-	
 	
 	<s:Panel id="pnDebugErrores" includeIn="Inicio" visible="true" x="122" y="129" width="515"
 			 height="322" title="Panel de debug"

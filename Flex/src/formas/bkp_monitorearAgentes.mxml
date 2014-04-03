@@ -24,7 +24,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			
-			import objectosJava.MonitoreoAgentes;
+			import objetosJava.MonitoreoAgentes;
 			//import objectosJava.MyDataGrid;
 			
 			import spark.events.GridSelectionEvent;

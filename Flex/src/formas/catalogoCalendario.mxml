@@ -19,9 +19,9 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.validators.Validator;
 			
-			import objectosJava.*;
-			import objectosJava.Calendario;
-			import objectosJava.Campana;
+			import objetosJava.*;
+			import objetosJava.Calendario;
+			import objetosJava.Campana;
 			
 			import spark.events.DropDownEvent;
 			import spark.events.GridEvent;

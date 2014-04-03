@@ -1,0 +1,87 @@
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="838" height="422">
+
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import objetosJava.*;
+			
+			
+			[Bindable]
+			
+			private var selectedFileReferences:Array = new Array();
+			
+			private var fileRefList:FileReferenceList;
+			
+			private var archivo: FileReference;
+			
+			//Variables generales del sistema
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var usuariologeado:Usuario;
+			
+			
+			private function browseFiles(event:MouseEvent):void
+			{
+				fileRefList = new FileReferenceList();
+				fileRefList.addEventListener(Event.SELECT, selectFiles);
+				fileRefList.browse();
+			}
+			
+			private function selectFiles(e:Event):void
+			{			
+				var selectedFiles:ArrayList = new ArrayList();
+				
+				for each(var fileRef : FileReference in fileRefList.fileList)
+				{
+					selectedFiles.addItem(fileRef.name);
+					selectedFileReferences.push(fileRef);
+					fileRef.load();
+				}
+				dataGrid.dataProvider = selectedFiles;
+				Alert.show("Contenido: "+selectedFiles.toString())
+			}
+			
+			private function uploadFiles(e:MouseEvent):void
+			{				
+				for each(var fileRef : FileReference in selectedFileReferences)
+				{
+					subeArchivos.doUpload(fileRef.name, fileRef.data);
+				}
+			}
+			
+			protected function doUploadResult(event:ResultEvent):void
+			{
+				Alert.show(event.toString(),"Resultado de evento");
+			}
+			
+			protected function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.toString(),"Error")
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:RemoteObject id="subeArchivos" destination="SubeArchivoService" fault="Alert.show(event.fault.message);" endpoint="{endpoint}">
+			<s:method name="doUpload" result="doUploadResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+	</fx:Declarations>
+	<s:DataGrid id="dataGrid" x="10" y="54" width="818" height="358" fontFamily="Verdana"
+				fontSize="11"/>
+	<s:HGroup x="10" y="10" width="818" height="36" fontFamily="Verdana" fontSize="11">
+		<s:Button label="Seleccionar Archivos" click="browseFiles(event)"/>
+		<s:Button label="Eliminar"/>
+		<s:Button label="Cargar Archivos" click="uploadFiles(event)"/>
+		<s:Button label="Cerrar"/>
+	</s:HGroup>
+	
+</mx:Canvas>

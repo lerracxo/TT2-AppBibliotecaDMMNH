@@ -24,7 +24,7 @@
 			import mx.validators.Validator;
 			
 			
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			import spark.events.TextOperationEvent;
 			[Bindable] public var endpoint:String;

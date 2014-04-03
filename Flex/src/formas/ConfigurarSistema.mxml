@@ -12,7 +12,7 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.events.CloseEvent;
-			import objectosJava.*;
+			import objetosJava.*;
 	
 			[Bindable] public var chanel:String;
 			[Bindable] public var message:String;

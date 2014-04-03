@@ -34,9 +34,9 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			
-			import objectosJava.*;
-			import objectosJava.DesconectarAgente;
-			import objectosJava.MonitoreoAgentes;
+			import objetosJava.*;
+			import objetosJava.DesconectarAgente;
+			import objetosJava.MonitoreoAgentes;
 			
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;

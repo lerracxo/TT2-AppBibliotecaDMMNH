@@ -41,7 +41,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			import mx.utils.StringUtil;			
-			import objectosJava.*;			
+			import objetosJava.*;			
 			//import org.hamcrest.mxml.collection.Array;
 			//import org.hamcrest.mxml.collection.InArray;			
 			import spark.events.IndexChangeEvent;

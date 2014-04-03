@@ -26,7 +26,7 @@
 			import spark.events.TextOperationEvent;
 			import mx.charts.Legend;
 			import mx.containers.Panel;
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			[Bindable] public var chanel:String;
 			[Bindable] public var usuariologeado:Usuario;

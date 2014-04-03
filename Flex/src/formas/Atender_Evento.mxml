@@ -22,7 +22,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.xml.SimpleXMLEncoder;
 			
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			[Bindable] public var endpoint:String;
 			[Bindable] public var nombreCatalogo:String;

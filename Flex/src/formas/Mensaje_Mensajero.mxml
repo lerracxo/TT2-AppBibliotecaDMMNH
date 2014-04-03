@@ -27,8 +27,8 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			
-			import objectosJava.*;
-			import objectosJava.Contacto;
+			import objetosJava.*;
+			import objetosJava.Contacto;
 			
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;

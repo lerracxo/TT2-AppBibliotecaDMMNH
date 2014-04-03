@@ -13,3 +13,6 @@ INSERT INTO cat_ocupaciones VALUES (1,"Estudiante");
 INSERT INTO cat_ocupaciones VALUES (2,"Profesor");
 INSERT INTO cat_ocupaciones VALUES (3,"Turista");
 INSERT INTO cat_ocupaciones VALUES (4,"Visitante casual");
+
+-- Inserciones para el menu 
+INSERT INTO menus VALUES (32,'Archivos',2,1,'administrarArchivos');

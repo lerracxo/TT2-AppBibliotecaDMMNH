@@ -3,7 +3,7 @@
 				xmlns:s="library://ns.adobe.com/flex/spark"
 				xmlns:mx="library://ns.adobe.com/flex/mx"
 				xmlns:extended="com.adobe.utls.*"
-				xmlns:local="objectosJava.*"
+				xmlns:objetosJava="objetosJava.*"
 				width="806" height="352" close="finPopUp()" color="#FFFFFF"
 				creationComplete="doInit()" layout="absolute" title="DCPro Administrar Alarmas">
 		
@@ -19,7 +19,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.validators.Validator;
 			
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			[Bindable] public var endpoint:String;
 			[Bindable] public var id_camp:int;

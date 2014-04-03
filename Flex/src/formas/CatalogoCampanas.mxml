@@ -24,13 +24,13 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.validators.Validator;
 			
-			import objectosJava.Campana;
-			import objectosJava.Campana_In;
-			import objectosJava.Campana_Out;
-			import objectosJava.Configurador;
-			import objectosJava.PosicionAgente;
-			import objectosJava.TipoUsuario;
-			import objectosJava.Usuario;
+			import objetosJava.Campana;
+			import objetosJava.Campana_In;
+			import objetosJava.Campana_Out;
+			import objetosJava.Configurador;
+			import objetosJava.PosicionAgente;
+			import objetosJava.TipoUsuario;
+			import objetosJava.Usuario;
 			
 			import spark.events.IndexChangeEvent;
 			import spark.events.TextOperationEvent;

@@ -20,9 +20,9 @@
 			import mx.validators.Validator;
 			import mx.managers.PopUpManager;
 			
-			import objectosJava.PosicionAgente;
-			import objectosJava.TipoUsuario;
-			import objectosJava.Usuario;
+			import objetosJava.PosicionAgente;
+			import objetosJava.TipoUsuario;
+			import objetosJava.Usuario;
 			
 			import spark.events.DropDownEvent;
 			import spark.events.IndexChangeEvent;

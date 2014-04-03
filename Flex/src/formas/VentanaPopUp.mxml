@@ -39,7 +39,7 @@
 			import mx.utils.ObjectUtil;
 			import mx.utils.StringUtil;
 			
-			import objectosJava.Indicadores;
+			import objetosJava.Indicadores;
 			
 			import spark.events.IndexChangeEvent;
 			import spark.events.TextOperationEvent;

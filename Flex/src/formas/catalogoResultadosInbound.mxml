@@ -25,9 +25,9 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			
-			import objectosJava.*;
-			import objectosJava.ResultadosInbound;
-			import objectosJava.ResultadosInbound_Campana;
+			import objetosJava.*;
+			import objetosJava.ResultadosInbound;
+			import objetosJava.ResultadosInbound_Campana;
 			
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;
@@ -842,7 +842,7 @@
 											import mx.controls.Alert;
 											import mx.core.FlexGlobals;
 											
-											import objectosJava.ResultadosInbound_Campana;
+											import objetosJava.ResultadosInbound_Campana;
 											
 											private var _myData:Object;
 											

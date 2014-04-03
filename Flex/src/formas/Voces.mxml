@@ -19,7 +19,7 @@
 			import mx.utils.ObjectUtil;
 			import mx.utils.StringUtil;
 
-			import objectosJava.*;
+			import objetosJava.*;
 				
 			[Bindable] public var chanel:String;
 			[Bindable] public var endpoint:String;

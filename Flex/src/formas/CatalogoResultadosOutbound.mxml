@@ -28,7 +28,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.utils.ObjectUtil;
 			
-			import objectosJava.*;
+			import objetosJava.*;
 			
 			import spark.events.IndexChangeEvent;
 			import spark.events.TextOperationEvent;
@@ -1364,7 +1364,7 @@
 										import mx.controls.Alert;
 										import mx.core.FlexGlobals;
 										
-										import objectosJava.ResultadosOutbound;
+										import objetosJava.ResultadosOutbound;
 										
 										private var _myData:Object;
 

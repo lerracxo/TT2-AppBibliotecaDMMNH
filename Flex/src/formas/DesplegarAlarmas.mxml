@@ -21,8 +21,8 @@
 			import mx.managers.PopUpManager;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;	
-			import objectosJava.Campana;
-			import objectosJava.Indicadores;
+			import objetosJava.Campana;
+			import objetosJava.Indicadores;
 			
 			import spark.components.TitleWindow;
 			
