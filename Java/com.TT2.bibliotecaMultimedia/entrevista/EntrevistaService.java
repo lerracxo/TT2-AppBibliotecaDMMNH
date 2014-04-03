@@ -56,34 +56,34 @@ public class EntrevistaService implements IEntrevistaService {
 
 	// Retorna el una lista de ocupaciones
 	@RemotingInclude
-	public List<Object[]> ObtieneOcupaciones(){
+	public List<String> ObtieneOcupaciones(){
 		String ls_sql = "SELECT id_ocupacion,desc_ocupacion FROM cat_ocupaciones";
 		
-		List <Object[]> lista = new ArrayList<Object[]>();
+		List <String> lista = new ArrayList<String>();
 		
 		// Se obtiene el mapeo de una lista
 		List<Map<String, Object>> rows =  simpleJdbcTemplate.queryForList(ls_sql);
 		
 		// Se genera una lista de un array de indice-valor de tipo objeto
     	for (Map<String, Object> row : rows)
-    		lista.add(new Object[]{row.get("id_ocupacion"),row.get("desc_ocupacion")});
+    		lista.add((String)row.get("desc_ocupacion"));
     		
     	return lista;
 	}
 	
 	// Retorna el una lista de razones de visita
 		@RemotingInclude
-		public List<Object[]> ObtieneRazonesVisita(){
-			String ls_sql = "SELECT id_razonVisita,desc_razon FROM cat_razonVisita";
+		public List<String> ObtieneRazonesVisita(){
+			String ls_sql = "SELECT desc_razon FROM cat_razonVisita";
 			
-			List <Object[]> lista = new ArrayList<Object[]>();
+			List <String> lista = new ArrayList<String>();
 			
 			// Se obtiene el mapeo de una lista
 			List<Map<String, Object>> rows =  simpleJdbcTemplate.queryForList(ls_sql);
 			
 			// Se genera una lista de un array de indice-valor de tipo objeto
 	    	for (Map<String, Object> row : rows)
-	    		lista.add(new Object[]{row.get("id_razonVisita"),row.get("desc_razon")});
+	    		lista.add((String)row.get("desc_razon"));
 	    		
 	    	return lista;
 		}
