@@ -53,7 +53,7 @@ SELECT * fROM Menus;
 SELECT * FROM c_tipo_usuario;
 
 
-INSERT INTO c_tipo_usuario VALUES (1,"Administrador","Administrador del sistema");
+INSERT INTO c_tipo_usuario VALUES (1,"Administrador","Administrador del sistemusuarioa");
 
 SELECT * fROM c_sistema;
 
@@ -67,10 +67,21 @@ DESCRIBE cat_razonVisita;
 
 SELECT * fROM cat_razonvisita;
 
-
-
 SELECT * FROM cat_ocupaciones;
+
+SELECT * frOM c_tipo_usuario;
 
 SELECT * fROM menus;
 
 DELETE fROM menus WHERE idmenu = 32;
+
+SELECT * fROM usuario;
+
+UPDATE usuario SET EMAIL_USR = 'admin' Where id_usr = 3;
+commit;
+
+SELECT IF(MAX(id_usr) IS NULL, 0, id_usr) fROM usuario WHERE email_usr = 'admin' AND 
+password = 'd033e22ae348aeb5660fc2140aec35850c4da997' AND estatus_usr = 1; 
+
+SELECT * FROM menus;
+INSERT INTO menus VALUES (33,'Piezas',2,1,'administrarPiezas');
