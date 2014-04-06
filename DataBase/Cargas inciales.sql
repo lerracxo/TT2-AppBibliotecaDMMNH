@@ -15,4 +15,11 @@ INSERT INTO cat_ocupaciones VALUES (3,"Turista");
 INSERT INTO cat_ocupaciones VALUES (4,"Visitante casual");
 
 -- Inserciones para el menu 
+-- id_local - nombre de entrada del menu - tipo de entreda - id del padre - nombre de forma
+INSERT INTO menus VALUES (1,'Administración',1,0,null);
+INSERT INTO menus VALUES (2,'Autores',1,0,null);
+INSERT INTO menus VALUES (4,'Reportes',1,0,null); -- Entrada para los reportes
+
 INSERT INTO menus VALUES (32,'Archivos',2,1,'administrarArchivos');
+INSERT INTO menus VALUES (33,'Piezas',2,1,'administrarPiezas');
+
