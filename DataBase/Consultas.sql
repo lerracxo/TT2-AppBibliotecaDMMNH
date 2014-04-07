@@ -87,3 +87,7 @@ SELECT * FROM menus;
 INSERT INTO menus VALUES (33,'Piezas',2,1,'administrarPiezas');
 
 SELECT * fROM campana;
+
+SELECT * FROM usuario;
+
+SELECT * FROM cat_tipo_usuario;
