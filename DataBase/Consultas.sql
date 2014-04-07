@@ -85,3 +85,5 @@ password = 'd033e22ae348aeb5660fc2140aec35850c4da997' AND estatus_usr = 1;
 
 SELECT * FROM menus;
 INSERT INTO menus VALUES (33,'Piezas',2,1,'administrarPiezas');
+
+SELECT * fROM campana;
