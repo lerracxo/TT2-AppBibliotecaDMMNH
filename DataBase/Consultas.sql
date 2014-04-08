@@ -91,3 +91,36 @@ SELECT * fROM campana;
 SELECT * FROM usuario;
 
 SELECT * FROM cat_tipo_usuario;
+
+UPDATE menus SET forma = 'administrarUsuarios' WHERE idmenu = 7;
+
+SELECT * fROM menus;
+
+SELECT * FROM cat_estado_civil;
+SELECT * fROM cat_frecuencia_asistencia;
+SELECT * fROM cat_numero_acompanantes;
+SELECT * fROM cat_ocupacion;
+SELECT * fROM cat_razon_visita;
+SELECT * FROM cat_rango_edades;
+
+SELECT * fROM seg_registro_visitante;
+
+SELECT curtime();
+
+INSERT INTO seg_registro_visitante VALUES (0,'H',1,2,1,2,1,2,curdate(), curtime());
+
+INSERT INTO seg_registro_visitante VALUES (0,'H',
+	(SELECT id_rango_edades FROM cat_rango_edades WHERE desc_rango_edades= 'Entre 10 y 15 años'),
+	(SELECT id_ocupacion FROM cat_ocupacion WHERE desc_ocupacion = 'Estudiante' ),
+	(SELECT id_estado_civil FROM cat_estado_civil WHERE desc_estado_civil = 'Unión libre'),
+	(SELECT id_razon_visita FROM cat_razon_visita WHERE desc_razon_visita = 'Me gusta el tema de la exposición'),
+	(SELECT id_frecuencia_asistencia FROM cat_frecuencia_asistencia WHERE desc_frecuencia_asistencia = 'Una vez al mes'),
+	(SELECT id_numero_acompanantes FROM cat_numero_acompanantes WHERE desc_numero_acompanantes = 'Entre 6 y 10'),
+	curdate(), curtime()
+	);
+
+
+
+
+
+
