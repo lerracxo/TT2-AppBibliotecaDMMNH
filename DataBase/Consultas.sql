@@ -109,6 +109,7 @@ SELECT curtime();
 
 INSERT INTO seg_registro_visitante VALUES (0,'H',1,2,1,2,1,2,curdate(), curtime());
 
+-- Consulta para guardar los datos de un visitante
 INSERT INTO seg_registro_visitante VALUES (0,'H',
 	(SELECT id_rango_edades FROM cat_rango_edades WHERE desc_rango_edades= 'Entre 10 y 15 años'),
 	(SELECT id_ocupacion FROM cat_ocupacion WHERE desc_ocupacion = 'Estudiante' ),
@@ -119,8 +120,7 @@ INSERT INTO seg_registro_visitante VALUES (0,'H',
 	curdate(), curtime()
 	);
 
-
-
-
-
+DELETE FROM autor;
+SELECT * fROM autor;
+SELECT * fROM usuario;
 

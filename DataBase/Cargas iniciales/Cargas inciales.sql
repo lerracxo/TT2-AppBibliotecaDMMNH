@@ -60,6 +60,31 @@ INSERT INTO cat_tipo_multimedia VALUES (4,"Imagen","png");
 INSERT INTO cat_tipo_multimedia VALUES (5,"Video","mp4");
 
 -- catalogo de epocas
+INSERT INTO cat_epoca VALUES(1,"Renacimiento Italiano.",1600);
+
+-- Catalogo de Autores
+INSERT INTO autor VALUES (1,"Leonardo Da Vinci","Leonardo da Vinci 
+							(Leonardo di ser Piero da Vinci Loudspeaker.svg escuchar) 
+							fue un pintor florentino. Notable polímata del Renacimiento italiano 
+							(a la vez anatomista, arquitecto, artista, botánico, científico, escritor, escultor, 
+							filósofo, ingeniero, inventor, músico, poeta y urbanista) nació en Vinci el 15 de abril de 
+							14522 y falleció en Amboise el 2 de mayo de 1519, a los 67 años, 
+							acompañado de su fiel Francesco Melzi, a quien legó sus proyectos, 
+							diseños y pinturas.2 Tras pasar su infancia en su ciudad natal, 
+							Leonardo estudió con el célebre pintor florentino Andrea de Verrocchio. 
+							Sus primeros trabajos de importancia fueron creados en Milán al servicio del duque 
+							Ludovico Sforza. Trabajó a continuación en Roma, Bolonia y Venecia, y pasó los últimos 
+							años de su vida en Francia, por invitación del rey Francisco I.",
+							STR_TO_DATE("15/04/1452","%d/%m/%Y"),1);
+
+-- Piezas registradas
+INSERT INTO Piezas VALUES (1,"La Virgen, el niño Jesús y santa Ana","La Vierge, l'Enfant Jésus et sainte Anne",1);
+
+-- Catalogo de multimedia relacionada a las piezas
+INSERT INTO pieza_multimedia VALUES ();
+
+SELECT * fROM multimedia;
+
 
 -- Inserciones para el menu 
 -- id_local - nombre de entrada del menu - tipo de entreda - id del padre - nombre de forma
