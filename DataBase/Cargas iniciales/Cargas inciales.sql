@@ -78,12 +78,14 @@ INSERT INTO autor VALUES (1,"Leonardo Da Vinci","Leonardo da Vinci
 							STR_TO_DATE("15/04/1452","%d/%m/%Y"),1);
 
 -- Piezas registradas
-INSERT INTO Piezas VALUES (1,"La Virgen, el niño Jesús y santa Ana","La Vierge, l'Enfant Jésus et sainte Anne",1);
+INSERT INTO pieza VALUES (1,"Cuadro de Leonardo Da Vinci","La Virgen, el niño Jesús y santa Ana","La Vierge, l'Enfant Jésus et sainte Anne",1);
+
+-- Elementos multimedia registrados previamente.
+INSERT INTO multimedia VALUES (1,2,"Cuadro","Cuadro1.jpeg","cuadroLeonardo.jpeg");
 
 -- Catalogo de multimedia relacionada a las piezas
-INSERT INTO pieza_multimedia VALUES ();
+INSERT INTO pieza_multimedia VALUES (1,1);
 
-SELECT * fROM multimedia;
 
 
 -- Inserciones para el menu 
@@ -95,6 +97,6 @@ INSERT INTO menus VALUES (4,'Reportes',1,0,null); -- Entrada para los reportes
 INSERT INTO menus VALUES (5,'Archivos',2,1,'administrarArchivos');
 INSERT INTO menus VALUES (6,'Piezas',2,1,'administrarPiezas');
 
-INSERT INTO menus VALUES (7,'Usuarios',2,1,'administrarUsuario'); -- Administración de usuarios 
-
+INSERT INTO menus VALUES (7,'Usuarios',2,1,'administrarUsuarios'); -- Administración de usuarios 
+SELECT id_pieza, desc_pieza, nombre, titulo, id_autor FROM pieza;
 

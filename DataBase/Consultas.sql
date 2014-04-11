@@ -124,3 +124,24 @@ DELETE FROM autor;
 SELECT * fROM autor;
 SELECT * fROM usuario;
 
+SELECT * fROM pieza;
+SELECT id_pieza, desc_pieza, nombre, titulo, id_autor FROM pieza ;
+
+SELECT * FROM pieza_multimedia;
+
+SELECT * fROM multimedia;
+SELECT * fROM cat_tipo_multimedia;
+SELECT id_ocupacion,desc_ocupacion FROM cat_ocupaciones;
+
+SELECT * fROM pieza;
+SELECT * fROM pieza_multimedia;
+
+SELECT m.id_multimedia, m.id_tipo_multimedia, 
+		m.nombre, m.nombre_archivo, m.nombre_original 
+	FROM multimedia m, pieza_multimedia pz
+	WHERE pz.id_multimedia = m.id_multimedia 
+	AND   pz.id_pieza = 1;
+
+SELECT * FROM multimedia;
+
+DELETE FROM menus WHERE idmenu = 6;
