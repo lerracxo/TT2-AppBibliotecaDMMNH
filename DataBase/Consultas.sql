@@ -145,3 +145,9 @@ SELECT m.id_multimedia, m.id_tipo_multimedia,
 SELECT * FROM multimedia;
 
 DELETE FROM menus WHERE idmenu = 6;
+
+DESCRIBE  pieza;
+DESCRIbE multimedia;
+DESCRIBE Autor;
+
+SELECT id_autor, nombre, desc_autor, fecha_nacimiento, id_epoca FROM autor;
