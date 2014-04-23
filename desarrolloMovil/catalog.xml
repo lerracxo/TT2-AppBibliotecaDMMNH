@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding ="utf-8"?>
+<swc xmlns="http://www.adobe.com/flash/swccatalog/9">
+  <versions>
+    <swc version="1.2" />
+    <flex version="4.5.1" build="21328" minimumSupportedVersion="4.0.0" />
+  </versions>
+  <features>
+    <feature-script-deps />
+    <feature-components />
+    <feature-files />
+  </features>
+  <components>
+    <component className="com.flextras.mobile.autoCompleteComboBox:AutoCompleteComboBoxMobile" name="AutoCompleteComboBoxMobile" uri="http://www.flextras.com/mxml"  />
+    <component className="com.flextras.mobile.dropDownList:DropDownList" name="DropDownList" uri="http://www.flextras.com/mxml"  />
+    <component className="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" name="AutoCompleteComboBoxLite" uri="http://www.flextras.com/mxml"  />
+  </components>
+  <libraries>
+    <library path="library.swf">
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_down_default" mod="1307230977169" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="spark/flextras/autoCompleteComboBox/renderers/IAutoCompleteRenderer" mod="1294592368377" signatureChecksum="3563692654" >
+        <def id="spark.flextras.autoCompleteComboBox.renderers:IAutoCompleteRenderer" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:IDataRenderer" type="i" /> 
+        <dep id="spark.components:IItemRenderer" type="i" /> 
+        <dep id="Object" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/renderers/DefaultAutoCompleteRenderer" mod="1310841381866" signatureChecksum="2350320935" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.renderers:DefaultAutoCompleteRenderer" /> 
+        <dep id="flash.events:Event" type="e" /> 
+        <dep id="RegExp" type="e" /> 
+        <dep id="mx.events:FlexEvent" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="s" /> 
+        <dep id="RegExp" type="s" /> 
+        <dep id="mx.events:FlexEvent" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.renderers:IAutoCompleteRenderer" type="i" /> 
+        <dep id="spark.components:LabelItemRenderer" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_down_1" mod="1307230976210" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_down_2" mod="1307230976408" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_down_3" mod="1307230976874" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_down_4" mod="1307230977001" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="spark/flextras/autoCompleteComboBox/AutoCompleteComboBoxLite" mod="1314460877539" signatureChecksum="3200789565" >
+        <def id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" /> 
+        <dep id="flash.events:Event" type="e" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="e" /> 
+        <dep id="spark.events:IndexChangeEvent" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteCollectionEvent" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.renderers:IAutoCompleteRenderer" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.skins:AutoCompleteComboBoxSkin" type="e" /> 
+        <dep id="RegExp" type="e" /> 
+        <dep id="mx.core:ClassFactory" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.renderers:DefaultAutoCompleteRenderer" type="e" /> 
+        <dep id="mx.collections:ListCollectionView" type="e" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="s" /> 
+        <dep id="spark.events:IndexChangeEvent" type="s" /> 
+        <dep id="mx.core:IVisualElement" type="s" /> 
+        <dep id="spark.events:TextOperationEvent" type="s" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteCollectionEvent" type="s" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.renderers:IAutoCompleteRenderer" type="s" /> 
+        <dep id="RegExp" type="s" /> 
+        <dep id="mx.collections:ListCollectionView" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="spark.components:ComboBox" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_up_default" mod="1307230975776" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/DownArrowSkin_Default" mod="1308155671583" signatureChecksum="205310802" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_Default" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_default" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_default" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_default" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_default" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_default" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_default" type="e" /> 
+        <dep id="flash.display:DisplayObject" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.skins.mobile:ButtonSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_down_4" mod="1307230979104" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="spark/flextras/autoCompleteComboBox/AutoCompleteCollectionEvent" mod="1286749354219" signatureChecksum="4227065312" >
+        <def id="spark.flextras.autoCompleteComboBox:AutoCompleteCollectionEvent" /> 
+        <dep id="flash.events:Event" type="s" /> 
+        <dep id="mx.events:CollectionEventKind" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.events:CollectionEvent" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_down_2" mod="1307230978523" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_down_4" mod="1307230974662" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_down_3" mod="1307230978945" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_down_2" mod="1307230974191" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_down_1" mod="1307230978378" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_down_3" mod="1307230974476" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_down_1" mod="1307230973802" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/AutoCompleteComboBoxMobileSkin_Default" mod="1310852154860" signatureChecksum="109206437" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="e" /> 
+        <dep id="spark.components:TextInput" type="e" /> 
+        <dep id="spark.components:PopUpPosition" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="spark.components:Button" type="e" /> 
+        <dep id="Math" type="e" /> 
+        <dep id="spark.components:IItemRenderer" type="e" /> 
+        <dep id="spark.components:Scroller" type="e" /> 
+        <dep id="spark.components:Group" type="e" /> 
+        <dep id="spark.layouts:VerticalLayout" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_Default" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteCollectionEvent" type="e" /> 
+        <dep id="spark.components:PopUpAnchor" type="e" /> 
+        <dep id="spark.skins.mobile:TextInputSkin" type="e" /> 
+        <dep id="spark.components:DataGroup" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox:AutoCompleteComboBoxMobile" type="s" /> 
+        <dep id="spark.layouts:VerticalLayout" type="s" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="s" /> 
+        <dep id="spark.components:TextInput" type="s" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteCollectionEvent" type="s" /> 
+        <dep id="spark.components:PopUpAnchor" type="s" /> 
+        <dep id="spark.components:Button" type="s" /> 
+        <dep id="spark.components:IItemRenderer" type="s" /> 
+        <dep id="spark.components:Scroller" type="s" /> 
+        <dep id="spark.components:Group" type="s" /> 
+        <dep id="spark.components:DataGroup" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.skins.mobile.supportClasses:MobileSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/dropDownList/skins/DropDownListMobileSkin_Default" mod="1314493184734" signatureChecksum="324726976" >
+        <def id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_Default" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="e" /> 
+        <dep id="spark.components:PopUpPosition" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="spark.components:Button" type="e" /> 
+        <dep id="Math" type="e" /> 
+        <dep id="spark.components:IItemRenderer" type="e" /> 
+        <dep id="spark.components:Scroller" type="e" /> 
+        <dep id="spark.components:Group" type="e" /> 
+        <dep id="spark.components:Label" type="e" /> 
+        <dep id="spark.layouts:VerticalLayout" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_Default" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="spark.components:PopUpAnchor" type="e" /> 
+        <dep id="spark.components:DataGroup" type="e" /> 
+        <dep id="flash.display:Sprite" type="e" /> 
+        <dep id="com.flextras.mobile.dropDownList:DropDownList" type="s" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="s" /> 
+        <dep id="spark.components:Button" type="s" /> 
+        <dep id="spark.components:IItemRenderer" type="s" /> 
+        <dep id="spark.components:Scroller" type="s" /> 
+        <dep id="spark.components:Group" type="s" /> 
+        <dep id="spark.components:Label" type="s" /> 
+        <dep id="spark.layouts:VerticalLayout" type="s" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_Default" type="s" /> 
+        <dep id="spark.components:PopUpAnchor" type="s" /> 
+        <dep id="flash.text:TextLineMetrics" type="s" /> 
+        <dep id="spark.components:DataGroup" type="s" /> 
+        <dep id="flash.display:Sprite" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.skins.mobile.supportClasses:MobileSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/dropDownList/skins/DropDownListMobileSkin_PopUp" mod="1314493189418" signatureChecksum="3794407716" >
+        <def id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_PopUp" /> 
+        <dep id="mx.managers:PopUpManager" type="e" /> 
+        <dep id="spark.components:Application" type="e" /> 
+        <dep id="spark.layouts:VerticalLayout" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="Math" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="spark.components:IItemRenderer" type="e" /> 
+        <dep id="spark.components:Application" type="s" /> 
+        <dep id="spark.components:IItemRenderer" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_Default" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/dropDownList/skins/DropDownListMobileSkin_PopUp_2" mod="1314492301906" signatureChecksum="3675421637" >
+        <def id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_PopUp_2" /> 
+        <dep id="flash.display:GradientType" type="e" /> 
+        <dep id="mx.managers:PopUpManager" type="e" /> 
+        <dep id="spark.components:Label" type="e" /> 
+        <dep id="spark.layouts:VerticalLayout" type="e" /> 
+        <dep id="spark.skins.mobile:ButtonSkin" type="e" /> 
+        <dep id="Math" type="e" /> 
+        <dep id="spark.components:Button" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins:ButtonSkinSquare" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="spark.components:Group" type="e" /> 
+        <dep id="mx.utils:ColorUtil" type="e" /> 
+        <dep id="spark.components:Label" type="s" /> 
+        <dep id="spark.layouts:VerticalLayout" type="s" /> 
+        <dep id="spark.components:Button" type="s" /> 
+        <dep id="spark.components:Group" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_PopUp" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_down_default" mod="1307230979444" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile320/ButtonRectangleBorder_up" mod="1314487411887" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile320:ButtonRectangleBorder_up" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile160/ButtonRectangleBorder_up" mod="1314487410684" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile160:ButtonRectangleBorder_up" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_up_default" mod="1307230980435" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/renderers/RadioButtonRenderer" mod="1314134773504" signatureChecksum="3628056261" >
+        <def id="com.flextras.mobile.shared.renderers:RadioButtonRenderer" /> 
+        <dep id="spark.components:RadioButton" type="e" /> 
+        <dep id="spark.components.supportClasses:StyleableTextField" type="e" /> 
+        <dep id="Math" type="e" /> 
+        <dep id="spark.components:RadioButton" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="spark.components:LabelItemRenderer" type="i" /> 
+      </script>
+      <script name="_b6ad8a9f64e38acfa915326b2a87bb0067569421adfc29aeab5bbe7802724af8_flash_display_Sprite" mod="1314493193007" signatureChecksum="1613200301" >
+        <def id="_b6ad8a9f64e38acfa915326b2a87bb0067569421adfc29aeab5bbe7802724af8_flash_display_Sprite" /> 
+        <dep id="flash.system:Security" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="flash.display:Sprite" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile320/ButtonRectangleBorder_down" mod="1314487411654" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile320:ButtonRectangleBorder_down" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_up_4" mod="1307230975635" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_up_3" mod="1307230975492" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_up_2" mod="1307230975139" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_up_1" mod="1307230975014" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile240/ButtonRectangleBorder_up" mod="1314487411297" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile240:ButtonRectangleBorder_up" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="spark/flextras/autoCompleteComboBox/renderers/DefaultAutoCompleteRenderer" mod="1294594515841" signatureChecksum="332272758" >
+        <def id="spark.flextras.autoCompleteComboBox.renderers:DefaultAutoCompleteRenderer" /> 
+        <dep id="spark.utils:TextFlowUtil" type="e" /> 
+        <dep id="flash.events:Event" type="e" /> 
+        <dep id="spark.components:RichText" type="e" /> 
+        <dep id="flash.display:DisplayObject" type="e" /> 
+        <dep id="mx.events:FlexEvent" type="e" /> 
+        <dep id="RegExp" type="e" /> 
+        <dep id="spark.components:RichText" type="s" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="s" /> 
+        <dep id="mx.events:FlexEvent" type="s" /> 
+        <dep id="RegExp" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.skins.spark:DefaultItemRenderer" type="i" /> 
+        <dep id="spark.flextras.autoCompleteComboBox.renderers:IAutoCompleteRenderer" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_up_1" mod="1307230977345" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_up_3" mod="1307230977832" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_up_2" mod="1307230977706" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_up_4" mod="1307230977967" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/dropDownList/DropDownList" mod="1314493178864" signatureChecksum="483770060" >
+        <def id="com.flextras.mobile.dropDownList:DropDownList" /> 
+        <dep id="com.flextras.mobile.dropDownList.skins:DropDownListMobileSkin_Default" type="e" /> 
+        <dep id="flash.events:Event" type="e" /> 
+        <dep id="spark.events:RendererExistenceEvent" type="e" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="e" /> 
+        <dep id="flash.events:MouseEvent" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="mx.core:InteractionMode" type="e" /> 
+        <dep id="mx.core:ClassFactory" type="e" /> 
+        <dep id="spark.components:LabelItemRenderer" type="e" /> 
+        <dep id="spark.components.supportClasses:TextBase" type="s" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="s" /> 
+        <dep id="spark.events:RendererExistenceEvent" type="s" /> 
+        <dep id="mx.core:IVisualElement" type="s" /> 
+        <dep id="flash.events:MouseEvent" type="s" /> 
+        <dep id="spark.components:Button" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="spark.components:DropDownList" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/DownArrowSkin_1" mod="1308155528816" signatureChecksum="1970684626" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_1" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_1" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_1" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_1" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_1" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_1" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_1" type="e" /> 
+        <dep id="spark.components.supportClasses:ButtonBase" type="s" /> 
+        <dep id="flash.display:DisplayObject" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.skins.mobile.supportClasses:MobileSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/DownArrowSkin_2" mod="1308155551858" signatureChecksum="1070920310" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_2" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_2" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_2" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_2" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_2" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_2" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_2" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_1" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/DownArrowSkin_3" mod="1308155595135" signatureChecksum="1188426366" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_3" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_3" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_3" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_3" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_3" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_3" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_3" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_1" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile240/ButtonRectangleBorder_down" mod="1314487411155" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile240:ButtonRectangleBorder_down" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/ButtonSkinSquare" mod="1314134690219" signatureChecksum="1405166086" >
+        <def id="com.flextras.mobile.shared.skins:ButtonSkinSquare" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile320:ButtonRectangleBorder_up" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile240:ButtonRectangleBorder_up" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile320:ButtonRectangleBorder_down" type="e" /> 
+        <dep id="trace" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile240:ButtonRectangleBorder_down" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile160:ButtonRectangleBorder_down" type="e" /> 
+        <dep id="com.flextras.mobile.shared.skins.assets.mobile160:ButtonRectangleBorder_up" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="spark.skins.mobile:ButtonSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile240/DownArrow_up_default" mod="1307230978115" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/DownArrowSkin_4" mod="1308155629567" signatureChecksum="1305932422" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_4" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_down_4" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_4" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_4" type="e" /> 
+        <dep id="mx.core:DPIClassification" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_up_4" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_up_4" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile240:DownArrow_down_4" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_1" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/shared/skins/assets/mobile160/ButtonRectangleBorder_down" mod="1314487410468" >
+        <def id="com.flextras.mobile.shared.skins.assets.mobile160:ButtonRectangleBorder_down" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="spark/flextras/autoCompleteComboBox/skins/AutoCompleteComboBoxSkin" mod="1302050035572" signatureChecksum="1675694232" >
+        <def id="spark.flextras.autoCompleteComboBox.skins:AutoCompleteComboBoxSkin" /> 
+        <dep id="spark.primitives:Rect" type="e" /> 
+        <dep id="mx.states:AddItems" type="e" /> 
+        <dep id="spark.components:TextInput" type="e" /> 
+        <dep id="mx.core:DeferredInstanceFromFunction" type="e" /> 
+        <dep id="spark.skins.spark:ComboBoxButtonSkin" type="e" /> 
+        <dep id="spark.primitives:RectangularDropShadow" type="e" /> 
+        <dep id="spark.components:Button" type="e" /> 
+        <dep id="spark.components:Scroller" type="e" /> 
+        <dep id="spark.components:Group" type="e" /> 
+        <dep id="mx.binding:BindingManager" type="e" /> 
+        <dep id="spark.layouts:VerticalLayout" type="e" /> 
+        <dep id="mx.states:SetProperty" type="e" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="e" /> 
+        <dep id="spark.skins.spark:DefaultItemRenderer" type="e" /> 
+        <dep id="mx.graphics:SolidColor" type="e" /> 
+        <dep id="spark.components:PopUpAnchor" type="e" /> 
+        <dep id="mx.states:State" type="e" /> 
+        <dep id="mx.core:ClassFactory" type="e" /> 
+        <dep id="mx.events:PropertyChangeEvent" type="e" /> 
+        <dep id="spark.components:DataGroup" type="e" /> 
+        <dep id="spark.skins.spark:ComboBoxTextInputSkin" type="e" /> 
+        <dep id="mx.graphics:SolidColorStroke" type="e" /> 
+        <dep id="spark.primitives:Rect" type="s" /> 
+        <dep id="spark.components:TextInput" type="s" /> 
+        <dep id="spark.primitives:RectangularDropShadow" type="s" /> 
+        <dep id="mx.core:DeferredInstanceFromFunction" type="s" /> 
+        <dep id="spark.components:Button" type="s" /> 
+        <dep id="spark.components:Scroller" type="s" /> 
+        <dep id="spark.components:Group" type="s" /> 
+        <dep id="mx.core:IFlexModuleFactory" type="s" /> 
+        <dep id="spark.layouts:VerticalLayout" type="s" /> 
+        <dep id="mx.graphics:SolidColor" type="s" /> 
+        <dep id="spark.components:PopUpAnchor" type="s" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="s" /> 
+        <dep id="mx.core:ClassFactory" type="s" /> 
+        <dep id="spark.components:DataGroup" type="s" /> 
+        <dep id="mx.graphics:SolidColorStroke" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="mx.core:IStateClient2" type="i" /> 
+        <dep id="flash.events:IEventDispatcher" type="i" /> 
+        <dep id="spark.skins:SparkSkin" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/AutoCompleteComboBoxMobileSkin_1" mod="1308153511752" signatureChecksum="2783201289" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_1" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_1" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/AutoCompleteComboBoxMobileSkin_4" mod="1308153511865" signatureChecksum="2799126543" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_4" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_4" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/AutoCompleteComboBoxMobileSkin_2" mod="1308153511791" signatureChecksum="2788509707" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_2" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_2" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/AutoCompleteComboBoxMobileSkin_3" mod="1308153511827" signatureChecksum="2793818125" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_3" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:DownArrowSkin_3" type="e" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile160/DownArrow_down_default" mod="1307230974868" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile160:DownArrow_down_default" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_up_3" mod="1307230980133" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_3" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_up_4" mod="1307230980302" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_4" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/AutoCompleteComboBoxMobile" mod="1314460538638" signatureChecksum="3073168922" >
+        <def id="com.flextras.mobile.autoCompleteComboBox:AutoCompleteComboBoxMobile" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.skins:AutoCompleteComboBoxMobileSkin_Default" type="e" /> 
+        <dep id="spark.events:RendererExistenceEvent" type="e" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="e" /> 
+        <dep id="flash.events:MouseEvent" type="e" /> 
+        <dep id="Number" type="e" /> 
+        <dep id="mx.core:FlexGlobals" type="e" /> 
+        <dep id="mx.core:InteractionMode" type="e" /> 
+        <dep id="mx.core:ClassFactory" type="e" /> 
+        <dep id="com.flextras.mobile.autoCompleteComboBox.renderers:DefaultAutoCompleteRenderer" type="e" /> 
+        <dep id="mx.styles:CSSStyleDeclaration" type="s" /> 
+        <dep id="spark.events:RendererExistenceEvent" type="s" /> 
+        <dep id="mx.core:IVisualElement" type="s" /> 
+        <dep id="flash.events:MouseEvent" type="s" /> 
+        <dep id="spark.events:TextOperationEvent" type="s" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="mx.core:mx_internal" type="n" /> 
+        <dep id="spark.flextras.autoCompleteComboBox:AutoCompleteComboBoxLite" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_up_2" mod="1307230980018" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_2" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <script name="com/flextras/mobile/autoCompleteComboBox/skins/assets/mobile320/DownArrow_up_1" mod="1307230979801" >
+        <def id="com.flextras.mobile.autoCompleteComboBox.skins.assets.mobile320:DownArrow_up_1" /> 
+        <dep id="AS3" type="n" /> 
+        <dep id="spark.core:SpriteVisualElement" type="i" /> 
+      </script>
+      <keep-as3-metadata>
+        <metadata name="DiscouragedForProfile" />
+      </keep-as3-metadata>
+      <digests>
+        <digest type="SHA-256" signed="false" value="b48b32d74ae32b5ba422e4e6ef94b66129abc10eb1514c85911f0888b1581f2e"   />
+      </digests>
+    </library>
+  </libraries>
+  <files>
+    <file path="design.xml" mod="1308157271963" />
+    <file path="manifest.xml" mod="1308153356600" />
+  </files>
+</swc>

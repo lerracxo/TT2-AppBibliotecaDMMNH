@@ -23,3 +23,8 @@
 	color: red;
 	textAlign: center;
 }
+global
+{
+	vertical-align: middle;
+	text-align: center;
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			
+			import spark.components.Image;
+			import spark.components.Label;
+			
+			
+			// Variable
+			var listaImagenes:ArrayList = new ArrayList(
+				["http://imagenes-chistosas.net/wp-content/uploads/2013/03/Imagenes-bonitas.jpg",
+					"http://mundoconsejos.com/wp-content/uploads/2012/11/el-valor-de-un-sentimiento.jpg",
+					"http://www.imagenesdeamoronline.com/imagenes-de-amor/imagenes-de-amor-con-frases.jpg"
+					,"http://fbjuegos.info/wp-content/uploads/2014/03/Im%C3%A1genes-bonitas-para-Facebook-3.jpg"
+					,"http://www.megusta.name/covers/thumbs/frases-con-imagenes-de-reflexion.jpg"
+				]);
+			
+			
+			
+			function cambiaImagen():void
+			{
+				for (var i:int = 0; i < listaImagenes.length; i++)
+				{					
+					var url:String = String(listaImagenes.getItemAt(i));
+					var request:URLRequest = new URLRequest(url);
+					var loader:Loader = new Loader();
+					//loader.contentLoaderInfo.addEventListener(Event.COMPLETE,completeHandler);
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+						function (event:Event){
+							completeHandler(event,url);
+						});
+					
+					//loader.contentLoaderInfo.addEventListener(Event.INIT, initHandler);
+					loader.load(request);
+					
+				}
+				loader.unload();
+			}
+		
+			function completeHandler(event:Event, nombre:String):void{
+				var loader:Loader = (event.target as LoaderInfo).loader;
+				
+				var imagen:Image = new Image();
+				imagen.width = 200;
+				imagen.height = 100;
+				var etiqueta:Label = new Label();
+				etiqueta.text=nombre;
+				imagen.source = loader.content;
+				vg_imagenes.addElement(imagen);
+				vg_imagenes.addElement(etiqueta);
+				
+				ta_prueba.text = ta_prueba.text + nombre +"\n";
+			}
+		]]>
+	</fx:Script>
+	<s:Scroller>
+		<s:Group x="10" y="34" width="100%" height="100%">
+			<s:Button x="225" y="660" width="180" height="65" label="Cambiar" click="cambiaImagen()"/>
+			<s:TextArea id="ta_prueba" x="-3" y="749" width="100%" height="117"/>
+			<s:VGroup id="vg_imagenes" x="0" y="149" width="100%" height="493">
+			</s:VGroup>
+		</s:Group>
+	</s:Scroller>		
+	
+	
+</s:View>

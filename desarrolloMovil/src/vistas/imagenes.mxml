@@ -1,75 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		xmlns:s="library://ns.adobe.com/flex/spark"
-		xmlns:mx="library://ns.adobe.com/flex/mx">
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		creationComplete="cambiaImagen()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
+	
 	
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			import mx.collections.ArrayList;
+			import mx.events.ResizeEvent;
 			
 			import spark.components.Image;
 			import spark.components.Label;
 			
-			
 			// Variable
-			var listaImagenes:ArrayList = new ArrayList(
-				["http://imagenes-chistosas.net/wp-content/uploads/2013/03/Imagenes-bonitas.jpg",
+			public var listaImagenes:ArrayList = new ArrayList(
+				["http://www.fotos-bonitas.com/wp-content/uploads/2013/08/imagenes-para-pin-para-dormir.jpg",
 					"http://mundoconsejos.com/wp-content/uploads/2012/11/el-valor-de-un-sentimiento.jpg",
-					"http://www.imagenesdeamoronline.com/imagenes-de-amor/imagenes-de-amor-con-frases.jpg"
-					,"http://fbjuegos.info/wp-content/uploads/2014/03/Im%C3%A1genes-bonitas-para-Facebook-3.jpg"
-					,"http://www.megusta.name/covers/thumbs/frases-con-imagenes-de-reflexion.jpg"
+					"http://1.bp.blogspot.com/-Js2M1dpyW9U/T_sC5JmjoAI/AAAAAAAAN_0/1yT_9h73nLo/s400/425025_360403250698676_1150211175_n.jpg",
+					"http://fbjuegos.info/wp-content/uploads/2014/03/Im%C3%A1genes-bonitas-para-Facebook-3.jpg",
+					"http://www.megusta.name/covers/thumbs/frases-con-imagenes-de-reflexion.jpg",
+					"http://imagenes-chistosas.net/wp-content/uploads/2013/03/M%C3%A1s-Im%C3%A1genes-chistosas-5.jpg",
+					"http://3.bp.blogspot.com/-2tdHeCrTaYA/UXXVtSEdjtI/AAAAAAAAJSo/X6ysUq50o3w/s640/imagenes-chistosas-gordura.jpg",
+					"http://1.bp.blogspot.com/-z3iwKy2QuSM/UbvWvO5zhHI/AAAAAAAAMCg/VOCm4iAy_Cg/s400/Kiss-love-31576442-1280-960.jpg",
+					"http://www.imagenesgraciosas.name/covers/preview/imagenes-graciosas-de-crayones.jpg",
+					"http://www.mundoimagenes.com/covers/org/imagenes%20tiernas%20para%20el%20facebook.jpg",
+					"http://1.bp.blogspot.com/-PodvsTRVD6U/UZD1qK5wZWI/AAAAAAAAJSQ/cFDlJSMvuXw/s1600/Imagenes+Graciosas+2013,+Para+Reirse+(3).jpg"
 				]);
+			public var cont_for:int = 0;
+			public var url:String;
 			
-			
-			
-			function cambiaImagen():void
+			private function cambiaImagen():void
 			{
-				for (var i:int = 0; i < listaImagenes.length; i++)
+				
+				
+				if (cont_for < listaImagenes.length)
 				{					
-					var url:String = String(listaImagenes.getItemAt(i));
+					url = String(listaImagenes.getItemAt(cont_for));
 					var request:URLRequest = new URLRequest(url);
 					var loader:Loader = new Loader();
-					//loader.contentLoaderInfo.addEventListener(Event.COMPLETE,completeHandler);
-					loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
-						function (event:Event){
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE,completeHandler);
+					
+					/*loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+						function cargar(event:Event):void{
 							completeHandler(event,url);
 						});
-					
+					*/
 					//loader.contentLoaderInfo.addEventListener(Event.INIT, initHandler);
 					loader.load(request);
+					loader.unload();
+				}else{
 					
 				}
-				loader.unload();
 			}
-		
-			function completeHandler(event:Event, nombre:String):void{
+			
+			private function completeHandler(event:Event):void{
 				var loader:Loader = (event.target as LoaderInfo).loader;
-				
 				var imagen:Image = new Image();
 				imagen.width = 200;
 				imagen.height = 100;
-				var etiqueta:Label = new Label();
-				etiqueta.text=nombre;
+				imagen.id = url;
 				imagen.source = loader.content;
+				imagen.addEventListener(MouseEvent.CLICK,
+					function clickImagen(event:Event):void{
+						//ta_prueba.text = String(imagen.id);
+						lb_titulo.text = String(imagen.id);
+						i_expandida.source = imagen.source;
+						g_imagenExpandida.visible = true;
+					});
+
 				vg_imagenes.addElement(imagen);
-				vg_imagenes.addElement(etiqueta);
 				
-				ta_prueba.text = ta_prueba.text + nombre +"\n";
+				cont_for++;
+				cambiaImagen();
+				//ta_prueba.text = ta_prueba.text + String(imagen.id);
+				//ta_prueba.text = ta_prueba.text + nombre +"\n";
 			}
+			
+			protected function i_expandida_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			} 
+			
 		]]>
 	</fx:Script>
-	<s:Scroller>
-		<s:Group x="10" y="34" width="100%" height="100%">
-			<s:Button x="225" y="660" width="180" height="65" label="Cambiar" click="cambiaImagen()"/>
-			<s:TextArea id="ta_prueba" x="-3" y="749" width="100%" height="117"/>
-			<s:VGroup id="vg_imagenes" x="0" y="10" width="100%" height="632">
-			</s:VGroup>
-		</s:Group>
-	</s:Scroller>		
+
+		<s:TileGroup id="vg_imagenes" x="0" y="213" width="100%" height="70%">
+		</s:TileGroup>
 	
+	<!--<s:Button x="169" y="123" width="254" height="62" label="Cargar" click="cambiaImagen()"/>-->
+	<s:VGroup id="g_imagenExpandida" visible="false" x="0" y="195" width="640" height="80%"
+			  horizontalAlign="center" verticalAlign="middle" >
+			<s:Label id="lb_titulo" width="100%" text="Imagen" textAlign="center"/>
+			<s:Image resize="i_expandida_resizeHandler(event)" id="i_expandida" width="100%" click="{g_imagenExpandida.visible=false}"
+					 horizontalAlign="center" scaleMode="letterbox" smooth="true"
+					 smoothingQuality="high" verticalAlign="bottom"/>
+	</s:VGroup>
 	
 </s:View>
