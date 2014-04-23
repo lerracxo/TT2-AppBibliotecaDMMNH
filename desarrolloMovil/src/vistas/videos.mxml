@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Label x="51" y="151" width="378" fontWeight="bold" text="Hola está es la sección de vídeos"
+			 textAlign="center" verticalAlign="middle"/>
+	<s:VideoDisplay id="video" x="43" y="259" width="398" height="242" autoPlay="true" source="video/pruebaVideo.mp4"/>
+		
+</s:View>

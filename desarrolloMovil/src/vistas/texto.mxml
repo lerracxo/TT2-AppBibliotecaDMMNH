@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Group x="0" y="200" width="100%" height="80%" visible="true">
+		<s:VGroup x="0" y="0" width="100%" height="100%">
+			<s:Label id="LBpieza" width="100%" height="10%" horizontalCenter="0"
+					 text="Aquí va el nombre de la pieza" textAlign="center" verticalAlign="middle"
+					 verticalCenter="-320"/>
+			<s:Label id="LBinformacion" width="100%" height="90%"
+					 text="La definición de literatura o texto literario surge de la combinación de estas dos palabras: arte y palabra escrita. Desde tiempos remotos,la humanidad ha buscado diversas formas de expresar sus ideas y sentimientos. La palabra escrita sin duda fue un pilar de esa manifestación. Un texto informativo por ejemplo, tiene una finalidad muy particular y muy distinta a un texto literario. Porque su objetivo es justamente,        informar. ¿Y cual es el objetivo de la literatura? Esa pregunta no es fácil de responder, pero se podría afirmar que cuando una persona escribe un escrito que pueda considerarse literario, lo que está queriendo hacer es darse a conocer, expresar su yo a través de historias, de poemas, etc."
+					 textAlign="center" verticalAlign="middle"/>
+		</s:VGroup>
+	</s:Group>
+	
+	
+</s:View>

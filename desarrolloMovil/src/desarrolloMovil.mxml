@@ -2,7 +2,10 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="754" height="704" applicationDPI="160">
+			   xmlns:flextras="http://www.flextras.com/mxml"
+			   width="754" height="704" applicationDPI="320" 
+			   currentState="cuestionario" creationComplete="init()">
+	
 	
 	<!--Declaración de hoja de estilos-->
 	<fx:Style source="stilos.css"/>
@@ -11,227 +14,440 @@
 		<s:State name="cuestionario"/>
 		<s:State name="base"/>
 	</s:states>
+	
+	
 	<!--Declaracion de funciones-->
 	<fx:Script>
 		<![CDATA[	
 			import flash.events.Event;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
 			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
 			
-			import views.escaneo;
+			import vistas.escaneo;
+			
+			//[Bindable] public var endpoint:String = "http://serverOmar:8080/dcpro_proto/messagebroker/amf";
+			//[Bindable] public var endpoint:String = "http://192.168.0.101:8080/dcpro_proto/messagebroker/amf";
+			[Bindable] public var endpoint:String = "http://192.168.1.85:8080/dcpro_proto/messagebroker/amf";
+			
+			/*
+			[Bindable] public var Dsexo_data:ArrayCollection = new ArrayCollection(
+											[{label: "Femenino", data:"1"},
+											{label: "Masculino", data:"2"}]);
+			*/
+			[Bindable] public var Dsexo_data:ArrayList = new ArrayList(["Femenino","Masculino"]);
+			/*private var Dedad_data:ArrayList = new ArrayList(
+											["Entre 10 y 15 años",
+											"Entre 16 y 20 años",
+											"Entre 21 y 25 años",
+											"Entre 26 y 30 años",
+											"Entre 31 y 40 años",
+											"Entre 41 y 50 años",
+											"Entre 51 y 60 años",
+											"Mayores a 60 años"]);
+ 				
+			private var Docupacion_data:ArrayList = new ArrayList(
+											["Estudiante",
+											"Profesor",
+											"Turista",
+											"Visitante casual"]);
+			
+			private var DedoCivil_data:ArrayList = new ArrayList(
+											["Soltero",
+											"Casado",
+											"Unión libre",
+											"Divorciado",
+											"Viudo"]);
+			
+			private var Dmotivo_data:ArrayList = new ArrayList(
+											["Me mandaron",
+											"Me gusta el tema de la exposición",
+											"Me recomendaron el museo",
+											"Acompañe a alguien más"]);
+			
+			private var Dfrecuencia_data:ArrayList = new ArrayList(
+										["1 vez a la semana",
+										"1 vez al mes",
+										"1 vez al año",
+										"Entre 2 y 3 veces al año"]);
+			
+			private var Dacompanante_data:ArrayList = new ArrayList(
+										["Ninguno",
+										"Uno",
+										"Entre 2 y 5",
+										"Entre 6 y 10",
+										"Más de 10"]);
+			
+			protected function iniciar():void{
 				
+				Dsexo.dataProvider = Dsexo_data;
+				Dedad.dataProvider = Dedad_data;
+				//Docupacion.dataProvider = Docupaci on_data;
+				DedoCivil.dataProvider = Dedad_data;
+				Dmotivo.dataProvider = Dmotivo_data;
+				Dfrecuencia.dataProvider = Dfrecuencia_data;
+				Dacompanante.dataProvider = Dacompanante_data;
+			}*/
 			
+			
+			//agregar iconos a botones
+			[Bindable]
+			[Embed("imagenes/escanear.png")]
+			private var buttonEscanear:Class;
+			
+			[Bindable]
+			[Embed("imagenes/texto.png")]
+			private var buttonTexto:Class;
+			
+			[Bindable]
+			[Embed("imagenes/imagen.png")]
+			private var buttonImagen:Class;
+			
+			[Bindable]
+			[Embed("imagenes/video.png")]
+			private var buttonVideo:Class;
+			
+			[Bindable]
+			[Embed("imagenes/audio.png")]
+			private var buttonAudio:Class;
+			
+			[Bindable]
+			[Embed("imagenes/cerrar.png")]
+			private var buttonCerrar:Class;
+			
+			[Bindable]
+			[Embed("imagenes/continuar.png")]
+			private var buttonContinuar:Class;
+			
+			//Primera función a llamar, que pide los datos para llenar comboboxs
+			protected function init():void
+			{
+				// TODO Auto-generated method stub
+				//ta_Prueba.text = "Hecho!";
+				//roCuestionario.ObtieneSexo();
+				roCuestionario.ObtieneRangoEdades();
+				roCuestionario.ObtieneOcupaciones();
+				roCuestionario.ObtieneEstadoCivil();
+				roCuestionario.ObtieneRazonesVisita();
+				roCuestionario.ObtieneFrecuenciaAsistencia();
+				roCuestionario.ObtieneNumeroAcompanantes();
+			}
+			
+			//Función en caso de fallo en la conexión
+			protected function faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				ta_Prueba.text="Incorrecto";	
+				
+			}
+					
+			//Llenado de comboBox Edad
+			protected function ObtieneRangoEdadesResult(event:ResultEvent):void{
+				var listaRangoEdades:ArrayCollection;
+				listaRangoEdades = ArrayCollection(event.result);
+				Dedad.dataProvider = listaRangoEdades;
+			}
+			
+			//Llenado de comboBox Ocupación
+			protected function ObtieneOcupacionesResult(event:ResultEvent):void{
+				var listaOcupaciones:ArrayCollection;
+				listaOcupaciones = ArrayCollection(event.result);
+				Docupacion.dataProvider = listaOcupaciones;
+				
+				//ta_Prueba.text=listaOcupaciones.toString();
+			}
+			
+			//Llenado de comboBox Estado Civil		
+			protected function ObtieneEstadoCivilResult(event:ResultEvent):void{
+				var listaEstadoCivil:ArrayCollection;
+				listaEstadoCivil = ArrayCollection(event.result);
+				DedoCivil.dataProvider = listaEstadoCivil;
+			}
+				
+			//Llenado de comboBox Razones de Visita	
+			protected function ObtieneRazonesVisitaResult(event:ResultEvent):void{
+				var listaRazonesVisita:ArrayCollection;
+				listaRazonesVisita = ArrayCollection(event.result);
+				Dmotivo.dataProvider = listaRazonesVisita;
+			}
+			
+			//Llenado de combooBox Frecuencia de Visita
+			protected function ObtieneFrecuenciaAsistenciaResult(event:ResultEvent):void{
+				var listaFrecuenciaAsistencia:ArrayCollection;
+				listaFrecuenciaAsistencia = ArrayCollection(event.result);
+				Dfrecuencia.dataProvider = listaFrecuenciaAsistencia;
+			}
+			
+			//Llenado de comboBox Acompañantes
+			protected function ObtieneNumeroAcompanantesResult(event:ResultEvent):void{
+				var listaNumeroAcompanantes:ArrayCollection;
+				listaNumeroAcompanantes = ArrayCollection(event.result);
+				Dacompanante.dataProvider = listaNumeroAcompanantes;
+			}
+			
+			//Obtiene valores de comboBox
+			protected function ObtieneValoresComboBox(event:MouseEvent):void{
+				try{
+					//Declaración de variables para los contenidos de los ComboBox
+					var ContenidoSexo:String;
+					var ContenidoEdad:String;
+					var ContenidoEstadoCivil:String;
+					var ContenidoOcupaciones:String;
+					var ContenidoRazonesVisita:String;
+					var ContenidoFrecuenciaAsistencia:String;
+					var ContenidoNumeroAcompanantes:String;
+					
+					//Asignación de Contenido de comboBox a las variables respestivas
+					ContenidoSexo = String(Dsexo.selectedItem);
+					ContenidoEdad = String(Dedad.selectedItem);
+					ContenidoEstadoCivil = String(DedoCivil.selectedItem);
+					ContenidoOcupaciones = String(Docupacion.selectedItem);
+					ContenidoRazonesVisita = String(Dmotivo.selectedItem);
+					ContenidoFrecuenciaAsistencia = String(Dfrecuencia.selectedItem);
+					ContenidoNumeroAcompanantes = String(Dacompanante.selectedItem);
+					
+					//Recolección de respuestas
+					if(Dsexo.selectedIndex != -1 && Dedad.selectedIndex != -1 && DedoCivil.selectedIndex != -1
+						&& Docupacion.selectedIndex != -1 && Dmotivo.selectedIndex != -1 && Dfrecuencia.selectedIndex != -1
+						&& Dacompanante.selectedIndex != -1){
+						
+						var RespuestasObtenidas:ArrayList = new ArrayList(
+							[ContenidoSexo, ContenidoEdad,ContenidoEstadoCivil, 
+								ContenidoOcupaciones, ContenidoRazonesVisita,
+								ContenidoFrecuenciaAsistencia, ContenidoNumeroAcompanantes]);
+						
+						L_error.text = " ";
+						ta_Prueba.text = String(RespuestasObtenidas);
+						Lsexo.setStyle("color","black");
+						Ledad.setStyle("color","black");
+						LedoCivil.setStyle("color","black");
+						Locupacion.setStyle("color","black");
+						LmovitoA.setStyle("color","black");
+						LfrecuenciaA.setStyle("color","black");
+						Lacompanantes.setStyle("color","black");
+						
+						currentState = 'base';
+					}
+					else {
+						L_error.text = "¡¡¡Favor de verificar los campos!!!";
+						
+						
+						Lsexo.setStyle("color","black");
+						Ledad.setStyle("color","black");
+						LedoCivil.setStyle("color","black");
+						Locupacion.setStyle("color","black");
+						LmovitoA.setStyle("color","black");
+						LfrecuenciaA.setStyle("color","black");
+						Lacompanantes.setStyle("color","black");
+						
+						if (Dsexo.selectedIndex == -1){
+							Lsexo.setStyle("color","red");
+						}
+						if (Dedad.selectedIndex == -1){
+							Ledad.setStyle("color","red");
+						}
+						if (DedoCivil.selectedIndex == -1){
+							LedoCivil.setStyle("color","red");
+						}
+						if(Docupacion.selectedIndex == -1){
+							Locupacion.setStyle("color","red");
+						} 
+						if (Dmotivo.selectedIndex == -1){
+							LmovitoA.setStyle("color","red");
+						}
+						if (Dfrecuencia.selectedIndex == -1){
+							LfrecuenciaA.setStyle("color","red");
+						}
+						if (Dacompanante.selectedIndex == -1){
+							Lacompanantes.setStyle("color","red");
+						}
+					}
+				}catch(error:Error){
+					ta_Prueba.text = error.toString();
+				}
+			}
 		]]>
 	</fx:Script>
 	
+	<fx:Declarations>
+		<s:RemoteObject id="roCuestionario" destination="EntrevistaService" fault="faultHandler(event)" endpoint="{endpoint}">
+			<!--<s:method name="ObtieneSexo" result="ObtieneSexoResult(event)" fault="faultHandler(event)"/>-->
+			<s:method name="ObtieneRangoEdades" result="ObtieneRangoEdadesResult(event)" fault="faultHandler(event)"/>
+			<s:method name="ObtieneEstadoCivil" result="ObtieneEstadoCivilResult(event)" fault="faultHandler(event)"/>
+			<s:method name="ObtieneOcupaciones" result="ObtieneOcupacionesResult(event)" fault="faultHandler(event)" />
+			<s:method name="ObtieneRazonesVisita" result="ObtieneRazonesVisitaResult(event)" fault="faultHandler(event)" />
+			<s:method name="ObtieneFrecuenciaAsistencia" result="ObtieneFrecuenciaAsistenciaResult(event)" fault="faultHandler(event)"/>
+			<s:method name="ObtieneNumeroAcompanantes" result="ObtieneNumeroAcompanantesResult(event)" fault="faultHandler(event)"/>
+		</s:RemoteObject>
+	</fx:Declarations>
+	
 	<!--Comienza la aplicación-->
 	
-	<s:Scroller x="0" y="0" width="100%" height="100%">
-		<s:Group width="100%" height="100%">
-			<s:ViewNavigator width="100%" height="100%" title="Museo Nacional de Historia"/>
-			<s:Group includeIn="cuestionario" x="7" y="51" width="98%" height="95%">
-				<s:Label id="cuestionario" x="4" y="24" width="100%" height="10%" text="Cuestionario" textAlign="center"
-						 verticalAlign="middle" styleName="estiloTitulo"/>
-				
-				<s:Scroller x="5" y="97" width="100%" height="100%">
-					<!--Grupo para hacer filas-->
-					<s:VGroup x="5" y="97" width="100%" height="90%">
-						
-						<!--Grupo para hacer columnas para SEXO-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label SEXO-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="Lsexo" x="3" y="3" width="100%" height="100%" text="Sexo:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de Sexo-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBsexo" width="80%" height="50%" horizontalCenter="-39"
-											styleName="estiloComboB" textAlign="center"
-											verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="f">Femenino</fx:String>
-											<fx:String id="m">Masculino</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para EDAD-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label EDAD-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="Ledad" x="3" y="3" width="100%" height="100%" text="Edad:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de EDAD-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBedad" width="80%" height="50%" horizontalCenter="-39"
-											styleName="estiloComboB" textAlign="center"
-											verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="e1">Entre 10 y 15 años</fx:String>
-											<fx:String id="e2">Entre 16 y 20 años</fx:String>
-											<fx:String id="e3">Entre 21 y 25 años</fx:String>
-											<fx:String id="e4">Entre 26 y 30 años</fx:String>
-											<fx:String id="e5">Entre 31 y 40 años</fx:String>
-											<fx:String id="e6">Entre 41 y 50 años</fx:String>
-											<fx:String id="e7">Entre 51 y 60 años</fx:String>
-											<fx:String id="e8">Más de 60 años</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para OCUPACIÓN-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label OCUPACIÓN-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="Locupacion" x="3" y="3" width="100%" height="100%" text="Ocupación:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de OCUPACIÓN-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBocupacion" width="80%" height="50%"
-											horizontalCenter="-39" styleName="estiloComboB"
-											textAlign="center" verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="o1">Ama de casa</fx:String>
-											<fx:String id="o2">Campesino</fx:String>
-											<fx:String id="o3">Comerciante</fx:String>
-											<fx:String id="o4">Estudiante</fx:String>
-											<fx:String id="o5">Profesor</fx:String>
-											<fx:String id="o6">Jubilado</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para ESTADO CIVIL-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label ESTADO CIVIL-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="LedoCivil" x="3" y="3" width="100%" height="100%" text="Estado civil:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de ESTADO CIVIL-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBedoCivil" width="80%" height="50%" horizontalCenter="-39"
-											styleName="estiloComboB" textAlign="center"
-											verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="ec1">Soltero</fx:String>
-											<fx:String id="ec2">Casado</fx:String>
-											<fx:String id="ec3">Unión libre</fx:String>
-											<fx:String id="ec4">Divorciado</fx:String>
-											<fx:String id="ec5">Viudo</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para MOTIVO DE ASISTENCIA-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label MOTIVO DE ASISTENCIA-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="LmovitoA" x="3" y="3" width="100%" height="100%" text="Motivo de {'\n'}asistencia:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de MOTIVO DE ASISTENCIA-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBmotivoA" width="80%" height="50%" horizontalCenter="-39"
-											styleName="estiloComboB" textAlign="center"
-											verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="m1">Me mandaron</fx:String>
-											<fx:String id="m2">Me gusta el tema de la exposición</fx:String>
-											<fx:String id="m3">Me recomendaron el museo</fx:String>
-											<fx:String id="m4">Acompañe a alguien más</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para FRECUENCIA DE ASISTENCIA-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label FRECUENCIA DE ASISTENCIA-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="LfrecuenciaA" x="3" y="3" width="100%" height="100%" text="Frecuencia de {'\n'}asistencia:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de FRECUENCIA DE ASISTENCIA-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBfrecuenciaA" width="80%" height="50%"
-											horizontalCenter="-39" styleName="estiloComboB"
-											textAlign="center" verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="f1">1 vez a la semana</fx:String>
-											<fx:String id="f2">1 vez al mes</fx:String>
-											<fx:String id="f3">1 vez al año</fx:String>
-											<fx:String id="f4">Entre 2 y 3 veces al año</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						
-						<!--Grupo para hacer columnas para NÚMERO DE ACOMPAÑANTES-->
-						<s:HGroup width="100%" height="10%">
-							<!--Grupo para el label NÚMERO DE ACOMPAÑANTES-->
-							<s:Group width="35%" height="100%">
-								<s:Label id="Lacompanantes" x="3" y="3" width="100%" height="100%" text="Número de {'\n'}acompañantes:"
-										 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
-							</s:Group>
-							<!--Grupo para el ComboBox de NÚMERO DE ACOMPAÑANTES-->
-							<s:Group width="65%" height="100%">
-								<s:ComboBox id="CBacompanantes" width="80%" height="50%"
-											horizontalCenter="-39" styleName="estiloComboB"
-											textAlign="center" verticalCenter="1"> 
-									<s:dataProvider>
-										<s:ArrayList>
-											<fx:String id="a1">Ninguno</fx:String>
-											<fx:String id="a2">1</fx:String>
-											<fx:String id="a3">Entre 2 y 5</fx:String>
-											<fx:String id="a4">Entre 5 y 10</fx:String>
-											<fx:String id="a5">Más de 10</fx:String>
-										</s:ArrayList>
-									</s:dataProvider>
-								</s:ComboBox>
-							</s:Group>
-						</s:HGroup>
-						<s:HGroup width="100%" height="20%">
-							<s:Group width="726" height="100%">
-								<s:Button x="150" y="42" width="109" height="32" label="Continuar" click="currentState='base';"/>
-								<s:Button x="10" y="42" width="107" height="32" label="Cancelar"/>
-							</s:Group>
-						</s:HGroup>
-						
-					</s:VGroup>
-				</s:Scroller>
-			</s:Group>
+	<s:Group width="100%" height="100%">
+		<s:ViewNavigator width="100%" height="100%" title="Museo Nacional de Historia"/>
+		<s:Group includeIn="cuestionario" x="0" y="93" width="98%" height="95%">
+			<s:Label id="cuestionario" x="4" y="-2" width="100%" height="58" text="Cuestionario" textAlign="center"
+					 verticalAlign="middle" styleName="estiloTitulo"/>
 			
-			<s:TabbedViewNavigator includeIn="base" x="0" y="46" width="100%" height="7%">
-				<s:ViewNavigator label="Texto" width="100%" height="100%"/>
-				<s:ViewNavigator label="Video" width="100%" height="100%"/>
-				<s:ViewNavigator label="Audio" width="100%" height="100%"/>
-				<s:ViewNavigator label="Fotos" width="100%" height="100%"/>
-			</s:TabbedViewNavigator>
-			<s:Group includeIn="base" x="0" y="93" width="100%" height="100%" visible.base="true">
-				
-				
-			</s:Group>
+			<s:Scroller x="5" y="97" width="100%" height="100%"  horizontalScrollPolicy="off" verticalScrollPolicy="on">
+				<!--Grupo para hacer filas-->
+				<s:VGroup x="5" y="97" width="100%" height="90%">
+					
+					<!--Grupo para hacer columnas para SEXO-->
+					<s:HGroup id="HGsexo" width="100%" height="10%" >
+						<!--Grupo para el label SEXO-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="Lsexo" x="3" y="3" width="100%" height="100%" text="Sexo:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de Sexo-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Dsexo" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left" 
+												   dataProvider="{Dsexo_data}"/>
+							<!--<s:DropDownList id="Dsexo" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para EDAD-->
+					<s:HGroup id="HGedad" width="100%" height="10%">
+						<!--Grupo para el label EDAD-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="Ledad" x="3" y="3" width="100%" height="100%" text="Edad:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de EDAD-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Dedad" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="Dedad" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para OCUPACIÓN-->
+					<s:HGroup id="HGocupacion" width="100%" height="10%">
+						<!--Grupo para el label OCUPACIÓN-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="Locupacion" x="3" y="3" width="100%" height="100%" text="Ocupación:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de OCUPACIÓN-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Docupacion" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="Docupacion" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para ESTADO CIVIL-->
+					<s:HGroup id="HGedoCivil" width="100%" height="10%">
+						<!--Grupo para el label ESTADO CIVIL-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="LedoCivil" x="3" y="3" width="100%" height="100%" text="Estado civil:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de ESTADO CIVIL-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="DedoCivil" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="DedoCivil" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para MOTIVO DE ASISTENCIA-->
+					<s:HGroup id="HGmotivoA" width="100%" height="10%">
+						<!--Grupo para el label MOTIVO DE ASISTENCIA-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="LmovitoA" x="3" y="3" width="100%" height="100%" text="Motivo de{'\n'}asistencia:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de MOTIVO DE ASISTENCIA-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Dmotivo" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="Dmotivo" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para FRECUENCIA DE ASISTENCIA-->
+					<s:HGroup id="HGfrecuenciaA" width="100%" height="10%">
+						<!--Grupo para el label FRECUENCIA DE ASISTENCIA-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="LfrecuenciaA" x="3" y="3" width="100%" height="100%" text="Frecuencia de{'\n'}asistencia:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de FRECUENCIA DE ASISTENCIA-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Dfrecuencia" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="Dfrecuencia" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					
+					<!--Grupo para hacer columnas para NÚMERO DE ACOMPAÑANTES-->
+					<s:HGroup id="HGacompanantes" width="100%" height="10%">
+						<!--Grupo para el label NÚMERO DE ACOMPAÑANTES-->
+						<s:Group width="35%" height="100%">
+							<s:Label id="Lacompanantes" x="3" y="3" width="100%" height="100%" text="Número de{'\n'}acompañantes:"
+									 textAlign="center" verticalAlign="middle" styleName="estiloPreguntas"/>
+						</s:Group>
+						<!--Grupo para el ComboBox de NÚMERO DE ACOMPAÑANTES-->
+						<s:Group width="65%" height="100%">
+							<flextras:DropDownList id="Dacompanante" width="80%" height="50%" horizontalCenter="-39" 
+												   verticalCenter="-1" styleName="estiloComboB" textAlign="left"/>
+							<!--<s:DropDownList id="Dacompanante" width="80%" height="50%" horizontalCenter="-39"
+											styleName="estiloComboB" textAlign="left"
+											verticalCenter="1"/>-->
+						</s:Group>
+					</s:HGroup>
+					<s:HGroup width="100%" height="20%">
+						<s:HGroup x="0" y="10" width="100%" height="100%">
+							<s:Group width="481" height="100%">
+								<s:Button left="10" bottom="9.74044" width="221" height="30%"
+										  label="Continuar" fontFamily.cuestionario="Verdana" 
+										  click="currentState='base';"/>
+										  <!--click="currentState='base';"-->
+										  <!--click="ObtieneValoresComboBox(event)"-->
+								<!--<s:Button x="10" y="10" width="117" height="56" label="Prueba" fontSize="12" click="clickHandler(event)"/>-->
+							</s:Group>	
+						</s:HGroup>
+						
+					</s:HGroup>
+					
+				</s:VGroup>
+			</s:Scroller>			
+			<s:Label id="L_error" x="10" y="46" width="719" styleName="error"/>
 		</s:Group>
-	</s:Scroller>
 	
+			
+			<!-- Aqui inicia el estado de base -->
+			
+			<s:Group includeIn="base" x="0" y="93" width="80%" height="100%" visible.base="true">
+				<s:TabbedViewNavigator includeIn="base" x="0" y="0" width="100%" height="10%">
+					<s:ViewNavigator width="100%" height="100%" firstView.base="vistas.escaneo" icon.base="{buttonEscanear}"/>
+					<s:ViewNavigator width="100%" height="100%" firstView="vistas.texto" icon.base="{buttonTexto}"/>
+					<s:ViewNavigator width="100%" height="100%" firstView="vistas.imagenes" icon.base="{buttonImagen}"/>
+					<s:ViewNavigator width="100%" height="100%" firstView="vistas.videos" icon.base="{buttonVideo}"/>
+					<s:ViewNavigator width="100%" height="100%" firstView="vistas.audios" icon.base="{buttonAudio}"/>
+				</s:TabbedViewNavigator>
+			</s:Group>
+		<s:TextArea id="ta_Prueba" width="718" x="9" y="10" height="75" visible="false"/>
+	</s:Group>
 	
 </s:Application>

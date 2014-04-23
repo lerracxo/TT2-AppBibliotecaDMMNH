@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		creationComplete="abrirCamara()">
+	
+		
+	<fx:Script>
+		<![CDATA[
+			import com.google.zxing.BarcodeFormat;
+			import com.google.zxing.BinaryBitmap;
+			import com.google.zxing.BufferedImageLuminanceSource;
+			import com.google.zxing.DecodeHintType;
+			import com.google.zxing.Result;
+			import com.google.zxing.client.result.ParsedResult;
+			import com.google.zxing.client.result.ResultParser;
+			import com.google.zxing.common.BitMatrix;
+			import com.google.zxing.common.ByteMatrix;
+			import com.google.zxing.common.GlobalHistogramBinarizer;
+			import com.google.zxing.common.flexdatatypes.HashTable;
+			import com.google.zxing.qrcode.QRCodeReader;
+			import com.google.zxing.qrcode.detector.Detector;
+			
+			import spark.events.ViewNavigatorEvent;
+			//import tv.digitalretro.components.MessageBox;
+			import utileria.Definiciones;
+			
+			protected var camera:Camera;
+			private var videoDisplay:Video;
+			private var qrReader:QRCodeReader;
+			private var bmd:BitmapData;
+			private var cameraStarted:Boolean = false;
+			
+			private const VIDEO_SIZE:Number = 300;
+			
+			[Bindable] private var endpoint:String = utileria.Definiciones.endpoint ;
+			
+			//primera función de ejecución
+			<!--private function onCC():void{
+				//label.text = endpoint;
+				abrirCamara();
+			}-->
+			
+			//funciones para abrir la cámara
+			protected function abrirCamara():void
+			{
+				//tv.digitalretro.components.MessageBox.show(this,"entro");
+				if (!cameraStarted){
+					if (Camera.isSupported)
+					{
+						camera = volverCamera();
+						camera.setMode(VIDEO_SIZE, VIDEO_SIZE, 200);
+						
+						videoDisplay = new Video(VIDEO_SIZE, VIDEO_SIZE);
+						videoDisplay.rotation = 90; 
+						videoDisplay.x = VIDEO_SIZE; 
+						
+						visualizar.addChild(videoDisplay);
+						
+						videoDisplay.attachCamera(camera);
+						qrReader = new QRCodeReader;
+						//BabrirC.label = "Escanear";
+						lbl.text = "";
+						cameraStarted = true;
+					}
+					else 
+					{
+						lbl.text = "No se encontró la cámara";
+					}
+				}
+				else 
+				{
+					lbl.text = "";
+					decodificar();
+				}
+			}
+			
+						
+			//función regresar a la cámara
+			private function volverCamera():Camera
+			{
+				var camera:Camera;
+				var cameraCount:uint = Camera.names.length;
+				for ( var i:uint = 0; i < cameraCount; ++i )
+				{
+					camera = Camera.getCamera( String(i) );
+					if ( camera.position == "Atrás" ) 
+						return camera;
+				}
+				return Camera.getCamera();
+			}
+			
+			//función para decodificar el código QR
+			public function decodificar():void
+			{
+				lbl.text="verificando...";
+				bmd=new BitmapData(VIDEO_SIZE, VIDEO_SIZE);
+				bmd.draw(videoDisplay, null, null, null, null, true);
+				videoDisplay.cacheAsBitmap=true;
+				videoDisplay.cacheAsBitmapMatrix=new Matrix;
+				decodificarMapaBits(bmd, VIDEO_SIZE, VIDEO_SIZE);
+				bmd.dispose();
+				bmd=null;
+				System.gc();
+			}
+			
+			public function decodificarMapaBits(bmpd:BitmapData, width:int, height:int):void
+			{
+				var lsource:BufferedImageLuminanceSource=new BufferedImageLuminanceSource(bmpd);
+				var bitmap:BinaryBitmap=new BinaryBitmap(new GlobalHistogramBinarizer(lsource));
+				
+				var ht:HashTable=null;
+				ht=this.getAllHints();
+				
+				var res:Result=null;
+				try 
+				{
+					res=qrReader.decode(bitmap, ht);
+				}
+				catch (event:Error) 
+				{
+				}
+				
+				if (res == null) 
+				{
+					videoDisplay.clear();
+					lbl.text="No existe contenido";
+				}
+				else 
+				{
+					var parsedResult:ParsedResult=ResultParser.parseResult(res);
+					lbl.text=parsedResult.getDisplayResult();
+					
+					BabrirC.label = "Escanear";
+				}
+			}
+			
+			public function getAllHints():HashTable
+				{
+					var ht:HashTable=new HashTable;
+					ht.Add(DecodeHintType.POSSIBLE_FORMATS, BarcodeFormat.QR_CODE);
+					return ht;
+				}
+						
+			//}
+		]]>
+		
+	</fx:Script>
+	<s:VGroup x="82" y="223" width="486" height="783">
+		<s:SpriteVisualElement id="visualizar" width="100%" height="50%"/>
+		<s:Label id="lbl" x="83" y="570" width="100%" height="15%" text="" textAlign="center"
+				 verticalAlign="middle"/>
+		<s:HGroup width="100%" height="10%">
+			<s:Group width="20%" height="100%">
+			</s:Group>
+			<s:Button id="BabrirC" x="206" y="664" width="60%" height="100%" label="Escanear"
+					  click="abrirCamara()"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+</s:View>
