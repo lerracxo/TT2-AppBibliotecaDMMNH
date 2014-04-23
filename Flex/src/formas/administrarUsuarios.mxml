@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="init()"
+		   width.alta_modificacion="888" height.alta_modificacion="550"
+		   width.grid="95%" height.grid="95%" locale="en_ES">
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.managers.PopUpManager;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			import mx.validators.Validator;
+			
+			import objetosJava.PosicionAgente;
+			import objetosJava.TipoUsuario;
+			import objetosJava.Usuario;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var chanel:String;
+			[Bindable] public var message:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var usuario:Usuario = new Usuario();
+			[Bindable] public var tipoUsuario:TipoUsuario;
+			[Bindable] public var posicionAgente:PosicionAgente;
+			[Bindable] public var datosGrid:ArrayCollection;
+			[Bindable] public var datosTipoUsuario:ArrayCollection;
+			[Bindable] public var datosPosicion:ArrayCollection;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] private var validatorArr:Array;
+			[Bindable] public var bloqueo:int;
+			[Bindable] public var VentanaBusqueda:Buscar_Usuario;
+			
+			[Bindable] public var datosSupervisor:ArrayCollection = new ArrayCollection(
+				[{nombre_tipo:"Agente", id_tipo_usr:2}]);
+			
+			
+			// Funcion que se llama la cargar la aplicacion
+			private function init():void
+			{
+					roUsuarios.findAll(); // Obtiene a todos los usuarios registrados
+					roTipoUsuario.findAll(); // Obtiene los tipos de usuario
+			}
+			
+			private function resultHandler_TiposUsuarioFindAll(event:ResultEvent):void
+			{
+				try{
+					//this.id_tipo_usr.dataProvider = ArrayCollection(event.result);
+					//Alert.show("Conversión: "+ArrayCollection(event.result))
+					
+					datosTipoUsuario = ArrayCollection(event.result)
+					
+					
+				}
+				catch(error:Error){
+					Alert.show("resultHandler_TiposUsuarioFindAll: "+error.message );
+				}
+			}
+			
+			private function prueba():void{
+				Alert.show("Presionaste el botón")
+			}
+			
+			/*
+			private function myEventHandler(event:MouseEvent):void {
+				if(event.target.id == "btnmodificar"){
+					usuario = this.VentanaBusqueda.usuario;
+					if (this.VentanaBusqueda.modificar_ok == 1){
+						currentState="alta_modificacion";
+						preparaModicicacion(usuario);
+					}
+				}
+				if(event.target.id == "btnsalir"){
+					//if(usuariologeado.id_tipo_usr == 3)
+						roUsuarios.findAll();
+					//else 
+						//roUsuarios.Find_UsuariosSupervisor(usuariologeado.id_usr);				
+				}
+			}
+			*/
+			
+			private function resultHandlerFindAll(event:ResultEvent):void
+			{
+				datosGrid = ArrayCollection(event.result);
+				dg.dataProvider = datosGrid;
+
+			}
+			
+			
+			
+			private function result_validaBloqueo(event:ResultEvent):void
+			{
+				bloqueo = int(event.result);
+				if(bloqueo == 5){
+					this.fibloqueado.visible =  true;
+					this.check_bloqueo.selected = true;
+				}else 
+					this.fibloqueado.visible = false;
+			}
+			
+			private function result_DesbloqueaUsuario(event:ResultEvent):void
+			{
+				var ok:int = int(event.result);
+				if(ok != 0)
+					Alert.show("El Usuario fue desbloqueado");
+			}
+			
+			
+			
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			//Funcion que realiza las validaciones necesarias para poder guardar un usuario
+			private function validaNuevoUsuario(usuario_l:Usuario):String{
+				var mensaje:String = ""
+					
+				var emailRexValid:String = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+				Alert.show(usuario_l.toString(),"Dentro de la funcion");
+				
+				if (usuario_l.nombre_usr == "" || usuario_l.nombre_usr == null) // Valida el nombre
+					mensaje=mensaje+"Nombre de usuario\n"
+						
+				if(usuario_l.apellido_paterno_usr == "" || usuario_l.apellido_paterno_usr == null)
+					mensaje=mensaje+"Apellido paterno\n"
+						
+				if(usuario_l.password == "" || usuario_l.password == null)
+					mensaje=mensaje+"Password\n"
+				/* // No se valida el apellido materno
+				if(usuario_l.apellido_materno_usr == "" || usuario_l.apellido_materno_usr == null)
+				mensaje=mensaje+"Apellido materno\n"
+				*/
+				if(usuario_l.email_usr == "" || usuario_l.email_usr == null || !usuario_l.email_usr.match(emailRexValid))
+					mensaje=mensaje+"E-mail\n"
+						
+				if( usuario_l.id_tipo_usr == -1)
+					mensaje=mensaje+"Tipo de usuario\n"
+						
+				return mensaje
+			}
+			
+
+			// funcion que ejecuta la rutina de guardado de un usuario
+			private function guardar():void
+			{ 
+				try{
+					var mensaje:String
+					
+					var l_usuario:Usuario = new Usuario();
+					// Se obtienen las variables correspondientes al tipo de usuario que se va a registrar 
+					l_usuario.nombre_usr = nombre_usr.text
+					l_usuario.apellido_paterno_usr = apellido_paterno_usr.text
+					l_usuario.apellido_materno_usr = apellido_materno_usr.text
+					l_usuario.email_usr = email_usr.text
+					l_usuario.password = SHA1.hash(password.text)
+					l_usuario.id_tipo_usr = int(id_tipo_usr.selectedItem.id_tipo_usr)
+					l_usuario.estatus_usr = estatus_usr.selected == false ? 0 : 1
+					
+					// Si obtiene algún mensaje entonces no se valido correctamente, e interrumpe el proceso
+					if((mensaje = validaNuevoUsuario(l_usuario)) != ""){
+						Alert.show(mensaje,"Errores de validación",Alert.OK);
+						return;
+					}
+					Alert.show("Todo salio bien: "+l_usuario.nombre_usr);
+					return;
+					if(id_usr.text == '0' ){
+						create(l_usuario); // Llama al metodo que realiza la inserción
+					}else{
+						update(l_usuario);
+					}
+				}catch(errObject:Error){
+					Alert.show(errObject.message +' '+ errObject.name+"\n"+l_usuario,"Error Validador")
+				}
+			}
+			
+			
+			private function create(l_usuario:Usuario):void{
+				try{				
+					// Si es un usuario nuevo se asigna una contraseña
+					//l_usuario.password = SHA1.hash(l_usuario.email_usr) // Su contraseña inicial es el email
+					roUsuarios.create(l_usuario);
+			
+				}catch(erObject:Error){
+					Alert.show(erObject.message + erObject.name,"Error")
+				}
+			}
+			
+			private function update(l_usuario:Usuario):void{
+				try{	
+					
+					roUsuarios.update(l_usuario);
+					
+				}catch(erObject:Error){
+					Alert.show(erObject.message + erObject.name,"Error")
+				}
+			}
+			
+			private function resultHandlerNuevoUsuario(event:ResultEvent):void
+			{
+				usuario = event.result as Usuario
+				Alert.show('El usuario '+usuario.nombre_usr+' se creó exitosamente' ,"Información")
+				roUsuarios.findAll();
+				cerrar();
+				
+			}
+			
+			private function resultHandlerActualizaUsuario(event:ResultEvent):void
+			{
+				var ok:int = event.result as int
+				if(ok == 1){
+					Alert.show('El usuario '+usuario.nombre_usr+' se actualizó exitosamente' ,"Información")
+					roUsuarios.findAll();
+					cerrar();
+				}else{
+					Alert.show('El usuario '+usuario.nombre_usr+' no se actualizó ' ,"Información")
+				}
+			}
+			
+			private function resultHandlerEliminaUsuario(event:ResultEvent):void
+			{
+				var ok:int = event.result as int
+				if(ok == 1){
+					Alert.show('El usuario '+usuario.nombre_usr+' se eliminó exitosamente' ,"Información")
+					roUsuarios.findAll();
+					currentState='grid';
+				}else{
+					Alert.show('El usuario '+usuario.nombre_usr+' no se eliminó ' ,"Información")
+				}
+			}
+			
+			/*
+			* Activa el estado de vista para crear un nuevo usuario 
+			*/
+			private function nuevo():void
+			{
+				currentState="alta_modificacion";
+				usuario = new Usuario()
+				preparaFormaUsuario(usuario)
+				
+			}
+			
+			
+			private function modificar():void
+			{
+				if(dg.selectedItem != null){
+					usuario = dg.selectedItem as Usuario;
+					currentState="alta_modificacion";
+					preparaFormaUsuario(usuario)
+						
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+				}
+				
+			}
+			
+			private function eliminar():void
+			{
+				if(dg.selectedItem != null){
+					usuario = dg.selectedItem as Usuario;
+					if(usuariologeado.id_tipo_usr == 1 && usuario.id_tipo_usr != 2)
+						Alert.show("Este registro no puede ser eliminado por un Supervisor","Información");
+					else
+						Alert.show("¿Está seguro de inactivar al usuario? ","Información",Alert.OK| Alert.NO,this,remove,null,Alert.OK);	
+				}else{
+					Alert.show("Favor de seleccionar un registro","Información");
+				}
+			}
+			
+			
+			private function remove(eventObj:CloseEvent):void
+			{
+				if(eventObj.detail==Alert.OK){
+				usuario = dg.selectedItem as Usuario;
+				roUsuarios.remove(usuario);
+				}
+			}
+			
+			private function Buscar():void
+			{
+				VentanaBusqueda = Buscar_Usuario(PopUpManager.createPopUp(this, Buscar_Usuario, false));
+				VentanaBusqueda.endpoint = endpoint;
+				VentanaBusqueda.usuariologeado = usuariologeado;
+				VentanaBusqueda.setStyle("borderAlpha", 0.9);
+				VentanaBusqueda.closeButton.visible = false;	
+				PopUpManager.centerPopUp(VentanaBusqueda);
+				PopUpManager.bringToFront(VentanaBusqueda);
+				//VentanaBusqueda.addEventListener(MouseEvent.CLICK,myEventHandler);
+				
+			}
+			
+			private function preparaFormaUsuario(l_usuario:Usuario):void{
+				//Si tiene datos en el dataprovider entonces se asiga el primero
+				id_tipo_usr.dataProvider.length > 0 ? id_tipo_usr.selectedIndex = 0 : id_tipo_usr.selectedIndex = -1;
+				
+				if (l_usuario.id_usr == 0){ // Se trata de un nuevo usuario
+					// Inicialización de las variables del usuario
+					nombre_usr.text = ''; 		
+					apellido_paterno_usr.text ='';
+					apellido_materno_usr.text = '';
+					email_usr.text ='';
+					estatus_usr.selected = true;
+					// Validadores
+					nombre_usr.errorString=''
+					apellido_paterno_usr.errorString=''
+					email_usr.errorString=''
+					id_tipo_usr.errorString='';
+				}
+				else{
+					nombre_usr.text = l_usuario.nombre_usr;
+					apellido_paterno_usr.text = l_usuario.apellido_paterno_usr;
+					apellido_materno_usr.text = l_usuario.apellido_materno_usr;
+					email_usr.text = l_usuario.email_usr;
+					estatus_usr.selected = Boolean(l_usuario.estatus_usr);
+					
+					this.finombre_usr.errorString = "";
+					this.fiapellido_paterno_usr.errorString = "";
+					this.fiemail_usr.errorString = "";
+					this.fiid_tipo_usr.errorString =  "";
+				}
+			}		
+			
+			private function cerrar():void{
+				currentState="grid";
+			}
+			
+			
+			protected function labelTipoUsuario(item:Usuario,nombre_columna:GridColumn):String
+			{
+				// documentar
+				switch(item.id_tipo_usr){
+					case 1 :
+						return "Administrador"
+						break;
+					case 2:
+						return "Revisor"
+						break;
+					default: // Tipo de usuario no definido
+						return ""
+			}
+				
+
+			
+			}
+			
+			// Pinta el campo de las contraseñas si no son iguales
+			protected function password_changeHandler(event:TextOperationEvent):void
+			{
+				if(password.text != conf_password.text){
+					password.setStyle("color","Red");
+					conf_password.setStyle("color","Red");
+				}
+				else{
+					password.setStyle("color",null);
+					conf_password.setStyle("color",null);
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="alta_modificacion"/>
+	</mx:states>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="roUsuarios" destination="UsuarioService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+			<s:method name="Find_UsuariosSupervisor" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
+			<s:method name="create" result="resultHandlerNuevoUsuario(event)" fault="faultHandler(event)" />
+			<s:method name="update" result="resultHandlerActualizaUsuario(event)" fault="faultHandler(event)" />
+			<s:method name="remove" result="resultHandlerEliminaUsuario(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="roTipoUsuario" destination="TipoUsuarioService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="resultHandler_TiposUsuarioFindAll(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+
+
+		<mx:StringValidator id="SV_nombre_usr" source="{nombre_usr}" trigger="{btnGuardar}" property="text" required="true" maxLength="30" />
+		<mx:StringValidator id="SV_apellido_paterno_usr" source="{apellido_paterno_usr}" trigger="{btnGuardar}" property="text"  required="true" minLength="2" maxLength="30" />
+		<mx:EmailValidator  id="EV_email_usr" source="{email_usr}" trigger="{btnGuardar}" property="text" required="false" missingAtSignError="E-mail invalido, no se encuentra el caracter @ " invalidDomainError="E-mail invalido, dominio invalido" missingUsernameError="E-mail invalido, no se encuentra username" />
+		<mx:StringValidator id="SV_estatus_usuario" source="{estatus_usr}" trigger="{btnGuardar}" property="selected" required="true" maxLength="5" minLength="4" />
+		<mx:NumberValidator id="NV_id_tipo_usr" source="{id_tipo_usr}" trigger="{btnGuardar}" property = "selectedIndex" minValue="0" lowerThanMinError="Campo obligatorio"/>
+
+	</fx:Declarations>
+	
+	<s:DataGrid id="dg" includeIn="grid" left="10" right="10" height="83%" editable="false"
+				enabled="true" horizontalCenter="0" verticalCenter="16">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="id_tipo_usr" headerText="Tipo Usuario" labelFunction="labelTipoUsuario" ></s:GridColumn>
+				<s:GridColumn dataField="email_usr" headerText="Email"></s:GridColumn>
+				<s:GridColumn dataField="nombre_usr" headerText="Nombre"></s:GridColumn>
+				<s:GridColumn dataField="apellido_paterno_usr" headerText="Apellido Paterno"></s:GridColumn>
+				<s:GridColumn dataField="apellido_materno_usr" headerText="Apellido Materno"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:HGroup id="id_contBotones" includeIn="grid" left="10" right="10" top="10" bottom="287"
+			  horizontalCenter="0" verticalCenter="-139">
+		<s:Button width="80" label="Nuevo" click="nuevo()"/>
+		<s:Button width="80" label="Modificar" click="modificar()"/>
+		<s:Button width="80" label="Eliminar" click="eliminar()"/>
+		<s:Button width="80" label="Buscar" click="Buscar()"/> 
+		<s:Button width="80" label="Cerrar" click="parent.removeChild(this)"/>
+		<s:Button id="btn_prueba" width="80" label="Prueba" click="prueba()"/>
+	</s:HGroup>
+	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
+		<s:Button id="btnGuardar" x="374" y="37" label="Guardar" click="guardar()"/>
+		<s:Button label="Cerrar" click="cerrar()"/>
+	</s:HGroup>
+	
+	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" width="454"
+			height="493">
+		<s:FormHeading label="Datos Generales"/>
+		<s:FormItem  id="finombre_usr" width="265" label="Nombre" required="true">
+			<s:layout>
+				<s:FormLayout/>
+			</s:layout>
+			<s:TextInput id="nombre_usr" text="{usuario.nombre_usr}"/>
+		</s:FormItem>
+		<s:FormItem id="fiapellido_paterno_usr" width="265" label="Apellido Paterno" required="true">
+			<s:TextInput id="apellido_paterno_usr" text="{usuario.apellido_paterno_usr}"/>
+		</s:FormItem>
+		<s:FormItem id="fiapellido_materno_usr" width="265" label="Apellido Materno" required="false">
+			<s:TextInput id="apellido_materno_usr" text="{usuario.apellido_materno_usr}"/>
+		</s:FormItem>
+		<s:FormItem id="fiemail_usr"  x="0" y="163" width="265" label="E-mail" required="true">
+			<s:TextInput id="email_usr" text="{usuario.email_usr}"/>
+		</s:FormItem>
+		<s:FormItem visible="true" width="265" label="Contraseña">
+			<s:TextInput id="password" change="password_changeHandler(event)"
+						 displayAsPassword="true" text="{usuario.password}"/>
+		</s:FormItem>
+		<s:FormItem visible="true" width="265" label="Confirmación contraseña">
+			<s:TextInput id="conf_password" change="password_changeHandler(event)" 
+						 displayAsPassword="true" text="{usuario.password}"/>
+		</s:FormItem>
+		<s:FormItem id="fiestatus_usr" width="265" label="Activo / Inactivo" >
+			<s:CheckBox id="estatus_usr"  />
+		</s:FormItem>
+		<s:FormItem id="fiid_tipo_usr" width="265" label="Tipo" required="true">
+			<s:ComboBox id="id_tipo_usr" width="120" labelField="nombre_tipo" dataProvider="{datosTipoUsuario}"/>
+		</s:FormItem>
+		<s:FormItem id="fibloqueado" width="265" label="Usuario Bloqueado" visible="false">
+			<s:CheckBox id="check_bloqueo"/>
+		</s:FormItem>
+		<s:FormItem  id="fiid_usr" visible="false" left="2" top="0" width="265" label="usr">
+			<s:TextInput id="id_usr" editable="false" text="{usuario.id_usr}"/>
+		</s:FormItem>
+	</s:Form>
+
+	
+</mx:Canvas>

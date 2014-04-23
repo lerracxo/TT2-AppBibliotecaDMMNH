@@ -34,13 +34,13 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 		public void setDataSource(DataSource dataSourceDCpro){
 
 			this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSourceDCpro);
-	        this.insertTipoUsuario = new SimpleJdbcInsert(dataSourceDCpro).withTableName("C_TIPO_USUARIO").usingGeneratedKeyColumns("ID_TIPO_USR");
+	        this.insertTipoUsuario = new SimpleJdbcInsert(dataSourceDCpro).withTableName("CAT_TIPO_USUARIO").usingGeneratedKeyColumns("ID_TIPO_USR");
 	        
 	       }
 
 	@RemotingInclude
 	public List<TipoUsuario> findAll() {
-    	return	simpleJdbcTemplate.query("SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM C_TIPO_USUARIO ", new RowMapper<TipoUsuario>() {
+    	return	simpleJdbcTemplate.query("SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM CAT_TIPO_USUARIO ", new RowMapper<TipoUsuario>() {
 	            public TipoUsuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new TipoUsuario( rs.getInt("id_tipo_usr"),rs.getString("nombre_tipo"),rs.getString("descripcion_tipo"));
 	                }
@@ -52,7 +52,7 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 	@RemotingInclude
 	public TipoUsuario findById(int id) {
     	return  simpleJdbcTemplate.queryForObject(
-	            "SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM C_TIPO_USUARIO WHERE id_tipo_usr = ?", new RowMapper<TipoUsuario>() {
+	            "SELECT id_tipo_usr, nombre_tipo, descripcion_tipo FROM CAT_TIPO_USUARIO WHERE id_tipo_usr = ?", new RowMapper<TipoUsuario>() {
 	            public TipoUsuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new TipoUsuario( rs.getInt("id_tipo_usr"), rs.getString("nombre_tipo"),rs.getString("descripcion_tipo"));
 	               
@@ -77,14 +77,14 @@ public class TipoUsuarioService implements ITipoUsuarioService {
 	@RemotingInclude
 	public int update(TipoUsuario tipousuario) {
         int flag = this.simpleJdbcTemplate.update(
-                "UPDATE C_TIPO_USUARIO SET NOMBRE_TIPO= ?, DESCRIPCION_TIPO= ? WHERE ID_TIPO_USR = ?", 
+                "UPDATE CAT_TIPO_USUARIO SET NOMBRE_TIPO= ?, DESCRIPCION_TIPO= ? WHERE ID_TIPO_USR = ?", 
                 tipousuario.getNombre_tipo(),tipousuario.getDescripcion_tipo(),tipousuario.getId_tipo_usr());
         return flag;
 	}
 
 	@RemotingInclude
 	public int remove(TipoUsuario tipousuario) {
-        int flag = this.simpleJdbcTemplate.update("DELETE FROM C_TIPO_USUARIO WHERE id_tipo_usr=?", tipousuario.getId_tipo_usr());
+        int flag = this.simpleJdbcTemplate.update("DELETE FROM CAT_TIPO_USUARIO WHERE id_tipo_usr=?", tipousuario.getId_tipo_usr());
         return flag;
 	}
 

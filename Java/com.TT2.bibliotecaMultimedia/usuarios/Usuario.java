@@ -7,7 +7,7 @@ public class Usuario implements Serializable {
 	
     private int id_usr;
     private int id_tipo_usr;
-    private String usr;
+    //private String usr;
     private String password;
     private String nombre_usr;
     private String apellido_paterno_usr;
@@ -19,7 +19,7 @@ public class Usuario implements Serializable {
       
     public Usuario(	int id_usr,
     				int id_tipo_usr,  
-    				String usr, 
+    				//String usr, 
     				String password, 
     				String nombre_usr, 
     				String apellido_paterno_usr, 
@@ -29,7 +29,7 @@ public class Usuario implements Serializable {
         
     	this.id_usr = id_usr;
         this.id_tipo_usr = id_tipo_usr;
-        this.usr = usr;
+        //this.usr = usr;
     	this.password = password;
         this.nombre_usr = nombre_usr;
         this.apellido_paterno_usr = apellido_paterno_usr;
@@ -59,6 +59,7 @@ public class Usuario implements Serializable {
 	}
 
 
+	/*
 	public String getUsr() {
 		return usr;
 	}
@@ -67,7 +68,7 @@ public class Usuario implements Serializable {
 	public void setUsr(String usr) {
 		this.usr = usr;
 	}
-
+	 */
 
 	public String getPassword() {
 		return password;

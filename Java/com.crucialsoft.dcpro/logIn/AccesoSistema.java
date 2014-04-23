@@ -44,7 +44,7 @@ public class AccesoSistema {
 
 	
 	@RemotingInclude
-	public int validaUsuario(String usuario, String contrasena, String blaze_clientid) {
+	public int validaUsuario(String email, String contrasena, String blaze_clientid) {
 		//System.out.println("Peticion recibida :D");
 		//System.out.println("Usuario: "+usuario);
 		//System.out.println("Contrasena: "+contrasena);
@@ -53,16 +53,17 @@ public class AccesoSistema {
 		int bloqueo = 0;
 		int primeravez = 0;
 		int id_usr = 0;
-		int logeoCorrecto = 0; // modf
-				
-		//simpleJdbcTemplate.query(sql, rm, args)
-		//hjbhjggjjhghjg
+		
+		String sql = "SELECT IF(MAX(id_usr) IS NULL, 0, id_usr) fROM usuario WHERE email_usr = ? AND password = ?"+
+						" AND estatus_usr = 1";
+		
 		id_usr = simpleJdbcTemplate
 				.queryForInt(
-						"SELECT IF(MAX(id_usr) IS NULL, 0, id_usr) fROM usuario WHERE usr = ? AND password = ?"+
-						" AND estatus_usr = 1",
-						new Object[] { usuario, contrasena });
+						sql,
+						new Object[] { email, contrasena });
 		
+		System.out.println("Consulta: "+sql+" email: "+email+" contra "+contrasena);
+		/* Codigo inecesario
 		//System.out.println("Hola que onda");
 		if (id_usr == 0) {
 			logeoCorrecto = 0;
@@ -72,11 +73,11 @@ public class AccesoSistema {
 			System.out.println("Sesion valida");
 			//ag.Update_AgenteEstatus(id_usuario,blaze_clientid);
 		}
-	
+		 */
 			
 		
-		System.out.println("Retorna: "+logeoCorrecto);
-		return logeoCorrecto;
+		System.out.println("Retorna: "+id_usr);
+		return id_usr;
 
 	}
 	

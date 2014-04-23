@@ -1,10 +1,17 @@
 <mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="838" height="422">
+			   width="838" height="422"
+			   label="{nombreCatalogo}" creationComplete="init()">
 
 	<fx:Script>
 		<![CDATA[
+			// Para las referencias de los archivos
+			import flash.net.FileFilter;
+			import flash.net.FileReference;
+			import flash.net.FileReferenceList;
+			
+			import mx.collections.ArrayCollection;
 			import mx.collections.ArrayList;
 			import mx.controls.Alert;
 			import mx.rpc.events.FaultEvent;
@@ -14,12 +21,13 @@
 			
 			
 			[Bindable]
-			
-			private var selectedFileReferences:Array = new Array();
-			
+			private var selectedFileReferences:ArrayCollection = new ArrayCollection();
 			private var fileRefList:FileReferenceList;
-			
 			private var archivo: FileReference;
+			//private var selectedFiles:ArrayCollection = new ArrayCollection();
+			
+			var imageTypes:FileFilter = new FileFilter("Images (*.jpg, *.jpeg, *.gif, *.png)", "*.jpg; *.jpeg; *.gif; *.png");
+			var allTypes:Array = new Array(imageTypes); // Configura el filtro de archivos que se desean 
 			
 			//Variables generales del sistema
 			[Bindable] public var chanel:String;
@@ -29,43 +37,64 @@
 			[Bindable] public var usuariologeado:Usuario;
 			
 			
+			private function init():void{
+			
+			}
+			
 			private function browseFiles(event:MouseEvent):void
 			{
 				fileRefList = new FileReferenceList();
 				fileRefList.addEventListener(Event.SELECT, selectFiles);
+				
+				//fileRefList.browse(allTypes);
 				fileRefList.browse();
 			}
 			
 			private function selectFiles(e:Event):void
 			{			
-				var selectedFiles:ArrayList = new ArrayList();
-				
 				for each(var fileRef : FileReference in fileRefList.fileList)
 				{
-					selectedFiles.addItem(fileRef.name);
-					selectedFileReferences.push(fileRef);
+					fileRef.addEventListener(ProgressEvent.PROGRESS, funcionProgreso);
 					fileRef.load();
+					selectedFileReferences.addItem(fileRef);
 				}
-				dataGrid.dataProvider = selectedFiles;
-				Alert.show("Contenido: "+selectedFiles.toString())
+			}
+			
+			protected function funcionProgreso(evt:ProgressEvent):void{
+				ta_debugErrores.text =""+ ((evt.bytesLoaded/evt.bytesTotal)*100)+"% Loaded " + evt.bytesLoaded + " of " + evt.bytesTotal + " bytes.";
 			}
 			
 			private function uploadFiles(e:MouseEvent):void
-			{				
-				for each(var fileRef : FileReference in selectedFileReferences)
-				{
-					subeArchivos.doUpload(fileRef.name, fileRef.data);
+			{		
+				try{
+					Alert.show("Len file: "+selectedFileReferences.length);
+					
+					for( var i:int =0; i < selectedFileReferences.length; i++) {
+						subeArchivos.doUpload(selectedFileReferences[i].name, selectedFileReferences[i].data);
+					}
+				}
+				catch(e:Error){
+					Alert.show(e.toString(),"Error");
 				}
 			}
 			
 			protected function doUploadResult(event:ResultEvent):void
 			{
-				Alert.show(event.toString(),"Resultado de evento");
+				if(Boolean(event))
+					Alert.show("Todo salió bien :)");
+				else
+					Alert.show("Sucedió un error");
 			}
 			
 			protected function faultHandler(event:FaultEvent):void
 			{
 				Alert.show(event.toString(),"Error")
+			}
+			
+			// Procedimiento para cerrar
+			protected function cerrar(event:MouseEvent){
+				// Quita esta pestana
+				parent.removeChild(this);
 			}
 		]]>
 	</fx:Script>
@@ -75,13 +104,21 @@
 			<s:method name="doUpload" result="doUploadResult(event)" fault="faultHandler(event)" />
 		</s:RemoteObject>
 	</fx:Declarations>
-	<s:DataGrid id="dataGrid" x="10" y="54" width="818" height="358" fontFamily="Verdana"
-				fontSize="11"/>
+	<s:DataGrid id="dataGrid" x="10" y="54" width="818" height="256" fontFamily="Verdana"
+				fontSize="11" dataProvider="{selectedFileReferences}">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="name" headerText="Nombre"></s:GridColumn>
+				<s:GridColumn dataField="size" headerText="Tamaño"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
 	<s:HGroup x="10" y="10" width="818" height="36" fontFamily="Verdana" fontSize="11">
-		<s:Button label="Seleccionar Archivos" click="browseFiles(event)"/>
+		<s:Button label="Subir" click="uploadFiles(event)"/>
+		<s:Button label="Seleccionar" click="browseFiles(event)"/>
 		<s:Button label="Eliminar"/>
-		<s:Button label="Cargar Archivos" click="uploadFiles(event)"/>
-		<s:Button label="Cerrar"/>
+		<s:Button label="Cerrar" click="cerrar(event)"/>
 	</s:HGroup>
+	<s:TextArea id="ta_debugErrores" x="10" y="318" width="662" height="25"/>
 	
 </mx:Canvas>

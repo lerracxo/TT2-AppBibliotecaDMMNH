@@ -1,6 +1,7 @@
 package usuarios;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +44,11 @@ public class UsuarioService implements IUsuarioService {
 
 	@RemotingInclude
 	public List<Usuario> findAll() {
-    	return	simpleJdbcTemplate.query("SELECT ID_USR, ID_TIPO_USR, USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR  " +
+    	return	simpleJdbcTemplate.query("SELECT ID_USR, ID_TIPO_USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR  " +
     			"FROM USUARIO WHERE estatus_usr = 1", new RowMapper<Usuario>() {
 	            public Usuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new Usuario( rs.getInt("id_usr"), 
-	                    					rs.getInt("id_tipo_usr"), 
-	                    					rs.getString("usr"), 
+	                    					rs.getInt("id_tipo_usr"),  
 	                    					rs.getString("password"), 
 	                    					rs.getString("nombre_usr"),
 	                    					rs.getString("apellido_paterno_usr"),
@@ -80,12 +80,11 @@ public class UsuarioService implements IUsuarioService {
 	@RemotingInclude
 	public Usuario findById(int id) {
     	return  simpleJdbcTemplate.queryForObject(
-	            "SELECT ID_USR, ID_TIPO_USR, USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR"+
+	            "SELECT ID_USR, ID_TIPO_USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR"+
 	            " FROM USUARIO WHERE id_usr = ? and estatus_usr = 1", new RowMapper<Usuario>() {
 	            public Usuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new Usuario(rs.getInt("id_usr"), 
             					rs.getInt("id_tipo_usr"), 
-            					rs.getString("usr"), 
             					rs.getString("password"), 
             					rs.getString("nombre_usr"),
             					rs.getString("apellido_paterno_usr"),
@@ -102,12 +101,11 @@ public class UsuarioService implements IUsuarioService {
 	@RemotingInclude
 	public  List<Usuario> FindUsuariobyName(String nombre, String apellido_paterno, String apellido_materno) {
     	return  simpleJdbcTemplate.query(
-	            "SELECT ID_USR, ID_TIPO_USR, USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR"+
+	            "SELECT ID_USR, ID_TIPO_USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR"+
 	            " FROM usuario where nombre_usr = ? and apellido_paterno_usr = ? and apellido_materno_usr = ? and estatus_usr = 1", new RowMapper<Usuario>() {
 	            public Usuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new Usuario( rs.getInt("id_usr"), 
 			            					rs.getInt("id_tipo_usr"), 
-			            					rs.getString("usr"), 
 			            					rs.getString("password"), 
 			            					rs.getString("nombre_usr"),
 			            					rs.getString("apellido_paterno_usr"),
@@ -127,13 +125,12 @@ public class UsuarioService implements IUsuarioService {
 		apellido_paterno = apellido_paterno + "%";
 		apellido_materno = apellido_materno + "%";
     	return  simpleJdbcTemplate.query(
-	            "SELECT ID_USR, ID_TIPO_USR, USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR " +
+	            "SELECT ID_USR, ID_TIPO_USR, PASSWORD, NOMBRE_USR, APELLIDO_PATERNO_USR, APELLIDO_MATERNO_USR, EMAIL_USR, ESTATUS_USR " +
 	            " FROM usuario where nombre_usr like ? and apellido_paterno_usr like ? " +
 	            "and apellido_materno_usr like ? and estatus_usr = 1", new RowMapper<Usuario>() {
 	            public Usuario mapRow( ResultSet rs,  int i) throws SQLException {
 	                    return new Usuario(rs.getInt("id_usr"), 
 			            					rs.getInt("id_tipo_usr"), 
-			            					rs.getString("usr"), 
 			            					rs.getString("password"), 
 			            					rs.getString("nombre_usr"),
 			            					rs.getString("apellido_paterno_usr"),
@@ -145,35 +142,49 @@ public class UsuarioService implements IUsuarioService {
 	            }
 	            },new Object [] {nombre,apellido_paterno,apellido_materno});        	
 	}
+	
+	/*
+	@RemotingInclude
+	public List<String> obtieneTiposUsuario(){
+		String s_sql = "SELECT ID_TIPO_USR, NOMBRE_TIPO FROM C_TIPO_USUARIO";
+		
+		List<String> r_lista = new ArrayList<String>();
+		
+		List<Map<String, Object>> rows = simpleJdbcTemplate.queryForList(s_sql);
+		
+		for (Map<String, Object> row : rows)
+			r_lista.add((String)row.get("NOMBRE_TIPO"));
+		System.out.println("Lista: "+r_lista);
+		return r_lista;
+	}
 
+	*/
 	@RemotingInclude
 	public Usuario create(Usuario usuario) {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("id_tipo_usr", usuario.getId_tipo_usr());
-        parameters.put("usr", usuario.getUsr());
         parameters.put("password",usuario.getPassword());
-        parameters.put("nombre_usr",usuario.getUsr());
+        parameters.put("nombre_usr",usuario.getNombre_usr());
         parameters.put("apellido_paterno_usr",usuario.getApellido_paterno_usr());
         parameters.put("apellido_materno_usr",usuario.getApellido_materno_usr());
         parameters.put("email_usr",usuario.getEmail_usr());
         parameters.put("estatus_usr", usuario.getEstatus_usr());
         
-        /*//Pendiente saber que hacen esas instrucciones
+        //Pendiente saber que hacen esas instrucciones
         Number id_usr = this.insertUsuario.executeAndReturnKey(parameters);
-        usuario.setId_usr(id_usr.intValue());
-        usuario.setUsr(usuario.getUsr()+id_usr);
-        usuario.setPassword(usuario.getUsr());
-        update(usuario);
-        actualizaContrasenaNuevoUsuario(usuario);
-        */
+        //usuario.setId_usr(id_usr.intValue());
+        //usuario.setPassword(usuario.getEmail_usr());
+        //update(usuario);
+        //actualizaContrasenaNuevoUsuario(usuario);
+        
         return usuario;
 	}
 
 	@RemotingInclude
 	public int update(Usuario usuario) {
         int flag = this.simpleJdbcTemplate.update(
-                "UPDATE USUARIO SET ID_TIPO_USR= ?, USR=? , NOMBRE_USR= ?, APELLIDO_PATERNO_USR= ?, APELLIDO_MATERNO_USR= ?, EMAIL_USR= ?, ESTATUS_USR= ? WHERE ID_USR = ?", 
-                usuario.getId_tipo_usr(), usuario.getUsr(),usuario.getNombre_usr(), usuario.getApellido_paterno_usr(),usuario.getApellido_materno_usr(),
+                "UPDATE USUARIO SET ID_TIPO_USR= ?, NOMBRE_USR= ?, APELLIDO_PATERNO_USR= ?, APELLIDO_MATERNO_USR= ?, EMAIL_USR= ?, ESTATUS_USR= ? WHERE ID_USR = ?", 
+                usuario.getId_tipo_usr(), usuario.getNombre_usr(), usuario.getApellido_paterno_usr(),usuario.getApellido_materno_usr(),
                 usuario.getEmail_usr(),usuario.getEstatus_usr(),usuario.getId_usr());
        // System.out.println("Actualiza usuario flag: "+flag);
         //System.out.println("ESTATUS USUARIO: "+usuario.getEstatus_usr());
@@ -193,6 +204,7 @@ public class UsuarioService implements IUsuarioService {
         return flag;
 	}
 	
+	 
 	/*
 	@RemotingInclude
 	public int actualizaContrasenaUsuario(int id_usuario, String contrasena, String contrasena_old) {

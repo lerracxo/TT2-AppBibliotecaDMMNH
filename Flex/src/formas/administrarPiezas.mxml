@@ -1,0 +1,274 @@
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   width="838" height="422" label="{nombreCatalogo}" creationComplete="init()"
+		   currentState="Inicio" xmlns:skins="cobalt.skins.*">
+
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.rpc.Fault;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import objetosJava.*;
+			
+			import spark.components.Image;
+			
+			
+			[Bindable]
+			
+			private var selectedFileReferences:Array = new Array();
+			
+			private var fileRefList:FileReferenceList;
+			
+			private var archivo: FileReference;
+			
+			// Data Provider para el data grid de las piezas
+			private var todasPiezas:ArrayCollection;//  Array que contiene todas las piezas
+			private var todosAutores:ArrayCollection; // Array que contiene todos los autores
+			
+			//Variables generales del sistema
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var usuariologeado:Usuario;
+			
+			private function init():void{
+				// Trae todas las piezas registradas
+				piezasService.findAll_autores();
+				
+			}
+			
+			/*
+			 * Remueve la pestaña del contenedor principal 
+			*/
+			private function cerrar():void{
+				parent.removeChild(this);
+			}
+			
+			private function faultHandler(event):void{
+				Alert.show(event.Fault.message,"Fault");
+			}
+			
+			private function findAll_piezasResult(event:ResultEvent):void{
+				todasPiezas  = ArrayCollection(event.result); 
+				dg_piezas.dataProvider = todasPiezas;
+			}
+			
+			private function findAll_autoresResult(event:ResultEvent):void{
+				todosAutores = ArrayCollection(event.result);
+				piezasService.findAll_piezas();	// Se manda a llamar aqui porque se requiere que primero se hayan cargado los autores
+				
+			}
+			
+			private function registro_piezaResult(event:ResultEvent):void{
+				var result:Boolean = Boolean(event.result);
+				Alert.show("Resultado del result: "+result);
+			}
+			
+			private function labelAutor (pieza:Pieza, nombre_columna:GridColumn):String{
+				
+				var retorno:String = "Label";
+				
+				try{
+					
+					for (var i:int = 0; i < 6; i++){
+						if( todosAutores.getItemAt(i).id_autor == pieza.id_autor ){
+							retorno =  todosAutores.getItemAt(i).nombre;
+							break; // termina el for
+						}
+						
+					}
+				}catch(e:Error){
+					Alert.show(e.message,"Error");
+				}
+		
+				return retorno;
+			}
+			
+			// Funcion que da de alta una nueva pieza
+			private function altaPieza():void{
+				currentState="alta_modificacionPieza";
+				
+			}
+			
+			private function modificaPieza():void{
+				try{
+					
+					// Genera una excepcion controlada
+					if(dg_piezas.selectedIndex == -1){
+						throw new Error("");
+					}
+					// Se obtiene el objeto seleccionado
+					var l_pieza:Pieza = dg_piezas.selectedItem as Pieza;
+					
+					// se cambia el estado y se activan todos los controles
+					currentState = "alta_modificacionPieza"
+					
+					// Se llenan los campos
+					nombre_pieza.text = l_pieza.nombre;
+					desc_pieza.text = l_pieza.desc_pieza;
+					titulo_pieza.text = l_pieza.titulo;
+					id_autor.selectedItem.id_autor = l_pieza.id_autor;
+					
+					
+						
+				}catch(e:Error){
+					Alert.show("Debe seleccionar alguna pieza.","Información");
+				}
+			}
+			
+			private function validaGuardarPieza():String{
+				var mensaje:String="";
+				
+				try{
+					
+					if (nombre_pieza.text == "" || nombre_pieza.text == null){
+						mensaje = mensaje + "Nombre\n";
+					}
+					
+					if (titulo_pieza.text == "" || titulo_pieza.text == null){
+						mensaje = mensaje + "Titulo\n";
+					}
+					
+					if (desc_pieza.text == "" || desc_pieza.text == null ){
+						mensaje = mensaje + "Descripción\n";
+					}
+					
+					// Esta linea debería generar una excepcion en caso de no estar disponible
+					id_autor.selectedItem.id_autor;
+					
+				}catch(e:Error){
+					mensaje = mensaje + "Autor\n";
+				}
+				
+				return mensaje;
+			}
+			
+			private function GuardarPieza():void{
+				var mensaje:String = "";
+				try{
+					
+					 if ((mensaje = validaGuardarPieza()) != "" ){
+					 	Alert.show(mensaje,"Error");
+					 	return;
+					 }
+					
+					var n_pieza:Pieza = new Pieza();
+					
+					n_pieza.desc_pieza = desc_pieza.text;
+					n_pieza.id_autor = id_autor.selectedItem.id_autor;
+					n_pieza.nombre = nombre_pieza.text;
+					n_pieza.titulo = titulo_pieza.text;
+					
+					 
+					piezasService.registroPieza(n_pieza) // Función que registra una nueva pieza
+					FinalizaFormaPieza();
+					currentState="Inicio";
+				}
+				catch(e:Error){
+					Alert.show("Error: "+e.message.toString());
+				}
+					
+				
+			}
+			
+			private function CancelarPieza():void{
+				FinalizaFormaPieza();
+				currentState = "Inicio";
+			}
+			
+			// Función que limpia los campos una vez que se han terminado de usar
+			private function FinalizaFormaPieza():void{
+				desc_pieza.text = "";
+				nombre_pieza.text = "";
+				titulo_pieza.text = "";
+				id_pieza.text = String(0);
+				id_autor.selectedIndex = -1;
+				
+				init(); // llama de nuevo a la función para traer la información de las piezas y autores.
+				
+			}
+		]]>	
+	</fx:Script>
+	<mx:states>
+		<s:State name="Inicio"/>
+		<s:State name="alta_modificacionPieza"/>
+	</mx:states>
+
+	<fx:Declarations>
+		<s:RemoteObject id="piezasService" destination="PiezaService" fault="faultHandler(event)" endpoint="{endpoint}">
+			<s:method name="findAll_piezas" result="findAll_piezasResult(event)" fault="faultHandler(event)" />
+			<s:method name="findAll_autores" result="findAll_autoresResult(event)" fault="faultHandler(event)" />
+			<s:method name="registroPieza" result="registro_piezaResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		<!--
+		<s:RemoteObject id="subeArchivos" destination="SubeArchivoService" fault="Alert.show(event.fault.message);" endpoint="{endpoint}">
+			<s:method name="doUpload" result="doUploadResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		-->
+	</fx:Declarations>
+	<s:DataGrid id="dg_piezas" includeIn="Inicio" x="10" y="54" width="818" height="358"
+				fontFamily="Verdana" fontSize="11">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="nombre" headerText="Pieza"></s:GridColumn>
+				<s:GridColumn dataField="titulo" headerText="Título"></s:GridColumn>
+				<s:GridColumn labelFunction="labelAutor" headerText="Autor" ></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:HGroup x="10" y="10" width="818" height="36" fontFamily="Verdana" fontSize="11">
+		<s:Button includeIn="Inicio" label="Nueva Pieza" click="altaPieza()"/>
+		<s:Button includeIn="Inicio" label="Modificar Pieza" click="modificaPieza()"/>
+		<s:Button includeIn="Inicio" label="Eliminar Pieza"/>
+		<s:Button includeIn="Inicio" label="Cerrar" click="cerrar()"/>
+		
+		<s:Button includeIn="alta_modificacionPieza" label="Guardar" click="GuardarPieza()"/>
+		<s:Button includeIn="alta_modificacionPieza" label="Cancelar" click="CancelarPieza()"/>
+
+		
+				  
+	</s:HGroup>
+	<s:Form includeIn="alta_modificacionPieza" x="10" y="54" height="276">
+		<s:FormItem id="fi_nombre_Pieza" width="265" label="Nombre" required="true">
+			<s:TextInput id="nombre_pieza" width="200"/>
+		</s:FormItem>
+		<s:FormItem id="fi_titulo_pieza" width="265" label="Titulo" required="true">
+			<s:TextInput id="titulo_pieza" width="200"/>
+		</s:FormItem>
+		<s:FormItem id="fi_desc_pieza" width="265" label="Descripción" required="true">
+			<s:TextArea  id="desc_pieza" width="200"/>
+		</s:FormItem>
+		
+		<s:FormItem id="fi_id_pieza" width="265" label="ID" visible="false">
+			<s:TextArea  id="id_pieza" width="200"/>
+		</s:FormItem>
+		
+	</s:Form>
+	<s:Form includeIn="alta_modificacionPieza" x="341" y="54" width="448" height="276">
+		<s:FormItem id="fi_id_autor" width="422" height="255" label="Autor" required="true">
+			<s:DataGrid id="id_autor" width="341" height="236" dataProvider="{todosAutores}">
+				<s:columns>
+					<s:ArrayList>
+						<s:GridColumn dataField="nombre" headerText="Nombre"></s:GridColumn>
+						<s:GridColumn dataField="fecha_nacimiento" headerText="Nacimiento"></s:GridColumn>
+						<s:GridColumn dataField="id_epoca" headerText="Epoca"></s:GridColumn>
+					</s:ArrayList>
+				</s:columns>
+			</s:DataGrid>
+		</s:FormItem>
+		
+	</s:Form>
+	
+</mx:Canvas>
+
+
+
+
+
+

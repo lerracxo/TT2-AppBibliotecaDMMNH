@@ -18,7 +18,8 @@ public class SubeArchivo {
 	@RemotingInclude
 	public Boolean doUpload(String fileName, byte[] data) {
 		try{
-			FilePath = "";
+			System.out.println("Peticion recibida: "+fileName+" len data: "+data.length);
+			//FilePath = "";
 			//create the dir that we will store files
 			File dir = new File(FilePath);
 			dir.mkdirs();
@@ -29,9 +30,11 @@ public class SubeArchivo {
 			output.close();
 		}
 		catch(FileNotFoundException e){
+			System.out.println("Error: "+e.getMessage());
 			return false;
 		}
 		catch(IOException e){
+			System.out.println("Error: "+e.getMessage());
 			return false;
 		}
 	

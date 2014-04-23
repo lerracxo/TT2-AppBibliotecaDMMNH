@@ -3,7 +3,8 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="100%" height="800"  creationComplete="oninit()"
-			   currentState="login" pageTitle="DCPRO : DESA"
+			   currentState="login" 
+			   pageTitle="TT Biblioteca Digital"
 			   width.Inicio="100%" height.Inicio="800" minWidth.Inicio="1024" minHeight.Inicio="800"
 			   backgroundColor.Inicio="#040000" 
 			   width.login="100%" height.login="800" minWidth.login="1024" minHeight.login="600">
@@ -22,6 +23,7 @@
 			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			import mx.managers.IFocusManagerComponent;
 			import mx.messaging.ChannelSet;
 			import mx.messaging.events.MessageAckEvent;
 			import mx.messaging.events.MessageEvent;
@@ -39,14 +41,14 @@
 			import spark.utils.LabelUtil;
 			
 			// Se añaden las clases de las formas que se llaman en el menu dinamico
-			catalogoUsuarios;catalogoResultadosInbound;
+			administrarUsuarios;catalogoResultadosInbound;
 			CatalogoResultadosOutbound;ConfigurarSistema;
 			CatalogoCampanas;monitorearAgentes;
 			VisualizarIndicadores;Alarmas;Agentes;
 			Voces;Atender_Evento;catalogoCalendario;
 			integracionCRM;DesplegarAlarmas;PosicionAgentes;
 			VistaCallCenter;DatosPosicion;enviarMensaje;
-			administrarArchivos;
+			administrarArchivos; administrarPiezas;
 			
 			
 			[Bindable] private var menuAC:ArrayCollection;
@@ -92,8 +94,9 @@
 				*/
 				
 				//currentState = "Inicio"
-				Abre_mensajero();
-				
+				//Abre_mensajero();
+				focusManager.setFocus(txtUser as IFocusManagerComponent);
+
 			}
 			
 			// Funcion que crea el menu de arbol de acuerdo a lo recibido desde la base de datos.
@@ -237,7 +240,7 @@
 				var acceso:int = int(String(event.result))
 				//Alert.show("Resultado: "+acceso)
 					
-				if (acceso > 1){ // Cuando esta condicion se cumple el id_del usuario se tiene en la varible acceso
+				if (acceso >= 1){ // Cuando esta condicion se cumple el id_del usuario se tiene en la varible acceso
 					id_usuario = acceso
 					roUsuarios.findById(id_usuario);
 					currentState = "Inicio"
@@ -606,7 +609,7 @@
 				  click="cacelaCambioContra(event)" enabled="true"/>
 	</s:Panel>
 	
-	<s:Panel id="pnDebugErrores" includeIn="Inicio" visible="true" x="122" y="129" width="515"
+	<s:Panel id="pnDebugErrores" includeIn="Inicio" visible="false" x="122" y="129" width="515"
 			 height="322" title="Panel de debug"
 			 x.login="27" y.login="198">
 		<s:Button  x="443" y="254" label="Ocultar"
@@ -619,7 +622,7 @@
 		<s:layout>
 			<s:HorizontalLayout gap="18" paddingLeft="10" paddingRight="10" verticalAlign="middle"/>
 		</s:layout>
-		<s:Label x="53" y="18" height="20" text="Usuario:" verticalAlign="middle"/>
+		<s:Label x="53" y="18" height="20" text="E-mail:" verticalAlign="middle"/>
 		<s:TextInput id="txtUser" x="89" y="22"/>
 		<s:Label height="23" horizontalCenter="-71" text="Contraseña:" verticalAlign="middle"
 				 verticalCenter="-21"/>

@@ -115,10 +115,10 @@
 			{
 				var ok:int = event.result as int
 				if(ok == 1){
-					Alert.show('El usuario '+usuario.usr+' se eliminó exitosamente' ,"Información");
+					Alert.show('El usuario '+usuario.nombre_usr+' se eliminó exitosamente' ,"Información");
 					roUsuarios.FindAllbyName(nombre,apellido_paterno,apellido_materno);			
 				}else{
-					Alert.show('El usuario '+usuario.usr+' no se eliminó ' ,"Información")
+					Alert.show('El usuario '+usuario.nombre_usr+' no se eliminó ' ,"Información")
 				}
 			}
 			

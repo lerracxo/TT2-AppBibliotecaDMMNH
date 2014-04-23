@@ -1,41 +1,45 @@
 package entrevista;
 import java.io.Serializable;
+import java.sql.Date;
+import java.sql.Time;
 
 public class Entrevista implements Serializable {
 	
 	static final long serialVersionUID = 103844514947365244L;
 	
-    private int id_registroVisitante;
+    private int 	id_registroVisitante;
     private char	genero;
-    private int 	edad;
+    private int 	id_rango_edad;
     private	int 	id_ocupacion;
-    private String	estadoCivil;
-    private int		id_razonVisita;
-    private	int		frecuencia;
-    private	int 	numero_acompanantes;
+    private int		id_estado_civil;
+    private int		id_razon_visita;
+    private	int		id_frecuencia_asistencia;
+    private	int 	id_numero_acompanantes;
+    private Date	fecha_visita;
+    private Time	hora_visita;
  
     
     public Entrevista(){}
       
     public Entrevista(	    
-    		int id_registroVisitante,
+    		int     id_registroVisitante,
 		    char	genero,
-		    int 	edad,
+		    int 	id_rango_edad,
 		    int 	id_ocupacion,
-		    String	estadoCivil,
-		    int		id_razonVisita,
-		    int		frecuencia,
-		    int 	numero_acompanantes
+		    int		id_estado_civil,
+		    int		id_razon_visita,
+		    int		id_frecuencia_asistencia,
+		    int 	id_numero_acompanantes
 		    ) {
         
 		this.id_registroVisitante = id_registroVisitante;
 		this.genero = genero;
-		this.edad = edad;
+		this.id_rango_edad = id_rango_edad;
 		this.id_ocupacion = id_ocupacion;
-		this.estadoCivil = estadoCivil;
-		this.id_razonVisita = id_razonVisita;
-		this.frecuencia = frecuencia;
-		this.numero_acompanantes = numero_acompanantes;
+		this.id_estado_civil = id_estado_civil;
+		this.id_razon_visita = id_razon_visita;
+		this.id_frecuencia_asistencia = id_frecuencia_asistencia;
+		this.id_numero_acompanantes = id_numero_acompanantes;
 
     }
 
@@ -68,17 +72,17 @@ public class Entrevista implements Serializable {
 	}
 
 	/**
-	 * @return the edad
+	 * @return the id_rango_edad
 	 */
-	public int getEdad() {
-		return edad;
+	public int getid_rango_edad() {
+		return id_rango_edad;
 	}
 
 	/**
-	 * @param edad the edad to set
+	 * @param id_rango_edad the id_rango_edad to set
 	 */
-	public void setEdad(int edad) {
-		this.edad = edad;
+	public void setid_rango_edad(int id_rango_edad) {
+		this.id_rango_edad = id_rango_edad;
 	}
 
 	/**
@@ -96,60 +100,93 @@ public class Entrevista implements Serializable {
 	}
 
 	/**
-	 * @return the estadoCivil
+	 * @return the id_estado_civil
 	 */
-	public String getEstadoCivil() {
-		return estadoCivil;
+	public int getid_estado_civil() {
+		return id_estado_civil;
 	}
 
 	/**
-	 * @param estadoCivil the estadoCivil to set
+	 * @param id_estado_civil the id_estado_civil to set
 	 */
-	public void setEstadoCivil(String estadoCivil) {
-		this.estadoCivil = estadoCivil;
+	public void setid_estado_civil(int id_estado_civil) {
+		this.id_estado_civil = id_estado_civil;
 	}
 
 	/**
-	 * @return the id_razonVisita
+	 * @return the id_razon_visita
 	 */
-	public int getId_razonVisita() {
-		return id_razonVisita;
+	public int getid_razon_visita() {
+		return id_razon_visita;
 	}
 
 	/**
-	 * @param id_razonVisita the id_razonVisita to set
+	 * @param id_razon_visita the id_razon_visita to set
 	 */
-	public void setId_razonVisita(int id_razonVisita) {
-		this.id_razonVisita = id_razonVisita;
+	public void setid_razon_visita(int id_razon_visita) {
+		this.id_razon_visita = id_razon_visita;
 	}
 
 	/**
-	 * @return the frecuencia
+	 * @return the id_frecuencia_asistencia
 	 */
-	public int getFrecuencia() {
-		return frecuencia;
+	public int getid_frecuencia_asistencia() {
+		return id_frecuencia_asistencia;
 	}
 
 	/**
-	 * @param frecuencia the frecuencia to set
+	 * @param id_frecuencia_asistencia the id_frecuencia_asistencia to set
 	 */
-	public void setFrecuencia(int frecuencia) {
-		this.frecuencia = frecuencia;
+	public void setid_frecuencia_asistencia(int id_frecuencia_asistencia) {
+		this.id_frecuencia_asistencia = id_frecuencia_asistencia;
 	}
 
 	/**
-	 * @return the numero_acompanantes
+	 * @return the id_numero_acompanantes
 	 */
-	public int getNumero_acompanantes() {
-		return numero_acompanantes;
+	public Date getfecha_visita() {
+		return this.fecha_visita;
 	}
 
 	/**
-	 * @param numero_acompanantes the numero_acompanantes to set
+	 * @param id_numero_acompanantes the id_numero_acompanantes to set
 	 */
-	public void setNumero_acompanantes(int numero_acompanantes) {
-		this.numero_acompanantes = numero_acompanantes;
+	public void setfecha_visita(Date fecha_visita) {
+		this.fecha_visita = fecha_visita;
+	}
+	
+	/**
+	 * @return the id_numero_acompanantes
+	 */
+	public Time gethora_visita() {
+		return hora_visita;
 	}
 
+	/**
+	 * @param id_numero_acompanantes the id_numero_acompanantes to set
+	 */
+	public void sethora_visita(Time hora_visita) {
+		this.hora_visita = hora_visita;
+	}
+	
+	/**
+	 * @return the id_numero_acompanantes
+	 */
+	public int getid_numero_acompanantes() {
+		return id_numero_acompanantes;
+	}
+
+	/**
+	 * @param id_numero_acompanantes the id_numero_acompanantes to set
+	 */
+	public void setid_numero_acompanantes(int id_numero_acompanantes) {
+		this.id_numero_acompanantes = id_numero_acompanantes;
+	}
+	
+
+ 
+	
+	
+	
 	
 }
