@@ -98,5 +98,4 @@ INSERT INTO menus VALUES (5,'Archivos',2,1,'administrarArchivos');
 INSERT INTO menus VALUES (6,'Piezas',2,1,'administrarPiezas');
 
 INSERT INTO menus VALUES (7,'Usuarios',2,1,'administrarUsuarios'); -- Administración de usuarios 
-SELECT id_pieza, desc_pieza, nombre, titulo, id_autor FROM pieza;
 

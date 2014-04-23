@@ -151,3 +151,13 @@ DESCRIbE multimedia;
 DESCRIBE Autor;
 
 SELECT id_autor, nombre, desc_autor, fecha_nacimiento, id_epoca FROM autor;
+
+INSERT INTO pieza (desc_pieza, nombre,titulo,id_autor) VALUES ("test 1","3","asd",1);
+
+SELECT * fROM autor;
+SELECT * fROM PIEZA;
+
+DELETE FROM PIEZA WHERE id_pieza = 0;
+
+SELECT * fROM multimedia;
+
