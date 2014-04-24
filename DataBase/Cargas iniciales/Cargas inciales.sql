@@ -40,8 +40,8 @@ INSERT INTO cat_rango_edad VALUES (8,"Mayores a 60 años");
 
 -- Catálogo de razones de visita
 INSERT INTO cat_razon_visita VALUES (1,"Me mandaron");
-INSERT INTO cat_razon_visita VALUES (2,"Me gusta el tema de la exposición");
-INSERT INTO cat_razon_visita VALUES (3,"Me recomedaron el museo");
+INSERT INTO cat_razon_visita VALUES (2,"Me gusta el tema");
+INSERT INTO cat_razon_visita VALUES (3,"Por recomendación");
 INSERT INTO cat_razon_visita VALUES (4,"Acompañé a alguien más");
 
 

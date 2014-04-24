@@ -160,4 +160,12 @@ SELECT * fROM PIEZA;
 DELETE FROM PIEZA WHERE id_pieza = 0;
 
 SELECT * fROM multimedia;
+UPDATE pieza SET desc_pieza= "desc_1", nombre = "nombre1", titulo = "titulo1", id_autor = 1 WHERE id_pieza = 3;
 
+SELECT * FROM pieza;
+DELETE FROM cat_razon_visita WHERE id_razon_visita = 3;
+INSERT INTO cat_razon_visita VALUES (2,"Me gusta el tema");
+INSERT INTO cat_razon_visita VALUES (3,"Por recomendación");
+
+
+SELECT * FROM cat_razon_visita;
