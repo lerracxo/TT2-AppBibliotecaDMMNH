@@ -169,3 +169,96 @@ INSERT INTO cat_razon_visita VALUES (3,"Por recomendación");
 
 
 SELECT * FROM cat_razon_visita;
+SELECT * fROM multimedia;
+SELECT * fROM cat_tipo_multimedia;
+SELECT id_tipo_multimedia, desc_tipo_multimedia, extension FROM cat_tipo_multimedia;
+SELECT id_pieza, desc_pieza, nombre, titulo, id_autor FROM pieza;
+
+DESCRIBE PIEZA;
+DESCRIBE MULTIMEDIA;
+
+
+SELECT m.id_multimedia, m.id_tipo_multimedia, m.desc_multimedia ,  m.nombre, m.nombre_archivo, m.nombre_original  FROM multimedia m, pieza_multimedia pz  WHERE pz.id_multimedia = m.id_multimedia  AND   pz.id_pieza =1;
+SELECT * fROM cat_tipo_multimedia;
+
+DELETE FROM cat_tipo_multimedia;
+
+SELECT * fROM multimedia;
+INSERT INTO multimedia VALUES (3,2,"Descripción del primer cuadro","Chami","http://www.islamicity.com/global/images/photo/IC-Articles/Heart-Love-Sky-Hands-Silhouette__1920x1200.JPG","cuadroLeonardo.jpeg");
+
+SELECT * FROM pieza_multimedia;
+
+INSERT INTO pieza_multimedia VALUES(1,3);
+
+SELECT m.id_multimedia, m.id_tipo_multimedia, m.desc_multimedia,   
+				 m.nombre, m.nombre_archivo, m.nombre_original  
+				 FROM multimedia m, pieza_multimedia pz  
+				 WHERE pz.id_multimedia = m.id_multimedia  
+				 AND   pz.id_pieza = 1
+				ORDER BY m.id_multimedia;
+SELECT * fROM cat_tipo_multimedia;
+SELECT * fROM usuario;
+SELECT * fROM multimedia;
+SELECT * FROM pieza_multimedia;
+
+INSERT INTO USUARIO VALUES (1,1,sha1("alopez"),"Omar","Santoyo","Martínez","omars@gmail.com",1 );
+
+DELETE FROM usuario WHERE id_usr = 1;
+
+SELECT * fROM autor;
+
+SELECT * fROM pieza_multimedia;
+
+SELECT sha1("admin");
+SELECT * fROm pieza_multimedia WHERE id_pieza = 2;
+SELECT * fROM multimedia WHERE id_multimedia in (3,4);
+SELECT * fROM multimedia;
+
+SELECT * FROM pieza;
+INSERT INTO multimedia (id_tipo_multimedia, desc_multimedia, nombre, nombre_archivo, nombre_original)
+	VALUES (2,"De pensar :D","Nuevo","06-05-2014-01-04-42-137.jpg","10338290_1450233855220950_5116624737764795133_n.jpg");
+
+SELECT * fROM seg_registro_visitante;
+
+INSERT INTO seg_registro_visitante (genero,id_rango_edad,id_ocupacion,id_estado_civil,
+ id_razon_visita,id_frecuencia_asistencia, id_numero_acompanantes, fecha_visita, hora_visita)
+	VALUES ('M',1,1,1,1,1,1,curdate(), curtime());
+
+
+
+INSERT INTO seg_registro_visitante (genero,id_rango_edad,id_ocupacion,id_estado_civil, id_razon_visita,id_frecuencia_asistencia, id_numero_acompanantes, fecha_visita, hora_visita)  VALUES ( 'F', 1, 1, 1, 1, 1, 1,curdate(), curtime());
+
+SELECT * fROM seg_registro_visitante;
+SELECT * fROM pieza;
+
+SELECT * fROM usuario;
+
+SELECT SHA1('admin');
+
+UPDATE USUARIO SET PASSWORD = SHA1('admin') WHERE id_usr = 3;
+SELECT * fROM autor;
+SELECT * FROM cat_tipo_multimedia;
+
+DELETE FROM menus WHERE idmenu = 4;
+
+
+-- Query para el reporte de visitantes
+SELECT * fROM seg_registro_visitante;
+-- 
+SELECT * FROM multimedia;
+SELECT * FROM cat_tipo_multimedia;
+
+DELETE FROM menus;
+SELECT * fROM menus;
+
+SELECT * fROM usuario;
+
+SELECT creaMenuDB();
+
+UPDATE USUARIO SET PASSWORD = sha1('revi') WHERE id_usr = 1;
+
+DROP FUNCTION creaMenuDB;
+
+
+
+
