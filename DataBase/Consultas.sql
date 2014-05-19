@@ -286,3 +286,135 @@ SELECT * FROM sala;
 DESCRIBE SALA;
 
 DESCRIBE EXPOSICION;
+
+DESCRIBE museo;
+
+
+
+select * from seg_registro_visitante;
+
+SELECT 	COUNT(genero),			genero, 
+		COUNT(id_rango_edad), 	id_rango_edad,
+		COUNT(id_ocupacion),	id_ocupacion
+	-- Lista de tablas
+	FROM seg_registro_visitante
+
+	group by 	genero, 
+				id_rango_edad,
+				id_ocupacion;
+
+
+
+SELECT COUNT(srv.id_rango_edad), cre.desc_rango_edad 
+	FROM seg_registro_visitante srv,cat_rango_edad cre
+	WHERE srv.id_rango_edad = cre.id_rango_edad
+	group by srv.id_rango_edad;
+
+SELECT * fROM cat_rango_edad;
+SELECT * fROM cat_ocupacion;
+
+
+-- Multiple counts con descripciones
+
+SELECT 
+		COUNT(srv.genero),			srv.genero, 
+		COUNT(srv.id_rango_edad), 	cre.desc_rango_edad,
+		COUNT(srv.id_ocupacion),	co.desc_ocupacion
+	-- Lista de tablas
+	FROM 
+		seg_registro_visitante srv, 
+		cat_rango_edad cre,
+		cat_ocupacion co
+	-- Lista de condiciniones 
+	WHERE 
+			srv.id_rango_edad 	= 	cre.id_rango_edad
+	AND		srv.id_ocupacion	=	co.id_ocupacion
+
+	group by 
+				srv.genero, 
+				cre.desc_rango_edad,
+				co.desc_ocupacion;
+
+
+DESCRIBE seg_registro_visitante;
+
+-- Nuevo diseño de reportes
+-- Genero
+SELECT 	
+		genero, COUNT(genero)
+	FROM 
+		seg_registro_visitante
+	GROUP BY genero;
+;
+ -- Rango edad
+SELECT 	
+	cre.desc_rango_edad, COUNT(srv.id_rango_edad)
+	FROM 
+		cat_rango_edad cre LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cre.id_rango_edad = srv.id_rango_edad
+	GROUP BY
+		cre.desc_rango_edad
+;
+
+ -- Ocupación
+SELECT 	
+	co.desc_ocupacion, COUNT(srv.id_ocupacion)
+	FROM 
+		cat_ocupacion co LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		co.id_ocupacion = srv.id_ocupacion
+	GROUP BY
+		co.desc_ocupacion
+;
+
+ -- Estado civil
+SELECT 	
+	cec.desc_estado_civil, COUNT(srv.id_estado_civil)
+	FROM 
+		cat_estado_civil cec LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cec.id_estado_civil = srv.id_estado_civil
+	GROUP BY
+		cec.desc_estado_civil
+;
+
+ -- Razón visita
+SELECT 	
+	crv.desc_razon_visita, COUNT(srv.id_razon_visita)
+	FROM 
+		cat_razon_visita crv LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		crv.id_razon_visita = srv.id_razon_visita
+	GROUP BY
+		crv.desc_razon_visita
+;
+
+-- Frecuencia asistencia
+SELECT 	
+	cfa.desc_frecuencia_asistencia, COUNT(srv.id_frecuencia_asistencia)
+	FROM 
+		cat_frecuencia_asistencia cfa LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cfa.id_frecuencia_asistencia = srv.id_razon_visita
+	GROUP BY
+		cfa.desc_frecuencia_asistencia
+;
+
+-- Numero de acompañantes
+SELECT 	
+	cna.desc_numero_acompanantes, COUNT(srv.id_numero_acompanantes)
+	FROM 
+		cat_numero_acompanantes cna LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cna.id_numero_acompanantes= srv.id_numero_acompanantes
+	GROUP BY
+		cna.desc_numero_acompanantes
+;
+

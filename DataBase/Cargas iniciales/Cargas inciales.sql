@@ -58,22 +58,36 @@ INSERT INTO cat_tipo_multimedia VALUES (2,"Imagen",null);
 INSERT INTO cat_tipo_multimedia VALUES (3,"Video",null);
 INSERT INTO cat_tipo_multimedia VALUES (4,"Texto",null);
 
+-- Visitantes precargados
+INSERT INTO seg_registro_visitante VALUES (1,'M',1,1,1,1,1,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (2,'M',2,4,2,1,3,2,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (3,'M',2,3,4,1,2,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (4,'M',3,2,1,1,2,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (5,'M',1,2,4,5,3,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (6,'M',2,1,3,5,3,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (7,'M',1,1,1,1,1,1,CURRENT_DATE(),CURRENT_TIME());
+INSERT INTO seg_registro_visitante VALUES (8,'F',2,2,2,2,2,2,CURRENT_DATE(),CURRENT_TIME());
+
+
+
+
+-- Catálogo de museos
+INSERT INTO museo VALUES (1,"Museo Nacional de Histria","Museo Nacional de Historia","Primera sección del Bosque de ChapultepecCol. San Miguel Chapultepec CP 11580 Miguel Hidalgo, Miguel Hidalgo, Distrito Federal","difusion.mnh@inah.gob.mx","40-40-52-28");
+
+-- Catálogo de exposiciones
+INSERT INTO exposicion VALUES (1,"Zapata","Exposición permanente dedicada a Zapata",1);
+
+-- Catálogo de salas
+INSERT INTO sala VALUES (1,"Sala 1","Primera sala de la exposición",NOW(),1);
+
+
 -- catalogo de epocas
 INSERT INTO cat_epoca VALUES(1,"Renacimiento Italiano.","Descripción","1600");
 
 -- Catalogo de Autores
 INSERT INTO autor VALUES (1,"Leonardo Da Vinci","Leonardo da Vinci 
 							(Leonardo di ser Piero da Vinci Loudspeaker.svg escuchar) 
-							fue un pintor florentino. Notable polímata del Renacimiento italiano 
-							(a la vez anatomista, arquitecto, artista, botánico, científico, escritor, escultor, 
-							filósofo, ingeniero, inventor, músico, poeta y urbanista) nació en Vinci el 15 de abril de 
-							14522 y falleció en Amboise el 2 de mayo de 1519, a los 67 años, 
-							acompañado de su fiel Francesco Melzi, a quien legó sus proyectos, 
-							diseños y pinturas.2 Tras pasar su infancia en su ciudad natal, 
-							Leonardo estudió con el célebre pintor florentino Andrea de Verrocchio. 
-							Sus primeros trabajos de importancia fueron creados en Milán al servicio del duque 
-							Ludovico Sforza. Trabajó a continuación en Roma, Bolonia y Venecia, y pasó los últimos 
-							años de su vida en Francia, por invitación del rey Francisco I.",
+							fue un pintor florentino.",
 							STR_TO_DATE("15/04/1452","%d/%m/%Y"),1);
 INSERT INTO autor VALUES (2,"Fotografo","Anónimo",STR_TO_DATE("15/04/1995","%d/%m/%Y"),1);
 

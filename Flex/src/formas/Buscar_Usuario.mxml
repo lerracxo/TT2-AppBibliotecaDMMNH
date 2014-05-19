@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="552" height="368"
-		 creationComplete="doInit()" title="DCPro Buscar Usuario">
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="552" height="368"
+			   creationComplete="doInit()" title="DCPro Buscar Usuario">
 	
 	<fx:Script>
 		<![CDATA[
@@ -101,9 +101,9 @@
 				DgUsuarios.dataProvider = datosGrid;
 				if (datosGrid.length == 0)
 					Alert.show("El usuario especificado no se encuentra en el sistema","Información");
-					
+				
 			}
-						
+			
 			private function ChangeHandler_Busqueda(event:TextOperationEvent):void{
 				nombre = nombre_usr.text;
 				apellido_paterno = apellido_paterno_usr.text;
@@ -132,11 +132,11 @@
 				Alert.show("El usuario especificado no se encuentra en el sistema","Información");
 			}
 			
-		
+			
 			protected function DgUsuarios_itemClickHandler(event:ListEvent):void
 			{
 				usuario = DgUsuarios.selectedItem as Usuario;
-		
+				
 			}
 			
 		]]>
@@ -152,9 +152,9 @@
 	</fx:Declarations>
 	<mx:DataGrid id="DgUsuarios" x="35" y="158" width="476" height="121" itemClick="DgUsuarios_itemClickHandler(event)">
 		<mx:columns>
-				<mx:DataGridColumn dataField="nombre_usr" headerText="Nombre"></mx:DataGridColumn>
-				<mx:DataGridColumn dataField="apellido_paterno_usr" headerText="Apellido Paterno"></mx:DataGridColumn>
-				<mx:DataGridColumn dataField="apellido_materno_usr" headerText="Apellido Materno"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="nombre_usr" headerText="Nombre"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="apellido_paterno_usr" headerText="Apellido Paterno"></mx:DataGridColumn>
+			<mx:DataGridColumn dataField="apellido_materno_usr" headerText="Apellido Materno"></mx:DataGridColumn>
 		</mx:columns>
 	</mx:DataGrid>
 	<s:Form y="10" left="10" width="311" height="140">

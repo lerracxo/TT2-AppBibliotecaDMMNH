@@ -1,34 +1,59 @@
 <mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
 		   xmlns:s="library://ns.adobe.com/flex/spark"
 		   xmlns:mx="library://ns.adobe.com/flex/mx"
-		   width="838" height="422" label="{nombreCatalogo}" creationComplete="init()"
-		   currentState="Inicio" xmlns:skins="cobalt.skins.*">
+		   xmlns:skins="cobalt.skins.*"
+		   width="838" label="{nombreCatalogo}" creationComplete="init()" currentState="Inicio"
+		   height.Inicio="422"
+		   height.multimedia="422">
 
 	<fx:Script>
 		<![CDATA[
+			import flash.utils.ByteArray;
+			
 			import mx.collections.ArrayCollection;
 			import mx.collections.ArrayList;
 			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
 			import mx.rpc.Fault;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import myComponents.*;
 			
 			import objetosJava.*;
 			
+			import spark.components.BorderContainer;
+			import spark.components.DropDownList;
+			import spark.components.Group;
 			import spark.components.Image;
+			import spark.components.Label;
+			import spark.components.RichEditableText;
+			import spark.components.TitleWindow;
+			import spark.components.VGroup;
+			import spark.components.VideoPlayer;
+			import spark.components.supportClasses.Skin;
+			import spark.components.supportClasses.SkinnableComponent;
+			import spark.events.TextOperationEvent;
 			
 			
 			[Bindable]
-			
 			private var selectedFileReferences:Array = new Array();
-			
 			private var fileRefList:FileReferenceList;
-			
 			private var archivo: FileReference;
 			
 			// Data Provider para el data grid de las piezas
 			private var todasPiezas:ArrayCollection;//  Array que contiene todas las piezas
-			private var todosAutores:ArrayCollection; // Array que contiene todos los autores
+			[Bindable] private var todosAutores:ArrayCollection; // Array que contiene todos los autores
+			[Bindable] private var tiposMultimedia:ArrayCollection; // Array que contiene todos los tipos de multimedia
+			
+			// Servidor de archivos
+			[Bindable] private var urlGeneral:String = "http://localhost:8080/dcpro_proto/multimedia/";	
+			
 			
 			//Variables generales del sistema
 			[Bindable] public var chanel:String;
@@ -39,10 +64,21 @@
 			
 			private function init():void{
 				// Trae todas las piezas registradas
-				piezasService.findAll_autores();
-				
+				ro_AutorService.findAll();
+				piezasService.findAll_tiposMultiemdia();
+				adaptaTipoUsuario();
 			}
 			
+			/*
+			 * Función que adapta la funcionalidad dependiendo el tipo de usuario 
+			*/
+			private function adaptaTipoUsuario():void{
+				if(usuariologeado.id_tipo_usr == 2 ){ // Se trata de un usuario revisor
+					btn_nueva_pieza.enabled = false;
+					btn_modifica_pieza.label = "Detalle";
+					btn_elimina_pieza.enabled = false;
+				}
+			}
 			/*
 			 * Remueve la pestaña del contenedor principal 
 			*/
@@ -55,19 +91,54 @@
 			}
 			
 			private function findAll_piezasResult(event:ResultEvent):void{
+				//Alert.show("Se reciben las piezas");
 				todasPiezas  = ArrayCollection(event.result); 
 				dg_piezas.dataProvider = todasPiezas;
 			}
 			
+			/*
+			 * Función que obtiene todos los tipos de multimedia disponibles 
+			*/
+			private function findAll_tiposMultiemdiaResult(event:ResultEvent):void{
+
+				var dataProviderTipoMultimedia:ArrayCollection = ArrayCollection(event.result);
+				tiposMultimedia = new ArrayCollection();
+				
+				for(var i:int = 0; i < dataProviderTipoMultimedia.length; i++){
+					var label:String = String(TipoMultimedia(dataProviderTipoMultimedia.getItemAt(i)).desc_tipo_multimedia);
+					//Alert.show("Opción agregada : "+label);
+					tiposMultimedia.addItemAt(label,i);
+				}
+				
+				
+				
+			}
+			
 			private function findAll_autoresResult(event:ResultEvent):void{
+				//Alert.show("Punto de control");
 				todosAutores = ArrayCollection(event.result);
+				//Alert.show("Se pide las piezas");
+				//id_autor.dataProvider = todosAutores;
 				piezasService.findAll_piezas();	// Se manda a llamar aqui porque se requiere que primero se hayan cargado los autores
 				
 			}
 			
 			private function registro_piezaResult(event:ResultEvent):void{
 				var result:Boolean = Boolean(event.result);
-				Alert.show("Resultado del result: "+result);
+				Alert.show("La pieza fue registrada exitosamente","Alta");
+				FinalizaFormaPieza();
+				currentState="Inicio";
+			}
+			
+			private function actualiza_piezaResult(event:ResultEvent):void{
+				var result:Boolean = Boolean(event.result);				
+				Alert.show("La pieza fue modificada exitosamente","Modificación");
+				FinalizaFormaPieza();
+				currentState="Inicio";
+			}
+			
+					
+			private function elimina_piezaResult(event:ResultEvent):void{
 			}
 			
 			private function labelAutor (pieza:Pieza, nombre_columna:GridColumn):String{
@@ -75,16 +146,15 @@
 				var retorno:String = "Label";
 				
 				try{
-					
+					//Alert.show("Len autores: "+String(todosAutores.length));
 					for (var i:int = 0; i < 6; i++){
 						if( todosAutores.getItemAt(i).id_autor == pieza.id_autor ){
 							retorno =  todosAutores.getItemAt(i).nombre;
 							break; // termina el for
 						}
-						
 					}
 				}catch(e:Error){
-					Alert.show(e.message,"Error");
+					//Alert.show(e.message,"Error de Autor");
 				}
 		
 				return retorno;
@@ -93,9 +163,12 @@
 			// Funcion que da de alta una nueva pieza
 			private function altaPieza():void{
 				currentState="alta_modificacionPieza";
-				
+				id_autor.dataProvider = todosAutores; // Setea el grid 
 			}
 			
+			/*
+			 * Función que realiza la modificación de una pieza 
+			*/
 			private function modificaPieza():void{
 				try{
 					
@@ -113,13 +186,95 @@
 					nombre_pieza.text = l_pieza.nombre;
 					desc_pieza.text = l_pieza.desc_pieza;
 					titulo_pieza.text = l_pieza.titulo;
-					id_autor.selectedItem.id_autor = l_pieza.id_autor;
+					id_pieza.text = String(l_pieza.id_pieza);
 					
+					id_autor.dataProvider = todosAutores;
 					
+					// Setea el autor
+					id_autor.selectedIndex = obtieneIndiceIdPieza(l_pieza.id_autor);
+					
+					btn_descargarQR.visible = true;
+					
+					// Valida el tipo de usuario 
+					if (usuariologeado.id_tipo_usr == 2){ // Es un tipo de usuario revisor
+						btn_guardar_pieza.enabled = false;
+						// Inactiva la modificación de los campos
+						nombre_pieza.editable = false;
+						desc_pieza.editable = false;
+						titulo_pieza.editable = false;
+						id_pieza.editable = false;
 						
+						id_autor.enabled = false;
+						
+					}
+					
+					//Alert.show("Pide el recurso: "+urlGeneral+"qrCodes/"+l_pieza.id_pieza+".png");
+					// Pide la imagen QR al Servidor
+					//ldr.unload();
+					
+				
 				}catch(e:Error){
 					Alert.show("Debe seleccionar alguna pieza.","Información");
 				}
+			}
+			
+			/*
+			 * Función que descarga el código QR de una pieza 
+			*/
+			private function descargaQRPieza():void{
+				try{
+					// Genera una excepcion controlada
+					if(dg_piezas.selectedIndex == -1){
+						throw new Error("");
+					}
+					
+					var l_pieza:Pieza = dg_piezas.selectedItem as Pieza;
+
+					var descargaqrcode:descargaQRCode =  PopUpManager.createPopUp(this,descargaQRCode,true) as descargaQRCode;
+					
+					descargaqrcode.urlGeneral = urlGeneral;
+					descargaqrcode.l_pieza = l_pieza;
+					descargaqrcode.chanel = chanel;
+					descargaqrcode.endpoint = endpoint;
+					descargaqrcode.message = message;
+					descargaqrcode.nombreCatalogo = nombreCatalogo;
+					descargaqrcode.usuariologeado = usuariologeado;
+					descargaqrcode.closeButton.visible = false;
+					
+					PopUpManager.centerPopUp(descargaqrcode);
+					/*
+					var l_pieza:Pieza = dg_piezas.selectedItem as Pieza;
+					var nombre_archivo:String = l_pieza.id_pieza+".png";
+					var urlRequest:URLRequest = new URLRequest(urlGeneral+"qrCodes/"+nombre_archivo);
+					var ldr:Loader = new Loader();
+					ldr.contentLoaderInfo.addEventListener(Event.COMPLETE,
+						function (event:Event):void{
+								var file:FileReference = new FileReference();
+								Alert.show("¿Desea Guardar el código QR?", "Guardar Archivo", Alert.YES|Alert.NO, null, 
+									function accion(evt:CloseEvent){
+										if (evt.detail == Alert.YES) {
+											file.save(event.target.content,nombre_archivo);
+										}
+									});	
+						});
+					
+					ldr.load(urlRequest);
+					*/
+				}catch(e:Error){
+					Alert.show("Debe seleccionar alguna pieza.","Información");				}
+				
+			}
+			
+			
+			private function obtieneIndiceIdPieza(id_autor_:int):int{
+				for (var i:int = 0; i < id_autor.dataProvider.length; i++){
+					var autor:Autor = id_autor.dataProvider.getItemAt(i) as Autor;
+					if (autor.id_autor = id_autor_){
+						return i;
+					}
+				}
+				
+				return -1;
 			}
 			
 			private function validaGuardarPieza():String{
@@ -154,7 +309,7 @@
 				try{
 					
 					 if ((mensaje = validaGuardarPieza()) != "" ){
-					 	Alert.show(mensaje,"Error");
+					 	Alert.show(mensaje,"Error de validación de campos.");
 					 	return;
 					 }
 					
@@ -165,10 +320,15 @@
 					n_pieza.nombre = nombre_pieza.text;
 					n_pieza.titulo = titulo_pieza.text;
 					
-					 
-					piezasService.registroPieza(n_pieza) // Función que registra una nueva pieza
-					FinalizaFormaPieza();
-					currentState="Inicio";
+					n_pieza.id_pieza = int(id_pieza.text);
+					
+					if(n_pieza.id_pieza == 0 ){
+						piezasService.registroPieza(n_pieza); // Función que registra una nueva pieza
+						//Alert.show("Creación de pieza");
+					}else{
+						piezasService.actualizaPieza(n_pieza); // Función que actualiza una pieza
+						//Alert.show("Actualización de pieza con id "+String(n_pieza.id_pieza));
+					}
 				}
 				catch(e:Error){
 					Alert.show("Error: "+e.message.toString());
@@ -187,30 +347,429 @@
 				desc_pieza.text = "";
 				nombre_pieza.text = "";
 				titulo_pieza.text = "";
-				id_pieza.text = String(0);
+				id_pieza.text = "";
 				id_autor.selectedIndex = -1;
+				btn_descargarQR.visible = false;
 				
 				init(); // llama de nuevo a la función para traer la información de las piezas y autores.
 				
+			}
+			
+			/*
+			 * Función que elimina la pieza en cuestion 
+			*/
+			private function eliminaPieza():void{
+				var pieza:Pieza = obtienePiezaSeleccionada();
+				if (pieza == null)
+					return;
+				
+				Alert.show("¿Desea eliminar la pieza?", "Eliminar pieza", Alert.YES|Alert.NO, null, 
+					function accion(evt:CloseEvent){
+						if (evt.detail == Alert.YES) {
+							piezasService.eliminaPieza(pieza);
+							init();
+						}
+					});	
+			}
+			
+/*************************************************** MULTIMEDIA *******************************************************/
+			[Bindable] private var pieza:Pieza;
+			[Bindable] private var contador_multimedia:int = 0;
+			
+			/*
+			 * Función que agrega elementos multimedia a una pieza 
+			*/
+			
+			private function multimedia():void{
+				// Valida que se haya obtenido la pieza seleccionada 
+				if ((pieza = obtienePiezaSeleccionada()) == null){
+					return;
+				}
+				currentState = "multimedia"; // Una vez obtenido la pieza en cuestión se procede a la captura de elementos multimedia
+				cargaElementosMultimedia();
+				 //agregaElementoMultimedia(elementoMultimedia.nombre,cargaImagen(elementoMultimedia.nombre_archivo));
+			}
+			
+			/*
+			 * Función que realiza la carga de los elementos multimedia en el tileWindow 
+			*/
+			private function cargaElementosMultimedia():void{
+				if( contador_multimedia < ArrayCollection(pieza.elementosMultimedia).length){
+					
+					var multimedia:Multimedia = ArrayCollection(pieza.elementosMultimedia).getItemAt(contador_multimedia) as Multimedia;
+					
+					cargaMultimediaComplete(multimedia); // Esta función es la encargada de crar los elementos
+					contador_multimedia ++; 
+					cargaElementosMultimedia();
+					//Alert.show(multimedia.nombre_archivo);
+					
+					/*try{
+						var loader:Loader = new Loader();
+						var urlRequest:URLRequest = new URLRequest(urlGeneral+multimedia.nombre_archivo);
+						
+						loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+							function (e:Event):void{
+								cargaMultimediaComplete(e,multimedia) // Esta función es la encargada de crar los elementos
+							});
+						//Alert.show("Se mando a llamar la función");
+						loader.load(urlRequest); // Se ordena que la imagen se cargue dinamicamente.
+						contador_multimedia ++; // Aumenta el contador de la multimedia
+						cargaElementosMultimedia(); // Llama nuevamente a la función que carga elementos multimedia
+					}catch(error:Error){
+						Alert.show("Error afuera: "+error.message);
+					}
+					*/
+				}
+			}
+			
+			private function cargaMultimediaComplete(multimedia:Multimedia):void{
+				try{
+					var bc_bordeEstilo:BorderContainer = new BorderContainer();
+					bc_bordeEstilo.setStyle("cornerRadius",5);
+					bc_bordeEstilo.setStyle("dropShadowVisible",true);
+					bc_bordeEstilo.width=230;
+					bc_bordeEstilo.height=230;
+					
+					//Alert.show("Se termino de cargar a imagen");
+					var vgroup:VGroup = new VGroup();
+					vgroup.id = "vgroup_imagenes_"+String(multimedia.id_multimedia);
+					vgroup.width=bc_bordeEstilo.width - 20;
+					vgroup.height=bc_bordeEstilo.height - 20;
+					vgroup.horizontalAlign = "center";
+
+					var label:Label = new Label();
+					label.text = multimedia.nombre;
+					label.width = vgroup.width;
+					label.height = 13;
+					label.y = vgroup.height-label.height;
+					label.x = 10;
+					vgroup.addElement(label);
+					
+					//Alert.show("Pide la multimedia a: "+urlGeneral+multimedia.nombre_archivo);
+					// Aqui decide que tipo de elemento generar
+					switch(multimedia.id_tipo_multimedia)
+					{
+						case 1: // Audio
+						{
+							var audioPlayer:Mp3Player = new Mp3Player();
+							audioPlayer.source = urlGeneral+multimedia.nombre_archivo;
+							audioPlayer.width = vgroup.width;
+							audioPlayer.height = vgroup.height-label.height;
+							vgroup.addElement(audioPlayer);
+							break;
+						}
+						case 2: // Imágen
+						{
+							var loader:Loader = new Loader();
+							var urlRequest:URLRequest = new URLRequest(urlGeneral+multimedia.nombre_archivo);
+							//Alert.show("Pidiendo multimedia a: "+urlGeneral+multimedia.nombre_archivo);
+							loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+								function (e:Event):void{
+									var image:spark.components.Image = new spark.components.Image();
+									image.source = e.target.content;
+									image.width= vgroup.width;
+									image.height=vgroup.height-label.height;
+									image.smooth = true;
+									vgroup.addElement(image);
+								});
+							loader.load(urlRequest);
+							
+							break;
+						}
+						case 3: // Video
+						{
+							var videoPlayer:VideoPlayer = new VideoPlayer();
+							videoPlayer.width = vgroup.width;
+							videoPlayer.height = vgroup.height-label.height;
+							videoPlayer.source = urlGeneral+multimedia.nombre_archivo;
+							videoPlayer.autoPlay = false;
+							vgroup.addElement(videoPlayer);
+							break;
+						}
+						case 4: // Texto
+						{
+						 	var ta_texto:TextArea = new TextArea();
+							ta_texto.width == vgroup.width;
+							ta_texto.height = vgroup.height-label.height;
+							ta_texto.text = multimedia.desc_multimedia;
+							ta_texto.editable = false;
+							ta_texto.setStyle("borderVisible","false");
+							vgroup.addElement(ta_texto);
+							break;
+						}
+							
+					}
+
+					
+					vgroup.addEventListener(MouseEvent.CLICK,
+						function (e:MouseEvent):void{
+							editaElementoMultimedia(multimedia);
+						});
+					
+					bc_bordeEstilo.addElement(vgroup);
+					vt_elementos.addElement(bc_bordeEstilo);
+					
+					//cargaElementosMultimedia();
+				}catch(error:Error){
+					Alert.show(error.message,"Error");
+				}
+			}
+			
+			/*
+			 *Esta función creael popup para editar la información de un elemento multimedia 
+			*/
+			private function editaElementoMultimedia(multimedia:Multimedia):void{
+				
+				var tw_editaPieza:editaPieza = PopUpManager.createPopUp(this,editaPieza,true) as editaPieza;
+				tw_editaPieza.urlGeneral = urlGeneral;
+				tw_editaPieza.multimedia = multimedia;
+				tw_editaPieza.id_pieza = pieza.id_pieza;
+				tw_editaPieza.tiposMultimedia = tiposMultimedia;
+				tw_editaPieza.chanel = chanel;
+				tw_editaPieza.endpoint = endpoint;
+				tw_editaPieza.message = message;
+				tw_editaPieza.nombreCatalogo = nombreCatalogo;
+				tw_editaPieza.usuariologeado = usuariologeado;
+				tw_editaPieza.closeButton.visible = false;
+				
+				tw_editaPieza.addEventListener(CloseEvent.CLOSE,
+					function (e:Event):void{
+						//Alert.show("Se ejecuta el cerrado de la ventana");
+						piezasService.multimediaPorPieza(pieza.id_pieza);
+					});
+				
+				PopUpManager.centerPopUp(tw_editaPieza);
+			
+				/*
+				if(multimedia.id_multimedia < 1){
+					Alert.show("Detecta correctamente que es una pieza nueva");
+					// Se crea el selector de tipo de multimedia que se desea crear
+					var ddl_tipo_multimedia:DropDownList = new DropDownList();
+					ddl_tipo_multimedia.dataProvider = tiposMultimedia;
+					
+					return;
+				}
+				var bandera_modificacion_imagen:Boolean = false;
+				//Se agrega el listener para modificar la imagen al darle click
+				elemento_multimedia.addEventListener(MouseEvent.CLICK, 
+					function (e:Event):void{
+						try{
+						var file:FileReference = new FileReference();
+						// Seleccion de archivo
+						file.addEventListener(Event.SELECT,
+							function (e:Event):void{
+								//Alert.show("Se ejecuta el evento de SELECT");
+								file.load();
+							});
+						// Barra de progreso
+						file.addEventListener(ProgressEvent.PROGRESS, function (e:Event):void{});
+						//Archivo cargado
+						file.addEventListener(Event.COMPLETE,
+							function (e:Event):void{
+								//Alert.show("Se ejecuta el evento de Complete con "+file.name);
+								(elemento_multimedia as Image).source = file.data;
+								multimedia.nombre_original = file.name;
+								bandera_modificacion_imagen = true;
+							});
+						
+						//Realiza la seleccion de un archivo
+						file.browse();
+						
+						}catch(error:Error){
+							Alert.show("Sucedio un error: "+error.message);
+						}
+					});
+				
+				var ventanaAgrega:TitleWindow = new TitleWindow();
+				ventanaAgrega.title = multimedia.nombre;
+				ventanaAgrega.height = 490;
+				ventanaAgrega.width = 500;
+				
+				
+				// Se agrega los componentes
+				var btn_aceptar_agregar_multimedia:Button = new Button();
+				btn_aceptar_agregar_multimedia.label="Aceptar";
+				btn_aceptar_agregar_multimedia.addEventListener(MouseEvent.CLICK,
+					function (e:Event):void{
+						multimedia.nombre = ti_nombre.text;
+						multimedia.desc_multimedia = ta_descripcion.text;
+						// verifica si se ha modificado la imagen
+						if (bandera_modificacion_imagen){
+							piezasService.modificaMultimedia(multimedia,(elemento_multimedia as Image).source);
+						} // Realiza la modificación de los registros 
+						else{
+							piezasService.modificaMultimedia(multimedia,null);
+						}
+						// Se cierra el popUp
+						PopUpManager.removePopUp(ventanaAgrega);
+					});
+				
+				var btn_cerrar_agregar_multimedia:Button = new Button();
+				btn_cerrar_agregar_multimedia.label = "Cerrar";
+				btn_cerrar_agregar_multimedia.addEventListener(MouseEvent.CLICK,
+					function genericFunction():void{
+						PopUpManager.removePopUp(ventanaAgrega);
+					});
+
+				var lb_imagen:Label = new Label();
+				lb_imagen.text = "Elemento multimedia:";
+				var lb_leyenda_imagen:Label = new Label();
+				lb_leyenda_imagen.text = "***Click en la imagen para modificar.";
+				var lb_descripcion:Label = new Label();
+				lb_descripcion.text = "Descripción:";
+				var lb_nombre:Label = new Label();
+				lb_nombre.text = "Nombre:";
+				var ta_descripcion:TextArea = new TextArea();
+				ta_descripcion.percentWidth = 100;
+				ta_descripcion.text = multimedia.desc_multimedia;
+				
+				var hgroup1:HGroup = new HGroup();
+				hgroup1.addElement(elemento_multimedia);
+				hgroup1.addElement(lb_leyenda_imagen);
+				
+				var ti_nombre:TextInput = new TextInput();
+				ti_nombre.text = multimedia.nombre;
+				ti_nombre.percentWidth = 100;
+				ti_nombre.addEventListener(TextOperationEvent.CHANGE,
+					function (event:Event){
+						ventanaAgrega.title=ti_nombre.text
+					});
+				
+				var hgroup2:HGroup = new HGroup();
+				hgroup2.addElement(btn_aceptar_agregar_multimedia);
+				hgroup2.addElement(btn_cerrar_agregar_multimedia);
+				
+				var vgroup:VGroup = new VGroup();
+				vgroup.percentHeight=100;
+				vgroup.percentWidth=100;
+				vgroup.addElement(lb_imagen);
+				vgroup.addElement(hgroup1);
+				vgroup.addElement(lb_nombre);
+				vgroup.addElement(ti_nombre);
+				vgroup.addElement(lb_descripcion);
+				vgroup.addElement(ta_descripcion);
+				vgroup.addElement(hgroup2);
+					
+				ventanaAgrega.addChild(vgroup);
+				
+				try{
+					PopUpManager.addPopUp(ventanaAgrega,this,true);
+					PopUpManager.centerPopUp(ventanaAgrega);
+				}catch(a:Error){
+					Alert.show(a.message,"Error");
+				}
+				//Alert.show("Esto se ejecuta");
+			*/
+			}
+			
+			/*
+			 * Función se lanza cuando se desea crear un nuevo elemento multimedia 
+			*/
+			private function creaNuevoElementoMultimedia(event:Event):void{
+				editaElementoMultimedia(new Multimedia());
+			}
+			
+			/*
+			* Recarga los elementos multimedia
+			*/
+			public function recargaMultimedia():void{
+					// 
+					Alert.show("sí recarga la multimedia");
+					piezasService.multimediaPorPieza(pieza.id_pieza);
+			}
+			
+			/*
+			* Función que recibe una lista de elementos multimedia, es mandado a llamar despúes de actualizar o agregar
+			* algún elemento multimedia
+			*/
+			private function multimediaPorPieza_multimediaResult(event:ResultEvent):void{
+				//Alert.show("Se recibe resultado multimedia.");
+				pieza.elementosMultimedia = event.result as ArrayCollection;
+				
+				//limpia el contenedor
+				var x:int = vt_elementos.x;
+				var top:Object = vt_elementos.top;
+				var percentHeight:int = vt_elementos.percentHeight;
+				var percentWidth:int = vt_elementos.percentWidth;
+				
+				
+				vt_elementos.removeAllElements();
+
+				//Alert.show("Se carga la multimedia de nuevo");
+				contador_multimedia = 0; // reinicia el contador de carga
+				cargaElementosMultimedia(); // llama de nuevo a la función que crea la carga de las imágenes
+			}
+			
+			
+			private function subeArchivo_result(event:ResultEvent):void{
+				var result:Boolean = Boolean(event.result);
+			}
+			
+			/*
+			 * Función que elimina todo lo generado en el grid
+			*/
+			private function cierraMultimedia(): void{
+				vt_elementos.removeAllElements(); // Remueve todos los elementos del contenedor
+				contador_multimedia = 0; // reinicia el contador de carga
+				currentState="Inicio"; // cambia el estado
+			}
+			
+			/*
+			 * Función que obtiene la pieza seleccionada en el datagrid,
+			 * En caso de error retorna null
+			*/
+			private function obtienePiezaSeleccionada():Pieza{
+				var pieza:Pieza = null;
+				try{
+					if(dg_piezas.selectedIndex < 0)
+						throw new Error("error");
+					pieza = dg_piezas.selectedItem as Pieza;
+				}catch(e:Error){
+					Alert.show("Debe seleccionar un registro.");
+				}
+				return pieza;
+			}
+			
+			
+			/////////////// PRUEBA
+			private function obtienePiezaPorID(event:MouseEvent):void{
+				//piezasService.piezaPorId(2);
+				
+			}
+			
+			private function piezaPorId_Result(event:ResultEvent):void{
+				var p:Pieza = event.result as Pieza;
+				if (p == null){
+					Alert.show("La pieza no está disponible.");
+					return;
+				}
+				Alert.show(p.toString());
 			}
 		]]>	
 	</fx:Script>
 	<mx:states>
 		<s:State name="Inicio"/>
 		<s:State name="alta_modificacionPieza"/>
+		<s:State name="multimedia"/>
 	</mx:states>
 
 	<fx:Declarations>
 		<s:RemoteObject id="piezasService" destination="PiezaService" fault="faultHandler(event)" endpoint="{endpoint}">
 			<s:method name="findAll_piezas" result="findAll_piezasResult(event)" fault="faultHandler(event)" />
-			<s:method name="findAll_autores" result="findAll_autoresResult(event)" fault="faultHandler(event)" />
+			<s:method name="findAll_tiposMultiemdia" result="findAll_tiposMultiemdiaResult(event)" fault="faultHandler(event)" />
+			<s:method name="eliminaPieza" result="elimina_piezaResult(event)" fault="faultHandler(event)" />
 			<s:method name="registroPieza" result="registro_piezaResult(event)" fault="faultHandler(event)" />
+			<s:method name="actualizaPieza" result="actualiza_piezaResult(event)" fault="faultHandler(event)" />
+			<s:method name="multimediaPorPieza" result="multimediaPorPieza_multimediaResult(event)" fault="faultHandler(event)" />
+			<s:method name="piezaPorId" result="piezaPorId_Result(event)" fault="faultHandler(event)" />
 		</s:RemoteObject>
-		<!--
-		<s:RemoteObject id="subeArchivos" destination="SubeArchivoService" fault="Alert.show(event.fault.message);" endpoint="{endpoint}">
-			<s:method name="doUpload" result="doUploadResult(event)" fault="faultHandler(event)" />
+		
+		<s:RemoteObject id="ro_AutorService" destination="AutorService" fault="faultHandler(event)" endpoint="{endpoint}">
+			<s:method name="findAll" result="findAll_autoresResult(event)" fault="faultHandler(event)" />			
 		</s:RemoteObject>
-		-->
+
+
+		
 	</fx:Declarations>
 	<s:DataGrid id="dg_piezas" includeIn="Inicio" x="10" y="54" width="818" height="358"
 				fontFamily="Verdana" fontSize="11">
@@ -222,19 +781,27 @@
 			</s:ArrayList>
 		</s:columns>
 	</s:DataGrid>
-	<s:HGroup x="10" y="10" width="818" height="36" fontFamily="Verdana" fontSize="11">
-		<s:Button includeIn="Inicio" label="Nueva Pieza" click="altaPieza()"/>
-		<s:Button includeIn="Inicio" label="Modificar Pieza" click="modificaPieza()"/>
-		<s:Button includeIn="Inicio" label="Eliminar Pieza"/>
+	<s:HGroup includeIn="Inicio,alta_modificacionPieza" x="10" y="10" width="818" height="36"
+			  fontFamily="Verdana" fontSize="11">
+		<s:Button id="btn_nueva_pieza" includeIn="Inicio" label="Nueva Pieza" click="altaPieza()"/>
+		<s:Button id="btn_modifica_pieza" includeIn="Inicio" label="Modificar Pieza"
+				  click="modificaPieza()"/>
+		<s:Button id="btn_elimina_pieza" includeIn="Inicio" label="Eliminar Pieza"
+				  click="eliminaPieza()"/>
+		<s:Button id="btn_multimedia_pieza" includeIn="Inicio" label="Multimedia"
+				  click="multimedia()"/>
 		<s:Button includeIn="Inicio" label="Cerrar" click="cerrar()"/>
 		
-		<s:Button includeIn="alta_modificacionPieza" label="Guardar" click="GuardarPieza()"/>
+		<s:Button id="btn_guardar_pieza" includeIn="alta_modificacionPieza" label="Guardar"
+				  click="GuardarPieza()"/>
 		<s:Button includeIn="alta_modificacionPieza" label="Cancelar" click="CancelarPieza()"/>
+		<s:Button includeIn="Inicio" label="Prueba" click="obtienePiezaPorID(event);" visible="false"/>
+		<s:Button id="btn_descargarQR" includeIn="alta_modificacionPieza" label="Descargar Código QR" visible="false" click="descargaQRPieza()"/>
 
 		
 				  
 	</s:HGroup>
-	<s:Form includeIn="alta_modificacionPieza" x="10" y="54" height="276">
+	<s:Form includeIn="alta_modificacionPieza" x="10" y="54" height="333">
 		<s:FormItem id="fi_nombre_Pieza" width="265" label="Nombre" required="true">
 			<s:TextInput id="nombre_pieza" width="200"/>
 		</s:FormItem>
@@ -252,7 +819,7 @@
 	</s:Form>
 	<s:Form includeIn="alta_modificacionPieza" x="341" y="54" width="448" height="276">
 		<s:FormItem id="fi_id_autor" width="422" height="255" label="Autor" required="true">
-			<s:DataGrid id="id_autor" width="341" height="236" dataProvider="{todosAutores}">
+			<s:DataGrid id="id_autor" width="341" height="236">
 				<s:columns>
 					<s:ArrayList>
 						<s:GridColumn dataField="nombre" headerText="Nombre"></s:GridColumn>
@@ -264,6 +831,13 @@
 		</s:FormItem>
 		
 	</s:Form>
+	<s:HGroup includeIn="multimedia" x="10" y="10" width="100%">
+		<s:Button id="btn_multimediaAgregar" label="Nuevo elemento multimedia" click="creaNuevoElementoMultimedia(event)" />
+		<s:Button id="btn_multimediaCerrar" label="Cerrar" click="cierraMultimedia()"/>
+	</s:HGroup>
+	
+	<s:TileGroup id="vt_elementos" includeIn="multimedia" x="10" top="37" width="100%" height="100%">
+	</s:TileGroup>
 	
 </mx:Canvas>
 

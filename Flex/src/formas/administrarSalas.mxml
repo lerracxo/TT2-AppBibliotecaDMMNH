@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   label="{nombreCatalogo}" creationComplete="init()"
+		   width.alta_modificacion="888" height.alta_modificacion="550"
+		   width.grid="95%" height.grid="95%" locale="en_ES">
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.managers.PopUpManager;
+			import mx.messaging.messages.ErrorMessage;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			import mx.validators.Validator;
+			
+			import objetosJava.Exposicion;
+			import objetosJava.Sala;
+			import objetosJava.TipoUsuario;
+			import objetosJava.Usuario;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var chanel:String;
+			[Bindable] public var message:String;
+			[Bindable] public var usuariologeado:Usuario;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var nombreCatalogo:String;
+			
+			//Local
+			private var ac_exposiciones:ArrayCollection;
+			
+			/*
+			 * Función que recibe un error en caso de presentarse 
+			*/
+			private function faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString,"Error");
+			}
+			
+			
+			// Funcion que se llama la cargar la aplicacion
+			private function init():void
+			{
+				ro_SalaService.findAll(); // Obtiene todos los registros
+				ro_ExposicionService.findAll(); // Obtiene todas las exposiciones
+				adpataRol(); // Adapta la funcionalidad de acuerdo al usuario que está logueado
+			}
+			
+			/*
+			 * Función que adapta la funcionalidad para el usuario revisor 
+			*/
+			private function adpataRol():void{
+				if(usuariologeado.id_tipo_usr == 2){ // Se trata de un usuario de tipo revisor
+					btn_nuevo.enabled = false;
+					btn_elimina.enabled = false;
+					btn_modifica.label = "Detalle";
+				}
+			}
+			
+			/*
+			 * Función que Recibe el resultado de findAll 
+			*/
+			private function findAll_result(event:ResultEvent):void{
+				var resultado:ArrayCollection = new ArrayCollection();
+				resultado = event.result as ArrayCollection;
+				dg.dataProvider = resultado;
+				/*
+				for(var i:int = 0; resultado; i++){
+					var sala:Sala = resultado.getItemAt(i) as Sala;
+					Alert.show(sala.toString(),"Elemento");
+					
+				}*/
+			}
+			
+			/*
+			 * Función que recibe todas las exposiciones disponibles 
+			*/
+			private function findAll_ExposicionResult(event:ResultEvent):void{
+				ac_exposiciones = event.result as ArrayCollection;
+			}
+			
+			/*
+			 * Función que realiza la alta de un registro 
+			*/
+			private function alta():void{
+				preparaForma(new Sala()); // Prepara la forma para una alta
+			}
+			
+			/*
+			* Función que Recibe el resultado de registro 
+			*/
+			private function registro_result(event:ResultEvent):void{
+				var titulo:String = "Registro"
+				
+				var mensajeExito:String = "El registro fue exitoso.";
+				var mensajeError:String = "Ocurrió un error al efectuar el registro.";
+				
+				if(event.result as Boolean){ // registro exitoso
+					Alert.show(mensajeExito,titulo);
+					ro_SalaService.findAll(); // Refresca los registros
+					currentState = "grid";
+				}
+				else{
+					Alert.show(mensajeError,titulo);
+				}
+			}
+			/*
+			 * Función que realiza la modificación de un registro 
+			*/
+			private function modificacion():void{
+				try{
+					preparaForma(getSeleccionado());
+				}catch(e:Error){
+					Alert.show(e.message,"Información.");
+				}
+			}
+			/*
+			* Función que Recibe el resultado de modificacion 
+			*/
+			private function modifica_result(event:ResultEvent):void{
+				var titulo:String = "Modificación"
+				
+				var mensajeExito:String = "La modificación fue exitosa";
+				var mensajeError:String = "Ocurrió un error al efectuar la modificación";
+				
+				if(event.result as Boolean){
+					Alert.show(mensajeExito,titulo);
+					Alert.show(mensajeExito,titulo);
+					ro_SalaService.findAll(); // Refresca los registros
+					currentState = "grid";
+				}
+				else{
+					Alert.show(mensajeError,titulo);
+				}
+			}
+			/*
+			 * Función que realiza la eliminación de un registro 
+			*/
+			private function eliminacion():void{
+				try{
+					var sala:Sala = getSeleccionado();
+					Alert.show("¿Desea eliminar el registro?", "Eliminar registro", Alert.YES|Alert.NO, null, 
+						function accion(evt:CloseEvent){
+							if (evt.detail == Alert.YES) {
+								ro_SalaService.elimina(sala);
+								init();
+							}
+						});	
+				}catch(e:Error){
+					Alert.show(e.message,"Información.");
+				}
+			}
+			/*
+			* Función que Recibe el resultado de eliminación 
+			*/
+			private function elimina_result(event:ResultEvent):void{
+				var titulo:String = "Eliminación"
+				
+				var mensajeExito:String = "La eliminación fue exitosa";
+				var mensajeError:String = "Ocurrió un error al efectuar la eliminación";
+				
+				if(event.result as Boolean){
+					Alert.show(mensajeExito,titulo);
+				}
+				else{
+					Alert.show(mensajeError,titulo);
+				}
+			}
+			/*
+			 * Función que realiza el guardado de una alta o modificación 
+			*/
+			private function guardar():void{
+				//Decide si es modificación o registro
+				var sala:Sala = new Sala();
+				sala.nombre = nombre.text;
+				sala.desc_sala = descripcion.text;
+				sala.id_exposicion = id_exposicion.selectedIndex + 1;
+				
+				var mensaje:String = "";
+				if( ( mensaje = validaCampos(sala)) != "" ){ // Si los campos no son válidos
+					Alert.show(mensaje,"Validación de campos");
+					return;
+				}
+				// Si llega acá, la validación fue exitosa
+				if(sala.id_sala == 0 ){ // Es una alta de registro
+					 ro_SalaService.registra(sala);
+				}
+				else{ // Es una modificación
+					ro_SalaService.modifica(sala);
+				}
+				
+			}
+			
+			/*
+			 * Función que realiza la validación de campos
+			*/
+			private function validaCampos(sala:Sala):String{
+				var mensaje:String = "";
+				if(sala.nombre == "")
+					mensaje = mensaje+"Nombre\n";
+				if(sala.desc_sala == "")
+					mensaje = mensaje+"Descripción\n";
+				if(sala.id_exposicion == 0)
+					mensaje = mensaje+"Exposición\n";
+				return mensaje;
+			}
+			
+			/*
+			 * Función que realiza la adaptación de la forma a una alta o modificación 
+			*/
+			private function preparaForma(sala:Sala):void{
+				currentState = "alta_modificacion"; // Cambia a la vista de alta y modificación
+				
+				id_exposicion.dataProvider = ac_exposiciones;
+				
+				if(sala.id_sala != 0){ // Significa que se trata de una modificación
+					nombre.text = sala.nombre;
+					descripcion.text = sala.desc_sala;
+					id_elemento.text = String(sala.id_sala);
+					id_exposicion.selectedIndex = sala.id_exposicion -1;
+				}else{
+					nombre.text = "";
+					descripcion.text = "";
+					id_elemento.text = '0';
+				}
+				
+				// Adaptación de la forma de modificación para usuario revisor
+				if(usuariologeado.id_tipo_usr == 2 ){
+					nombre.editable = false;
+					descripcion.editable=false;
+					id_elemento.editable = false;
+					btn_guardar.enabled = false;
+				}
+			}		
+			
+			/*
+			 * Función que retorna un elemento seleccionado en el grid 
+			*/
+			private function getSeleccionado():Sala{
+				if(dg.selectedIndex == -1){
+					throw new Error("Debes seleccionar un elemento.");
+				}
+				
+				return dg.selectedItem as Sala;
+			}
+			
+			/*
+			 * Función que cierra el escenario 
+			*/
+			private function cerrar():void{
+				currentState="grid";
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<mx:states>
+		<s:State name="grid"/>
+		<s:State name="alta_modificacion"/>
+	</mx:states>
+	
+	<fx:Declarations>
+		<s:RemoteObject id="ro_SalaService" destination="SalaService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="findAll_result(event)" fault="faultHandler(event)" />
+			<s:method name="registra" result="registro_result(event)" fault="faultHandler(event)" />
+			<s:method name="elimina" result="elimina_result(event)" fault="faultHandler(event)" />
+			<s:method name="modifica" result="modifica_result(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+		<s:RemoteObject id="ro_ExposicionService" destination="ExposicionService" fault="faultHandler(event)"  endpoint="{endpoint}">
+			<s:method name="findAll" result="findAll_ExposicionResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+	</fx:Declarations>
+	
+	<s:DataGrid id="dg" includeIn="grid" left="10" right="10" height="83%" editable="false"
+				enabled="true" horizontalCenter="0" verticalCenter="16">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="nombre" headerText="Nombre"></s:GridColumn>
+				<s:GridColumn dataField="desc_sala" headerText="Descripción"></s:GridColumn>
+				<s:GridColumn dataField="id_exposicion" headerText="Exposición"></s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+	<s:HGroup id="id_contBotones" includeIn="grid" x="10" y="10">
+		<s:Button id="btn_nuevo" width="80" label="Nuevo" click="alta()"/>
+		<s:Button id="btn_modifica" width="80" label="Modificar" click="modificacion()"/>
+		<s:Button id="btn_elimina" width="80" label="Eliminar" click="eliminacion()"/>
+		<s:Button width="80" label="Cerrar" click="parent.removeChild(this)"/>		
+	</s:HGroup>
+	
+	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
+		<s:Button id="btn_guardar" x="374" y="37" label="Guardar" click="guardar()"/>
+		<s:Button label="Cerrar" click="cerrar()"/>
+	</s:HGroup>
+	
+	<s:Form id="form" includeIn="alta_modificacion" y="38" left="10">
+		<s:FormHeading label="Datos Generales"/>
+		<s:FormItem  id="finombre" width="265" label="Nombre" required="true">
+			<s:TextInput id="nombre"/>
+		</s:FormItem>
+		<s:FormItem  id="fidescripcion" width="265" label="Descripción" required="true">
+			<s:TextArea id="descripcion"/>
+		</s:FormItem>
+		<s:FormItem  id="fianio" width="265" label="Año" required="true">
+			<s:TextInput id="anio"/>
+		</s:FormItem>
+
+		<!-- Aqui se coloca el ID del elemento -->
+		<s:FormItem  id="fiid" visible="false" label="id">
+			<s:TextInput id="id_elemento" editable="false"/>
+		</s:FormItem>
+	</s:Form>
+	
+	<s:Form id="form2" includeIn="alta_modificacion" y="42" left="362">
+		<s:FormItem  id="fiexposicion" width="265" label="Exposición" required="true">
+			<s:DataGrid id="id_exposicion" width="300" height="250">
+				<s:columns>
+					<s:ArrayList>
+						<s:GridColumn dataField="nombre" headerText="Nombre"></s:GridColumn>
+						<s:GridColumn dataField="desc_exposicion" headerText="Descripción"></s:GridColumn>
+						<s:GridColumn dataField="id_museo" headerText="Museo"></s:GridColumn>
+					</s:ArrayList>
+				</s:columns>
+			</s:DataGrid>
+		</s:FormItem>
+	</s:Form>
+	
+</mx:Canvas>

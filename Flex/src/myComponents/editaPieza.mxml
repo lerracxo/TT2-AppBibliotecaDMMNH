@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   width="500" height="600"
+			   creationComplete="init()"
+			   >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import myComponents.*;
+			
+			import objetosJava.*;
+			
+			import spark.components.Image;
+			import spark.components.VideoPlayer;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+
+			
+			[Bindable]
+			public var multimedia:Multimedia;
+			public var tiposMultimedia:ArrayCollection;
+			public var urlGeneral:String;
+			public var id_pieza:int; // Id de la pieza padre de este elemento multimedia
+			
+			private var filtroTiposDeArchivo:FileFilter;
+			private var file:FileReference = new FileReference();
+			private var audioPlayer:Mp3Player; 
+			
+			// Variables necesarias para la conexión remota
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var usuariologeado:Usuario;
+			
+			/*
+			 * Set de instrucciones que se hacen al iniciar 
+			*/
+			private function init():void{
+				
+				//Alert.show("Ejecuta el creation complete:"+multimedia.id_multimedia+" - "+String(tiposMultimedia.length));
+				
+				
+				if (multimedia.id_multimedia >= 1){ // Se trata de una modificación de pieza :D
+					this.title = multimedia.nombre;
+					
+					ddl_tiposMultimedia.selectedIndex = multimedia.id_tipo_multimedia -1;
+					ti_nombre.text = multimedia.nombre;
+					ta_descripcion.text = multimedia.desc_multimedia;
+					
+					actualizaFiltrosArchivos();
+					
+					// Si la multimedia es diferente a TEXTO realiza la carga de la misma
+					if (multimedia.id_tipo_multimedia != 4){
+						cargaElementoMultimedia();
+					}
+					// Activa el botón eliminar
+					btn_eliminaElemento.setVisible(true);
+				}
+				
+				ddl_tiposMultimedia.dataProvider = tiposMultimedia;
+				
+				file.addEventListener(Event.SELECT,
+					function (e:Event):void{
+						//Alert.show("Se ejecuta el evento de SELECT");
+						file.load();
+					});
+				file.addEventListener(Event.COMPLETE,archivoCargado);
+				
+			}
+			
+			/*
+			 * Función que cierra la ventana sin actualizar
+			*/
+			private function cerrarVentana():void{
+				//this.dispatchEvent(new Event(Event.CLOSE, true, false));
+				PopUpManager.removePopUp(this);
+			}
+
+			
+			/*
+			* Función que despacha el evento que actualiza las piezas en el padre de este elemento
+			*/
+			private function actualizaElementosMultimedia():void{
+				this.dispatchEvent(new Event(Event.CLOSE, true, false));
+				//PopUpManager.removePopUp(this);
+			}
+			
+			
+			/*
+			 * Función que registra la pieza en el servidor y base de datos 
+			*/
+			private function registraNuevoElementoMultimedia(event:CloseEvent):void{
+				if (event.detail != Alert.YES){
+					return;
+				}
+				multimedia.desc_multimedia = ta_descripcion.text;
+				multimedia.nombre = ti_nombre.text;
+				
+				if(multimedia.id_multimedia < 1){
+					//Alert.show("Registro");
+					ro_piezasService.registraMultimedia(multimedia,id_pieza)
+				}else{
+					//Alert.show("Modificacion");
+					ro_piezasService.modificaMultimedia(multimedia)
+				}
+			}
+			
+			/*
+			 * Obtiene el resultado del registro de la multimedia en el servidor
+			*/
+			private function registraMultimedia_multimediaResult(event:ResultEvent):void{
+				if(Boolean(event.result)){
+					Alert.show("La multimedia se registró correctamente.");
+					actualizaElementosMultimedia(); // Actualiza los elementos multimedia del maestro
+					cerrarVentana(); // Cierra la ventana
+				}
+				else{
+					Alert.show("Ocurrió un error al registrar el elemento multimedia.");
+				}
+			}
+			
+			/*
+			 * Recibe el resultado de la modificación de la multimedia en el servidor 
+			*/
+			private function modificaMultimedia_multimediaResult(event:ResultEvent):void{
+				if(Boolean(event.result)){
+					Alert.show("La multimedia se registró correctamente.");
+					actualizaElementosMultimedia(); // Actualiza los elementos multimedia del maestro
+					cerrarVentana(); // Cierra la ventana
+				}
+				else{
+					Alert.show("Ocurrió un error al registrar el elemento multimedia.");
+				}
+			}
+			
+			/*
+			 * Actualiza los filtros de archivos 
+			*/
+			private function actualizaFiltrosArchivos():void{
+				switch(multimedia.id_tipo_multimedia)
+				{
+					case 1:{filtroTiposDeArchivo = new FileFilter("Audio (*.mp3)", "*.mp3"); break;} // Audio
+					case 2:{filtroTiposDeArchivo = new FileFilter("Imágenes (*.jpg, *.jpeg, *.gif, *.png)", "*.jpg; *.jpeg; *.gif; *.png"); break;}	// Imagen    
+					case 3:{filtroTiposDeArchivo = new FileFilter("Video (*.mp4, *.flv, *.m4v, *.mov)", "*.mp4; *.flv; *.m4v; *.mov");break;} // Video
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			/*
+			 * Reacciona al cambio del tipo de multimedia 
+			*/
+			private function eligeTipoMultimedia(event:CloseEvent):void{
+				if (event.detail != Alert.YES){
+					// Regresa a la multimedia proeviamente seleccionada
+					ddl_tiposMultimedia.selectedIndex = multimedia.id_tipo_multimedia- 1;
+					return;
+				}
+				
+				// Cambia el tipo de multimedia
+				multimedia.id_tipo_multimedia = (ddl_tiposMultimedia.selectedIndex+1); 
+	
+				if (multimedia.id_tipo_multimedia == 4){ // Se selecciona texto
+					btn_seleccionMultimedia.visible = false; // desaparece el botón
+					vg_elementoMultimedia.removeAllElements(); // vacia el grupo					
+					return; // no ejecuta las rutinas de carga de archivos
+				}
+				// Como se realizó un cambio en el timpo de multimedia se actualizan los filtros de archivo
+				actualizaFiltrosArchivos();
+				
+				// Como se realizó un cambio en el tipo de multimedia se pide un nuevo archivo
+				seleccionaMultimedia();
+				
+				//Manda a la carga de un nuevo archivo
+				//cargaElementoMultimedia();
+				
+				//Alert.show("Tipo multimedia a: "+ String(multimedia.id_tipo_multimedia)+" Tipo multimedia n: "+String(ddl_tiposMultimedia.selectedIndex+1));
+			}
+			
+			private function cargaElementoMultimedia():void{
+
+				// Si está reproduciendo audio, lo pausa
+				try{ audioPlayer.isPlaying? audioPlayer.pause() : null; }catch(e:Error){}
+				
+				// Limpia el grupo para agregar un nuevo elemento multimedia
+				vg_elementoMultimedia.removeAllElements();
+				
+				switch(multimedia.id_tipo_multimedia)
+				{
+					case 1: // Audio
+					{
+						audioPlayer  = new Mp3Player();
+						audioPlayer.source = urlGeneral+multimedia.nombre_archivo;
+						vg_elementoMultimedia.addElement(audioPlayer);
+						break;
+					}
+					case 2: // Imagen
+					{
+						var loader:Loader = new Loader();
+						var urlRequest:URLRequest = new URLRequest(urlGeneral+multimedia.nombre_archivo)
+						loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+							function (e:Event):void{
+								var imagen:Image = new Image();
+								imagen.width = 400;
+								imagen.height = 200;
+								imagen.source = e.target.content;
+								vg_elementoMultimedia.addElement(imagen);
+							});
+						loader.load(urlRequest);
+
+						break;
+					}
+					case 3: // Video
+					{
+						var videoPlayer:VideoPlayer = new VideoPlayer();
+						videoPlayer.width = 400;
+						videoPlayer.height = 200;
+						videoPlayer.source = urlGeneral+multimedia.nombre_archivo;
+						vg_elementoMultimedia.addElement(videoPlayer);
+						break;
+					}	
+					default:
+					{
+						break;
+					}
+				} ;
+			}
+			
+			/*
+			 * Función a través con la cual seleccionas un elemento multimedia
+			*/
+			private function seleccionaMultimedia():void{
+				try{
+					file.browse(new Array(filtroTiposDeArchivo));
+				}catch(e:Error){
+					Alert.show("Error: "+e.message);
+				}
+			}
+			
+			/*
+			 * Se ejecuta cuando un archivo se ha cargado completamente en la memoria de flash
+			*/
+			private function archivoCargado(event:Event):void{
+				multimedia.nombre_original = file.name;
+				//Alert.show("el archivo fue cargado en memoria: "+multimedia.nombre_original);
+				ro_piezasService.obtieneNombreArchivoFechaservidor(multimedia.nombre_original);
+				
+			}
+			
+			/*
+			 * Obtiene el nombre del archivo que se desea cargar
+			*/
+			private function obtieneNombreArchivoFechaservidor_multimediaResult(event:ResultEvent):void{
+				multimedia.nombre_archivo = event.result as String;
+				//Alert.show("Se recibe el nombre asignado para el archivo: "+multimedia.nombre_archivo);
+				// En este punto el archivo ya está en memoria por lo que se procede a enviar el archivo al servidor
+				ro_subeArchivoService.escribeArchivo(multimedia.nombre_archivo,file.data);
+			}
+			
+			/*
+			 * Es avisada que el archivo fue escrito exitosamente :D 
+			*/
+			private function escribeArchivo_multimediaResult(event:ResultEvent):void{
+				if ( Boolean(event.result)){
+					//Alert.show("El archivo fue escrito exitosamente: "+multimedia.nombre_archivo);
+					cargaElementoMultimedia();// recarga el elemento multimedia
+				}else{
+					Alert.show("El elemento multimedia no pudo cargarse correctamente");				
+				}
+				
+			}
+			/*
+			 * Recibe cualquier error producido en la ejecución del llamado remoto 
+			*/
+			private function faultHandler(event):void{
+				Alert.show(event.Fault.message,"Fault");
+			}
+			
+			/*
+			 * Función que actualiza el título de acuerdo a lo escrito en el cuadro de nombre 
+			*/
+			protected function ti_nombre_changingHandler(event:TextOperationEvent):void
+			{
+				this.title = ti_nombre.text;
+			}
+			
+			/*
+			 * Función que elimina el elemento multimedia en cuestión 
+			*/
+			private function eliminaMultimedia(event:CloseEvent):void{
+				if (event.detail != Alert.YES){
+					return;
+				}
+				ro_piezasService.eliminaMultimedia(multimedia);
+			}
+			
+			/*
+			 * Función que realiza la eliminación de un elemento multimedia 
+			*/
+			private function eliminaMultimedia_multimediaResult(event:ResultEvent):void{
+				if( event.result as Boolean){
+					Alert.show("El elemento multimedia se eliminó correctamente.");
+					actualizaElementosMultimedia();
+					cerrarVentana();
+				}
+				else{
+					Alert.show("Ocurrió un error al eliminar el elemento multimedia.");
+				}
+					
+			}
+			
+		]]>	
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:RemoteObject id="ro_piezasService" destination="PiezaService" fault="faultHandler(event)" endpoint="{endpoint}">
+			
+			<s:method name="registraMultimedia" result="registraMultimedia_multimediaResult(event)" fault="faultHandler(event)" />
+			<s:method name="modificaMultimedia" result="modificaMultimedia_multimediaResult(event)" fault="faultHandler(event)" />
+			<s:method name="eliminaMultimedia" result="eliminaMultimedia_multimediaResult(event)" fault="faultHandler(event)" />
+			<s:method name="obtieneNombreArchivoFechaservidor" result="obtieneNombreArchivoFechaservidor_multimediaResult(event)" fault="faultHandler(event)" /> 
+
+		</s:RemoteObject>
+		<s:RemoteObject id="ro_subeArchivoService" destination="SubeArchivoService" fault="faultHandler(event)" endpoint="{endpoint}">
+			<s:method name="escribeArchivo" result="escribeArchivo_multimediaResult(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+		
+	</fx:Declarations>
+	
+	<s:Form>
+		<s:FormItem id="fi_tiposMultimedia" label="Tipo de multimedia: " >
+			<s:DropDownList id="ddl_tiposMultimedia" 
+							close=" ( ddl_tiposMultimedia.selectedIndex == -1 ) ? null : (multimedia.id_tipo_multimedia != (ddl_tiposMultimedia.selectedIndex+1)) ? 
+							Alert.show('¿Desea cambiar el tipo de multimedia?', 'Modificación de pieza', Alert.YES|Alert.NO, null,eligeTipoMultimedia) :null;" 
+			/>
+		</s:FormItem>
+		<!---->
+		<s:VGroup id="vg_elementoMultimedia"/>
+		<s:Button id="btn_seleccionMultimedia" label="Selecciona multimedia..." click="seleccionaMultimedia();" />
+		<s:FormItem label="Nombre: ">
+			<s:TextInput id="ti_nombre"  width="100%" change="ti_nombre_changingHandler(event)"/>
+		</s:FormItem>
+		<s:FormItem label="Descripción: ">
+			<s:TextArea id="ta_descripcion"  width="100%"/>
+		</s:FormItem>
+		<s:HGroup>
+			<s:Button label="Aceptar" click="Alert.show('¿Desea guardar sus cambios?','Guardar Pieza',Alert.YES|Alert.NO,null,registraNuevoElementoMultimedia)"/>
+			<s:Button label="Cancelar" click="cerrarVentana();"/>
+		</s:HGroup>
+	</s:Form>
+	<s:Button id="btn_eliminaElemento" visible="false" x="372" y="-30" label="Eliminar multimedia" click="Alert.show('¿Desea eliminar el elemento multimedia?','Eliminar multimedia',
+			  													Alert.YES|Alert.NO, null,eliminaMultimedia);" />
+</s:TitleWindow>

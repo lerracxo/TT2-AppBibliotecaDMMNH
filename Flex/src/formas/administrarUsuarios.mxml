@@ -22,7 +22,6 @@
 			import mx.utils.ObjectUtil;
 			import mx.validators.Validator;
 			
-			import objetosJava.PosicionAgente;
 			import objetosJava.TipoUsuario;
 			import objetosJava.Usuario;
 			
@@ -35,7 +34,6 @@
 			[Bindable] public var usuariologeado:Usuario;
 			[Bindable] public var usuario:Usuario = new Usuario();
 			[Bindable] public var tipoUsuario:TipoUsuario;
-			[Bindable] public var posicionAgente:PosicionAgente;
 			[Bindable] public var datosGrid:ArrayCollection;
 			[Bindable] public var datosTipoUsuario:ArrayCollection;
 			[Bindable] public var datosPosicion:ArrayCollection;
@@ -45,15 +43,23 @@
 			[Bindable] public var bloqueo:int;
 			[Bindable] public var VentanaBusqueda:Buscar_Usuario;
 			
-			[Bindable] public var datosSupervisor:ArrayCollection = new ArrayCollection(
-				[{nombre_tipo:"Agente", id_tipo_usr:2}]);
-			
-			
 			// Funcion que se llama la cargar la aplicacion
 			private function init():void
 			{
 					roUsuarios.findAll(); // Obtiene a todos los usuarios registrados
 					roTipoUsuario.findAll(); // Obtiene los tipos de usuario
+					adaptaTipoUsuario(); // función que hace las adaptaciones necesarias para el tipo de archivo.
+			}
+			
+			/*
+			 * Función que realiza la adaptación correspondiente al tipo de usuario 
+			*/
+			private function adaptaTipoUsuario():void{
+				if(usuariologeado.id_tipo_usr == 2 ){ // Revisor
+					btn_modificar_usuario.label = "Detalle";
+					btn_nuevo_usuario.enabled = false;
+					btn_eliminar_usuario.enabled = false;
+				}	
 			}
 			
 			private function resultHandler_TiposUsuarioFindAll(event:ResultEvent):void
@@ -132,7 +138,7 @@
 					
 				var emailRexValid:String = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-				Alert.show(usuario_l.toString(),"Dentro de la funcion");
+				//Alert.show(usuario_l.toString(),"Dentro de la funcion");
 				
 				if (usuario_l.nombre_usr == "" || usuario_l.nombre_usr == null) // Valida el nombre
 					mensaje=mensaje+"Nombre de usuario\n"
@@ -141,7 +147,9 @@
 					mensaje=mensaje+"Apellido paterno\n"
 						
 				if(usuario_l.password == "" || usuario_l.password == null)
-					mensaje=mensaje+"Password\n"
+					mensaje=mensaje+"Password\n";
+				if(usuario_l.password != conf_password.text)
+					mensaje=mensaje+"Confirmación de Password\n";
 				/* // No se valida el apellido materno
 				if(usuario_l.apellido_materno_usr == "" || usuario_l.apellido_materno_usr == null)
 				mensaje=mensaje+"Apellido materno\n"
@@ -163,12 +171,14 @@
 					var mensaje:String
 					
 					var l_usuario:Usuario = new Usuario();
+					//Alert.show("Pass actual: "+usuario.password);
 					// Se obtienen las variables correspondientes al tipo de usuario que se va a registrar 
+					l_usuario.id_usr = int(id_usr.text);
 					l_usuario.nombre_usr = nombre_usr.text
 					l_usuario.apellido_paterno_usr = apellido_paterno_usr.text
 					l_usuario.apellido_materno_usr = apellido_materno_usr.text
 					l_usuario.email_usr = email_usr.text
-					l_usuario.password = SHA1.hash(password.text)
+					l_usuario.password =  password.text;
 					l_usuario.id_tipo_usr = int(id_tipo_usr.selectedItem.id_tipo_usr)
 					l_usuario.estatus_usr = estatus_usr.selected == false ? 0 : 1
 					
@@ -177,12 +187,22 @@
 						Alert.show(mensaje,"Errores de validación",Alert.OK);
 						return;
 					}
-					Alert.show("Todo salio bien: "+l_usuario.nombre_usr);
-					return;
-					if(id_usr.text == '0' ){
+					//Alert.show("Todo salio bien: "+l_usuario.nombre_usr);
+					//return;
+					if(l_usuario.id_usr == 0 ){ // Es una inserción por lo que el passwd debe ir tal cual
+						l_usuario.password = SHA1.hash(l_usuario.password );
 						create(l_usuario); // Llama al metodo que realiza la inserción
 					}else{
-						update(l_usuario);
+						
+						if (l_usuario.password != usuario.password){
+						// Hubo modificación en el password por lo que se pide que se actualice
+							//Alert.show("Se actualiza la contraseña de: "+usuario.password+" a "+ l_usuario.password+" con sha1: "+SHA1.hash(l_usuario.password));
+							
+							l_usuario.password = SHA1.hash(l_usuario.password );
+							roUsuarios.actualizaContrasenaUsuario(l_usuario); // pide actualizar la contraseña
+							//return;
+						} 
+						update(l_usuario); // llama al método que realiza la modificación
 					}
 				}catch(errObject:Error){
 					Alert.show(errObject.message +' '+ errObject.name+"\n"+l_usuario,"Error Validador")
@@ -308,6 +328,7 @@
 				//Si tiene datos en el dataprovider entonces se asiga el primero
 				id_tipo_usr.dataProvider.length > 0 ? id_tipo_usr.selectedIndex = 0 : id_tipo_usr.selectedIndex = -1;
 				
+				
 				if (l_usuario.id_usr == 0){ // Se trata de un nuevo usuario
 					// Inicialización de las variables del usuario
 					nombre_usr.text = ''; 		
@@ -315,24 +336,32 @@
 					apellido_materno_usr.text = '';
 					email_usr.text ='';
 					estatus_usr.selected = true;
-					// Validadores
-					nombre_usr.errorString=''
-					apellido_paterno_usr.errorString=''
-					email_usr.errorString=''
-					id_tipo_usr.errorString='';
+					
+					lbl_nota.visible = false;
 				}
-				else{
+				else{ // Se trata de una modificación de usuario
 					nombre_usr.text = l_usuario.nombre_usr;
 					apellido_paterno_usr.text = l_usuario.apellido_paterno_usr;
 					apellido_materno_usr.text = l_usuario.apellido_materno_usr;
 					email_usr.text = l_usuario.email_usr;
 					estatus_usr.selected = Boolean(l_usuario.estatus_usr);
 					
-					this.finombre_usr.errorString = "";
-					this.fiapellido_paterno_usr.errorString = "";
-					this.fiemail_usr.errorString = "";
-					this.fiid_tipo_usr.errorString =  "";
+					lbl_nota.visible = true;
 				}
+				
+				////////////// Se realizan las modificaciones necesarias para el tipo de usuario revisor
+				if(usuariologeado.id_tipo_usr == 2){
+					nombre_usr.editable = false;		
+					apellido_paterno_usr.editable = false;	
+					apellido_materno_usr.editable = false;	
+					email_usr.editable = false;	
+					estatus_usr.enabled = false;	
+					
+					lbl_nota.visible = false;
+					
+					btnGuardar.enabled = false;
+				}
+				
 			}		
 			
 			private function cerrar():void{
@@ -384,6 +413,7 @@
 			<s:method name="findAll" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
 			<s:method name="Find_UsuariosSupervisor" result="resultHandlerFindAll(event)" fault="faultHandler(event)" />
 			<s:method name="create" result="resultHandlerNuevoUsuario(event)" fault="faultHandler(event)" />
+			<s:method name="actualizaContrasenaUsuario" fault="faultHandler(event)" />
 			<s:method name="update" result="resultHandlerActualizaUsuario(event)" fault="faultHandler(event)" />
 			<s:method name="remove" result="resultHandlerEliminaUsuario(event)" fault="faultHandler(event)" />
 		</s:RemoteObject>
@@ -415,20 +445,19 @@
 	</s:DataGrid>
 	<s:HGroup id="id_contBotones" includeIn="grid" left="10" right="10" top="10" bottom="287"
 			  horizontalCenter="0" verticalCenter="-139">
-		<s:Button width="80" label="Nuevo" click="nuevo()"/>
-		<s:Button width="80" label="Modificar" click="modificar()"/>
-		<s:Button width="80" label="Eliminar" click="eliminar()"/>
+		<s:Button id="btn_nuevo_usuario" width="80" label="Nuevo" click="nuevo()"/>
+		<s:Button id="btn_modificar_usuario" width="80" label="Modificar" click="modificar()"/>
+		<s:Button id="btn_eliminar_usuario" width="80" label="Eliminar" click="eliminar()"/>
 		<s:Button width="80" label="Buscar" click="Buscar()"/> 
 		<s:Button width="80" label="Cerrar" click="parent.removeChild(this)"/>
-		<s:Button id="btn_prueba" width="80" label="Prueba" click="prueba()"/>
+		<s:Button id="btn_prueba" width="80" label="Prueba" click="prueba()" visible="false"/>
 	</s:HGroup>
 	<s:HGroup includeIn="alta_modificacion" y="10" left="10" right="10" horizontalCenter="0">
 		<s:Button id="btnGuardar" x="374" y="37" label="Guardar" click="guardar()"/>
 		<s:Button label="Cerrar" click="cerrar()"/>
 	</s:HGroup>
 	
-	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" width="454"
-			height="493">
+	<s:Form id="formDatosPersonales" includeIn="alta_modificacion" y="38" left="1" width="374">
 		<s:FormHeading label="Datos Generales"/>
 		<s:FormItem  id="finombre_usr" width="265" label="Nombre" required="true">
 			<s:layout>
@@ -445,6 +474,9 @@
 		<s:FormItem id="fiemail_usr"  x="0" y="163" width="265" label="E-mail" required="true">
 			<s:TextInput id="email_usr" text="{usuario.email_usr}"/>
 		</s:FormItem>
+		
+	</s:Form>
+	<s:Form includeIn="alta_modificacion" x="383" y="75">
 		<s:FormItem visible="true" width="265" label="Contraseña">
 			<s:TextInput id="password" change="password_changeHandler(event)"
 						 displayAsPassword="true" text="{usuario.password}"/>
@@ -466,6 +498,8 @@
 			<s:TextInput id="id_usr" editable="false" text="{usuario.id_usr}"/>
 		</s:FormItem>
 	</s:Form>
+	<s:Label id="lbl_nota" includeIn="alta_modificacion" x="10" y="384"
+			 text="Nota: La contraseña se actualizará solo si es modificada. Deberás modificarla por completo." visible="false"/>
 
 	
 </mx:Canvas>

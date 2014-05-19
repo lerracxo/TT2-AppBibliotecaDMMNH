@@ -2,12 +2,10 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="100%" height="800"  creationComplete="oninit()"
-			   currentState="login" 
+			   creationComplete="oninit()" currentState="login"
 			   pageTitle="TT Biblioteca Digital"
-			   width.Inicio="100%" height.Inicio="800" minWidth.Inicio="1024" minHeight.Inicio="800"
-			   backgroundColor.Inicio="#040000" 
-			   width.login="100%" height.login="800" minWidth.login="1024" minHeight.login="600">
+			   backgroundColor.Inicio="#040000"
+			  >
 	<fx:Style source="dcpro.css"/>
 	 
 	<fx:Script>
@@ -22,8 +20,8 @@
 			import mx.controls.Alert;
 			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
 			import mx.managers.IFocusManagerComponent;
+			import mx.managers.PopUpManager;
 			import mx.messaging.ChannelSet;
 			import mx.messaging.events.MessageAckEvent;
 			import mx.messaging.events.MessageEvent;
@@ -41,14 +39,9 @@
 			import spark.utils.LabelUtil;
 			
 			// Se añaden las clases de las formas que se llaman en el menu dinamico
-			administrarUsuarios;catalogoResultadosInbound;
-			CatalogoResultadosOutbound;ConfigurarSistema;
-			CatalogoCampanas;monitorearAgentes;
-			VisualizarIndicadores;Alarmas;Agentes;
-			Voces;Atender_Evento;catalogoCalendario;
-			integracionCRM;DesplegarAlarmas;PosicionAgentes;
-			VistaCallCenter;DatosPosicion;enviarMensaje;
-			administrarArchivos; administrarPiezas;
+			administrarUsuarios;administrarSalas;
+			administrarArchivos; administrarPiezas, administrarReportes;
+			administrarAutores; administrarEpocas;
 			
 			
 			[Bindable] private var menuAC:ArrayCollection;
@@ -62,9 +55,7 @@
 			[Bindable] private var id_usuario:int;
 			[Bindable] private var blaze_clientid:String;
 			[Bindable] private var usuario:Usuario;
-			
-			var ventana_mensaje:enviarMensaje;
-			
+					
 			
 			private function oninit():void{
 				
@@ -95,6 +86,7 @@
 				
 				//currentState = "Inicio"
 				//Abre_mensajero();
+				// Setea el foco en el input del usuario
 				focusManager.setFocus(txtUser as IFocusManagerComponent);
 
 			}
@@ -268,7 +260,19 @@
 			
 			public function resultFindUsuario(event:ResultEvent):void
 			{
-				usuario = Usuario(event.result);	
+				usuario = Usuario(event.result);
+				switch(usuario.id_tipo_usr){
+					case 1: // El usuario es administrador	
+						lbl_tipo_usuario.text = "- Administrador";
+						break;
+					case 2: // El usuario es revisor
+						lbl_tipo_usuario.text = "- Revisor";
+						//Alert.show("Este tipo de usuario es revisor;");
+						break;
+					default:
+						break;
+				};
+				
 			}
 			
 			protected function subscribir(id_usuario:int):void
@@ -431,28 +435,13 @@
 				// TODO Auto-generated method stub
 				currentState="login";
 				messageConsumerAgentes.unsubscribe(false);
-				//Mensajero
-				ventana_mensaje.setVisible(false);
-				ventana_mensaje.Desconexion();		
 			}
 			
 			public function cerrarSesionDCPro():void{
 				currentState="login";
 				messageConsumerAgentes.unsubscribe(false);
-				
-				//Mensajero
-				ventana_mensaje.setVisible(false);
-				ventana_mensaje.Desconexion();
 			}
 			
-			protected function llamaReportes():void{
-				navigateToURL(new URLRequest(reportesJasper+"report1.pdf?dato="+txtdato.text),"_blank");
-			}
-			
-			private function addMessageToArea(message:String):void
-			{
-				txtdato.text = txtdato.text + " " + message;
-			}
 			
 			private function handleResponse(event:MessageEvent):void
 			{
@@ -467,31 +456,6 @@
 				Alert.show("Favor de verificar su conexión","Error");
 			}
 			
-			private function Abre_mensajero():void{
-				ventana_mensaje = PopUpManager.createPopUp(this, enviarMensaje, false) as enviarMensaje;
-				ventana_mensaje.setVisible(false);
-				ventana_mensaje.endpoint = endpoint;
-				ventana_mensaje.usuariologeado = usuario;
-				ventana_mensaje.message= message;				
-			}
-			
-			private function Mostrar_mensajero(event:Event):void{
-				ventana_mensaje.Inicializar(endpoint,usuario,message);
-				ventana_mensaje.setVisible(true);
-			}
-			
-			public function CreaConversacion_mensajero(contacto:Contacto):void{
-				ventana_mensaje.CreaUnaConversacion(contacto);
-				ventana_mensaje.setVisible(true);
-			}
-			
-			private function Ocultar_mensajero(event:Event):void{
-				ventana_mensaje.setVisible(false);
-			}
-			
-			private function Desconectar_mensajer():void{
-				ventana_mensaje.Desconexion();
-			}
 	
 		]]>
 	</fx:Script>
@@ -535,11 +499,11 @@
 	</fx:Declarations>
 	
 	<s:controlBarContent>
-		<s:Button includeIn="Inicio" label="Reportes" click="llamaReportes()"/>
-		<s:TextInput id="txtdato" includeIn="Inicio" />
 		<s:Button id="button" includeIn="Inicio"  label="Salir" click="salirDCPro(event)"  />
+		<s:Label includeIn="Inicio" height="100%" color="#C4EEFF" fontSize="14"
+				 text="SACH - Sistema Administrador de Contenido Histórico" verticalAlign="middle"/>
+		<s:Label id="lbl_tipo_usuario" includeIn="Inicio" text="" height="100%" color="#C4EEFF" fontSize="14"  verticalAlign="middle"/>
 		<s:Button includeIn="Inicio" visible="false" label="Subscribe" click="subscribir(id_usuario);"/>
-		<s:Image includeIn="Inicio"/>
 	</s:controlBarContent>
 	
 	<s:HGroup includeIn="Inicio" y="10" left="10" right="10" height="600" horizontalAlign="left"
@@ -617,8 +581,8 @@
 		<s:TextArea id="ta_debugErrores" x="10" y="10" width="495" height="236"/>
 	</s:Panel>
 	
-	<s:Panel id="pnLogin" includeIn="login" width="500" height="127" horizontalCenter="0"
-			 title="Acceso" verticalCenter="-155">
+	<s:Panel id="pnLogin" includeIn="login" y="195" width="500" height="127" horizontalCenter="0"
+			 title="Acceso">
 		<s:layout>
 			<s:HorizontalLayout gap="18" paddingLeft="10" paddingRight="10" verticalAlign="middle"/>
 		</s:layout>
@@ -629,6 +593,9 @@
 		<s:TextInput id="txtPasswd" x="110" y="63" displayAsPassword="true" enter="login(event)"/>
 		<s:Button x="110" y="91" label="Entrar" click="login(event)"/>
 	</s:Panel>	
+	<s:Label includeIn="login" x="0" y="131" width="100%" color="#454444" fontSize="30"
+			 text="SACH - Sistema Administrador de Contenido Histórico" textAlign="center"
+			 textDecoration="none" verticalAlign="middle"/>
 	
 	
 </s:Application>

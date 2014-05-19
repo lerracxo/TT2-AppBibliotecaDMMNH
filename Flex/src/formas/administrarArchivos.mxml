@@ -55,6 +55,10 @@
 				for each(var fileRef : FileReference in fileRefList.fileList)
 				{
 					fileRef.addEventListener(ProgressEvent.PROGRESS, funcionProgreso);
+					fileRef.addEventListener(Event.COMPLETE, 
+						function (e:Event):void{
+							Alert.show("Cargado a memoria completo");
+						});
 					fileRef.load();
 					selectedFileReferences.addItem(fileRef);
 				}

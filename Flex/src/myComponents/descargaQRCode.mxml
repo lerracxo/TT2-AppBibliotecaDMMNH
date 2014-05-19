@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="334" height="316"
+			   creationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			import mx.printing.FlexPrintJob;
+			import mx.printing.FlexPrintJobScaleType;
+			import mx.rpc.events.ResultEvent;
+			
+			import objetosJava.*;
+			
+			[Bindable] public var urlGeneral:String;
+			[Bindable] public var l_pieza:Pieza;
+			
+			// Variables necesarias para la conexión remota
+			[Bindable] public var chanel:String;
+			[Bindable] public var endpoint:String;
+			[Bindable] public var message:String;
+			[Bindable] public var nombreCatalogo:String;
+			[Bindable] public var usuariologeado:Usuario;
+			
+			private var directorioQR:String = "qrCodes/";
+			private var extension:String = "png";
+			
+			private var ba_codigoqr_binario:ByteArray; // Contiene la imagen binaria
+			/*
+			 * Función inicial 
+			*/
+			private function init():void{
+				lbl_titulo.text = l_pieza.nombre;
+				cargaImagen();
+				ro_qrCodeService.bajaQRCode(l_pieza.id_pieza);
+				
+			}
+			
+			/*
+			 * Función que realiza la carga de la imagen 
+			*/
+			private function cargaImagen():void{
+				var loader:Loader = new Loader();
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+					function (event:Event):void{
+						img_qrCode.source = event.target.content;
+					});
+				//Alert.show("Se pide el elemento: "+urlGeneral+directorioQR+l_pieza.id_pieza+"."+extension);
+				loader.load(new URLRequest(urlGeneral+directorioQR+l_pieza.id_pieza+"."+extension));
+			}
+			
+			/*
+			* Recibe cualquier error producido en la ejecución del llamado remoto 
+			*/
+			private function faultHandler(event):void{
+				Alert.show(event.Fault.message,"Fault");
+			}
+			
+			/*
+			 * Recibe la imagen del código qr en formato de archivo binario 
+			*/
+			private function bajaQRCode_Result(event:ResultEvent):void{
+				ba_codigoqr_binario = event.result as ByteArray; // obtiene el contenido binario
+				if (ba_codigoqr_binario == null){
+					Alert.show("Esta imagen no se puede descargar.","Información");
+					btn_imprimir.enabled = false;
+					return;
+				}
+				
+			}
+			
+			/*
+			 * Realiza el guardado de la imagen binaria en el disco duro
+			*/
+			private function guardaImagen(event:MouseEvent):void{
+				var file:FileReference = new FileReference();
+				file.save(ba_codigoqr_binario,l_pieza.id_pieza+"."+extension); // manda a guardar el archivo
+			}
+			
+			
+			/*
+			 * Función que manda a imprimir la imagen
+			*/
+			private function imprimeImagen(event:MouseEvent):void{
+				var printJob:FlexPrintJob = new FlexPrintJob();
+				
+				if(printJob.start() != true) return;
+				// Verifica si o no
+				printJob.addObject(vg_grupoImagen);
+				// Se envía a imprimir
+				printJob.send();
+			}
+			
+			/*
+			 * Función que cierra esta ventana 
+			*/
+			private function cierraVentana():void{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>	
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:RemoteObject id="ro_qrCodeService" destination="QRCodeService" fault="faultHandler(event)" endpoint="{endpoint}">
+			<s:method name="bajaQRCode" result="bajaQRCode_Result(event)" fault="faultHandler(event)" />
+		</s:RemoteObject>
+	</fx:Declarations>
+	<s:HGroup x="40" y="251" width="275" textAlign="left">
+		<s:Button label="Guardar Imagen" click="guardaImagen(event)"/>
+		<s:Button id="btn_imprimir" label="Imrpimir" click="imprimeImagen(event)"/>
+		<s:Button label="Cerrar" click="cierraVentana();"/>
+	</s:HGroup>
+	<s:VGroup id="vg_grupoImagen" x="31" y="10" width="270" height="233"  horizontalAlign="center">
+		<s:Label id="lbl_titulo" width="100%" fontSize="20" text="" textAlign="center"/>
+		<s:Image id="img_qrCode" width="200" height="200" smooth="true"/>
+	</s:VGroup>
+</s:TitleWindow>

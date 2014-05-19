@@ -1,7 +1,7 @@
 package objetosJava
 {
 	[Bindable]
-	[RemoteClass(alias="piezas.Autor")]
+	[RemoteClass(alias="autores.Autor")]
 	
 	public class Autor
 	{
@@ -11,5 +11,7 @@ package objetosJava
 		public var desc_autor:String;
 		public var fecha_nacimiento:Date;
 		public var id_epoca:int;
+		
+		public function Autor(){}
 	}
 }

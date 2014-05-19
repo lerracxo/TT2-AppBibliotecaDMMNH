@@ -1,6 +1,6 @@
 package objetosJava
 {
-	import mx.collections.ArrayList;
+	import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="piezas.Pieza")]
@@ -13,7 +13,7 @@ package objetosJava
 		public var nombre:String;
 		public var titulo:String;
 		public var id_autor:int;
-		public var elementosMultimedia:ArrayList;
+		public var elementosMultimedia:ArrayCollection;
 		
 		public function toString():String{
 			return id_pieza+" "+desc_pieza+" "+nombre+" "+titulo+" "+id_autor+" "+elementosMultimedia;
