@@ -259,6 +259,24 @@ UPDATE USUARIO SET PASSWORD = sha1('revi') WHERE id_usr = 1;
 
 DROP FUNCTION creaMenuDB;
 
+SELECT * fROM pieza;
+SELECT * fROM usuario;
 
+SELECT * FROM usuario WHERE PASSWORD = sha1('2');
+SELECT sha1('');
 
+DESCRIBE AUTOR;
 
+DESCRIBE CAT_EPOCA;
+DESCRIBE BITACORA;
+SELECT * fROM BITACORA;
+
+SELECT * FROM bitacora;
+
+SELECT * fROM pieza;
+
+SELECT * fROM cat_tipo_multimedia;
+SELECT * fROM cat_epoca;
+DELETE from cat_epoca;
+
+SELECT id_epoca, nombre, desc_epoca, DATE(fecha) FROM cat_epoca;

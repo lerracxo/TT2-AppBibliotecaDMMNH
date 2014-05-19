@@ -59,7 +59,7 @@ INSERT INTO cat_tipo_multimedia VALUES (3,"Video",null);
 INSERT INTO cat_tipo_multimedia VALUES (4,"Texto",null);
 
 -- catalogo de epocas
-INSERT INTO cat_epoca VALUES(1,"Renacimiento Italiano.",1600);
+INSERT INTO cat_epoca VALUES(1,"Renacimiento Italiano.","Descripción","1600");
 
 -- Catalogo de Autores
 INSERT INTO autor VALUES (1,"Leonardo Da Vinci","Leonardo da Vinci 
@@ -85,8 +85,6 @@ INSERT INTO pieza VALUES (2,"Cuadro realizado a Benito Juarez, siendo presidente
 INSERT INTO multimedia VALUES (1,2,"Descripción del primer cuadro","Cuadro","Cuadro1.jpeg","cuadroLeonardo.jpeg");
 INSERT INTO multimedia VALUES (2,2,"Descripción 1","Cuadro","http://www.islamicity.com/global/images/photo/IC-Articles/Heart-Love-Sky-Hands-Silhouette__1920x1200.JPG","103154.JPG");
 
-
-
 -- Catalogo de multimedia relacionada a las piezas
 INSERT INTO pieza_multimedia VALUES (1,1);
 INSERT INTO pieza_multimedia VALUES (2,2);
@@ -95,14 +93,9 @@ INSERT INTO pieza_multimedia VALUES (2,2);
 -- Inserciones para el menu 
 -- id_local - nombre de entrada del menu - tipo de entreda - id del padre - nombre de forma
 INSERT INTO menus VALUES (1,'Administración',1,0,null);
-
 INSERT INTO menus VALUES (4,'Reportes',1,0,'administrarReportes'); -- Entrada para los reportes
-
-INSERT INTO menus VALUES (5,'Archivos',2,1,'administrarArchivos');
 INSERT INTO menus VALUES (6,'Piezas',2,1,'administrarPiezas');
-
 INSERT INTO menus VALUES (7,'Usuarios',2,1,'administrarUsuarios'); -- Administración de usuarios 
-
 INSERT INTO menus VALUES (8,'Autores',2,1,'administrarAutores');-- Administración de los autores.
 INSERT INTO menus VALUES (9,'Epocas',2,1,'administrarEpocas');
 INSERT INTO menus VALUES (10,'Información de Museo',1,0,null);
@@ -110,3 +103,6 @@ INSERT INTO menus VALUES (11,'Museo',2,10,'administrarMuseo');
 INSERT INTO menus VALUES (12,'Exposiciones',2,10,'administrarExposiciones');
 INSERT INTO menus VALUES (13,'Salas',2,10,'administrarSalas');
 INSERT INTO menus VALUES (14,'Visualizar Bitácora',2,0,'visualizarBitacora');
+INSERT INTO menus VALUES (15,'Notificación de corrección',1,0,'notificacionNotificacion');
+
+
