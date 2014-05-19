@@ -280,3 +280,9 @@ SELECT * fROM cat_epoca;
 DELETE from cat_epoca;
 
 SELECT id_epoca, nombre, desc_epoca, DATE(fecha) FROM cat_epoca;
+SELECT * FROM autor;
+
+SELECT * FROM sala;
+DESCRIBE SALA;
+
+DESCRIBE EXPOSICION;
