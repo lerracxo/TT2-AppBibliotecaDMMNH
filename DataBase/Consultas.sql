@@ -418,3 +418,31 @@ SELECT
 		cna.desc_numero_acompanantes
 ;
 
+SELECT * FROM menus;
+
+SELECT * fROM PIEZA;
+SELECT * FROM pieza;
+DESCRIBE MUSEO;
+DESCRIBE EXPOSICION;
+DESCRIBE pieza;
+
+SELECT * fROM multimedia;
+SELECT * fROM pieza_multimedia;
+SELECT * fROM sala;
+SELECT * fROM museo;
+
+DESCRIBE bitacora;
+
+SELECT id_museo, nombre, desc_museo, direccion, email, telefono FROM museo;
+
+SELECT * FROM bitacora;
+
+
+
+
+
+
+
+
+
+

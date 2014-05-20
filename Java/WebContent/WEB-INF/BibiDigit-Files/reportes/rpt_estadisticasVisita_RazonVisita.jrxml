@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt_estadisticasVisita_RazonVisita" pageWidth="572" pageHeight="752" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2ee646e0-9566-41f4-addd-28b819a6f767">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[-- Razón visita
+SELECT
+	crv.desc_razon_visita, COUNT(srv.id_razon_visita)
+	FROM
+		cat_razon_visita crv LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		crv.id_razon_visita = srv.id_razon_visita
+	GROUP BY
+		crv.desc_razon_visita]]>
+	</queryString>
+	<field name="desc_razon_visita" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="COUNT(srv.id_razon_visita)" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="230" splitType="Stretch">
+			<pieChart>
+				<chart>
+					<reportElement x="36" y="41" width="501" height="189" uuid="45f1bf14-8135-4128-bee6-85a2528d8fba"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<keyExpression><![CDATA[$F{desc_razon_visita}]]></keyExpression>
+					<valueExpression><![CDATA[$F{COUNT(srv.id_razon_visita)}]]></valueExpression>
+				</pieDataset>
+				<piePlot>
+					<plot/>
+					<itemLabel/>
+				</piePlot>
+			</pieChart>
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="41" uuid="8952a8bc-ac39-4491-a682-173d58bbfcbd"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Razón de visita]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

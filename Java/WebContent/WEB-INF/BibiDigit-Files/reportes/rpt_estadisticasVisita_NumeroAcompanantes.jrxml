@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt_estadisticasVisita_NumeroAcompanantes" pageWidth="572" pageHeight="752" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="e4ef14ef-956a-4f1e-b8cc-d341defad6e4">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[-- Numero de acompañantes
+SELECT
+	cna.desc_numero_acompanantes, COUNT(srv.id_numero_acompanantes)
+	FROM
+		cat_numero_acompanantes cna LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cna.id_numero_acompanantes= srv.id_numero_acompanantes
+	GROUP BY
+		cna.desc_numero_acompanantes]]>
+	</queryString>
+	<field name="desc_numero_acompanantes" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="COUNT(srv.id_numero_acompanantes)" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="266" splitType="Stretch">
+			<pieChart>
+				<chart>
+					<reportElement x="36" y="41" width="501" height="189" uuid="500c68ab-9ee7-4b1d-8efb-10ffc457e4f5"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<keyExpression><![CDATA[$F{desc_numero_acompanantes}]]></keyExpression>
+					<valueExpression><![CDATA[$F{COUNT(srv.id_numero_acompanantes)}]]></valueExpression>
+				</pieDataset>
+				<piePlot>
+					<plot/>
+					<itemLabel/>
+				</piePlot>
+			</pieChart>
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="41" uuid="ae80fede-ea92-4526-8c9e-020bb722c742"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Número de acompañantes]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

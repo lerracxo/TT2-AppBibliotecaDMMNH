@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt_estadisticasVisita_RangoEdad" pageWidth="572" pageHeight="752" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="9e4af133-6925-4a35-8ee0-b2fe4e2f2c85">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[-- Rango edad
+SELECT
+	cre.desc_rango_edad, COUNT(srv.id_rango_edad)
+	FROM
+		cat_rango_edad cre LEFT OUTER JOIN
+		seg_registro_visitante srv
+	ON
+		cre.id_rango_edad = srv.id_rango_edad
+	GROUP BY
+		cre.desc_rango_edad]]>
+	</queryString>
+	<field name="desc_rango_edad" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="COUNT(srv.id_rango_edad)" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="231" splitType="Stretch">
+			<pieChart>
+				<chart>
+					<reportElement x="36" y="41" width="501" height="189" uuid="0f33e595-9ffb-43e2-ac4f-9e3611f51aea"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<keyExpression><![CDATA[$F{desc_rango_edad}]]></keyExpression>
+					<valueExpression><![CDATA[$F{COUNT(srv.id_rango_edad)}]]></valueExpression>
+				</pieDataset>
+				<piePlot>
+					<plot/>
+					<itemLabel/>
+				</piePlot>
+			</pieChart>
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="41" uuid="a4d58879-9a92-4047-8837-babca5570d40"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Rango de Edad]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

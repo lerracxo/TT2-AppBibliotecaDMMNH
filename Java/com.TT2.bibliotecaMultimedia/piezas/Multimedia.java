@@ -4,14 +4,17 @@ public class Multimedia {
 
 	private int id_multimedia;
 	private int id_tipo_multimedia;
+	private String desc_multimedia;
 	private String nombre;
 	private String nombre_archivo;
 	private String nombre_original;
 	
+	public Multimedia(){}
 	
-	public Multimedia(int id_multimedia, int id_tipo_multimedia, String nombre, String nombre_archivo, String nombre_original){
+	public Multimedia(int id_multimedia, int id_tipo_multimedia,String desc_multimedia, String nombre, String nombre_archivo, String nombre_original){
 		this.id_multimedia = id_multimedia;
 		this.id_tipo_multimedia = id_tipo_multimedia;
+		this.desc_multimedia = desc_multimedia;
 		this.nombre = nombre;
 		this.nombre_archivo = nombre_archivo;
 		this.nombre_original = nombre_original;	
@@ -28,6 +31,19 @@ public class Multimedia {
 	 */
 	public void setId_multimedia(int id_multimedia) {
 		this.id_multimedia = id_multimedia;
+	}
+	/**
+	 * @return the desc_multimedia
+	 */
+	public String getDesc_multimedia() {
+		return desc_multimedia;
+	}
+
+	/**
+	 * @param desc_multimedia the desc_multimedia to set
+	 */
+	public void setDesc_multimedia(String desc_multimedia) {
+		this.desc_multimedia = desc_multimedia;
 	}
 	/**
 	 * @return the nombre

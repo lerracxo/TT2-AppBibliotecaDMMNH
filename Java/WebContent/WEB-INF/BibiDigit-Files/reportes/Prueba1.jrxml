@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteVisitantes" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f51faedd-badc-4535-946a-c62063fb8a19">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT * fROM seg_registro_visitante]]>
+	</queryString>
+	<field name="id_registro_visitante" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="genero" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_rango_edad" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_ocupacion" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_estado_civil" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_razon_visita" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_frecuencia_asistencia" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="id_numero_acompanantes" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="fecha_visita" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="hora_visita" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="39" uuid="12c87678-18d2-4b70-8c8e-af75bfa71d6c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="24" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte de Visitantes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="342" y="39" width="119" height="18" uuid="f682780f-b58b-46b9-85de-c618dbcc334b"/>
+				<text><![CDATA[Fecha de generación:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="461" y="39" width="100" height="20" uuid="14766e3a-d068-4836-8d98-2e59eca9caac"/>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="57" height="20" uuid="6f9648db-df64-44da-a8d3-b57a35a84a39"/>
+				<text><![CDATA[id_registro_visitante]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="57" y="0" width="57" height="20" uuid="70fb2f57-5a82-445c-8e7a-8d417aa45faf"/>
+				<text><![CDATA[genero]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="114" y="0" width="57" height="20" uuid="68265f52-8ce2-43e6-aaf4-f5045086b79f"/>
+				<text><![CDATA[id_rango_edad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="171" y="0" width="57" height="20" uuid="e6a286c0-0ce7-4eee-b930-85f40553100d"/>
+				<text><![CDATA[id_ocupacion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="228" y="0" width="57" height="20" uuid="41818b92-40b6-4a68-ac90-8904de2e7d87"/>
+				<text><![CDATA[id_estado_civil]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="285" y="0" width="57" height="20" uuid="f5c05a8d-31b6-4dd1-b5c6-016a995d510b"/>
+				<text><![CDATA[id_razon_visita]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="342" y="0" width="57" height="20" uuid="ad4ed3e7-894f-4fa1-93b0-48ce2ce8f3f6"/>
+				<text><![CDATA[id_frecuencia_asistencia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="399" y="0" width="57" height="20" uuid="41c03597-29d4-4034-a53c-3524d298796a"/>
+				<text><![CDATA[id_numero_acompanantes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="456" y="0" width="57" height="20" uuid="2b6c8027-94a2-4b33-80bd-c10acb3e0d4a"/>
+				<text><![CDATA[fecha_visita]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="513" y="0" width="57" height="20" uuid="1c385b0c-3b8e-4c92-9a6c-b25285965e49"/>
+				<text><![CDATA[hora_visita]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="57" height="20" uuid="daaedc51-9adb-4932-949a-08b6a640b3d8"/>
+				<textFieldExpression><![CDATA[$F{id_registro_visitante}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="57" y="0" width="57" height="20" uuid="9783f428-4ae9-49d9-b512-fc8d727b9fe8"/>
+				<textFieldExpression><![CDATA[$F{genero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="114" y="0" width="57" height="20" uuid="681e5145-ba61-4ec1-8af6-eab84ccf41e2"/>
+				<textFieldExpression><![CDATA[$F{id_rango_edad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="171" y="0" width="57" height="20" uuid="c219f4b6-e151-4e45-942a-50266a06c753"/>
+				<textFieldExpression><![CDATA[$F{id_ocupacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="228" y="0" width="57" height="20" uuid="66ea7a20-bb4a-43bc-ae69-557ea7f2d3c2"/>
+				<textFieldExpression><![CDATA[$F{id_estado_civil}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="285" y="0" width="57" height="20" uuid="5e0be136-307b-4776-b797-b6ed459b54d4"/>
+				<textFieldExpression><![CDATA[$F{id_razon_visita}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="0" width="57" height="20" uuid="c93fe498-8f63-40bc-8871-11fb97d7e31c"/>
+				<textFieldExpression><![CDATA[$F{id_frecuencia_asistencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="399" y="0" width="57" height="20" uuid="23f081ce-b560-4c24-886e-b686d57d4b08"/>
+				<textFieldExpression><![CDATA[$F{id_numero_acompanantes}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="456" y="0" width="57" height="20" uuid="4bbf0d74-412f-4109-adab-3cfb1576480a"/>
+				<textFieldExpression><![CDATA[$F{fecha_visita}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="513" y="0" width="57" height="20" uuid="6af40265-13d1-42c0-9233-697293476bd1"/>
+				<textFieldExpression><![CDATA[$F{hora_visita}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -8,7 +8,7 @@ public class Entrevista implements Serializable {
 	static final long serialVersionUID = 103844514947365244L;
 	
     private int 	id_registroVisitante;
-    private char	genero;
+    private String	genero;
     private int 	id_rango_edad;
     private	int 	id_ocupacion;
     private int		id_estado_civil;
@@ -23,7 +23,7 @@ public class Entrevista implements Serializable {
       
     public Entrevista(	    
     		int     id_registroVisitante,
-		    char	genero,
+		    String	genero,
 		    int 	id_rango_edad,
 		    int 	id_ocupacion,
 		    int		id_estado_civil,
@@ -60,14 +60,14 @@ public class Entrevista implements Serializable {
 	/**
 	 * @return the genero
 	 */
-	public char getGenero() {
+	public String getGenero() {
 		return genero;
 	}
 
 	/**
 	 * @param genero the genero to set
 	 */
-	public void setGenero(char genero) {
+	public void setGenero(String genero) {
 		this.genero = genero;
 	}
 

@@ -186,8 +186,6 @@ public class UsuarioService implements IUsuarioService {
                 "UPDATE USUARIO SET ID_TIPO_USR= ?, NOMBRE_USR= ?, APELLIDO_PATERNO_USR= ?, APELLIDO_MATERNO_USR= ?, EMAIL_USR= ?, ESTATUS_USR= ? WHERE ID_USR = ?", 
                 usuario.getId_tipo_usr(), usuario.getNombre_usr(), usuario.getApellido_paterno_usr(),usuario.getApellido_materno_usr(),
                 usuario.getEmail_usr(),usuario.getEstatus_usr(),usuario.getId_usr());
-       // System.out.println("Actualiza usuario flag: "+flag);
-        //System.out.println("ESTATUS USUARIO: "+usuario.getEstatus_usr());
         return flag;
 	}
 
@@ -197,9 +195,9 @@ public class UsuarioService implements IUsuarioService {
         return flag;
 	}
 	
-	@RemotingExclude
+	@RemotingInclude
 	public int actualizaContrasenaUsuario(Usuario usuario) {
-		//System.out.println("Password Nuevo Usuario: "+usuario.getPassword());
+		System.out.println("Password Nuevo Usuario: "+usuario.getPassword()+" "+usuario.getId_usr());
 		int flag = this.simpleJdbcTemplate.update("UPDATE USUARIO SET PASSWORD = ? WHERE id_usr=?",usuario.getPassword() ,usuario.getId_usr());
         return flag;
 	}

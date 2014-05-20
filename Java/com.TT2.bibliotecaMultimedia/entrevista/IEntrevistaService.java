@@ -4,7 +4,7 @@ import usuarios.Usuario;
 
 public interface IEntrevistaService
 {
-	public int registraVisitante(Entrevista entrevista);
+	public boolean registraVisitante(Entrevista entrevista);
 	
     //public List<Usuario> findAll();
     

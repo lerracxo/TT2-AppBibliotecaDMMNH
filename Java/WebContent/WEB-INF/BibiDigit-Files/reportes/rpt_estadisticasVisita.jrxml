@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rpt_estadisticasVisita" pageWidth="612" pageHeight="900" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1a4ac97c-4130-4c01-bdcb-b47ecd641c55">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/Users/omar/Dropbox/ESCOM/TT/Desarrollo Personal/java/BibliotecaDigital/WebContent/WEB-INF/BibiDigit-Files/reportes/"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 1 FROM seg_registro_visitante limit 1]]>
+	</queryString>
+	<field name="1" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="115">
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="39" uuid="c680a8c7-bbc1-4647-b367-b5010775aa71"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="24" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte Gráficas de asistencia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="49" width="119" height="18" uuid="eae1b792-d9dc-45bf-b889-886d922eef70"/>
+				<text><![CDATA[Fecha de generación:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="471" y="49" width="100" height="20" uuid="8f748214-ef59-4ee1-9862-5f52b8799340"/>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="83" width="570" height="1" uuid="93d8f5fd-8846-4d35-8c26-481f556f8d55"/>
+			</line>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="266">
+			<subreport>
+				<reportElement x="0" y="0" width="571" height="50" uuid="66c01fe8-2042-448a-aad1-4e6d58c13a45"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["rpt_estadisticasVisita_Genero.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="0" y="0" width="571" height="50" uuid="7f7be2fa-7ee9-44e9-8665-2efb3ac672e4"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["rpt_estadisticasVisita_EstadoCivil.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="0" y="0" width="572" height="50" uuid="479f7b29-96a6-49c9-8141-ec2553ad88cb"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["rpt_estadisticasVisita_Ocupacion.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="1" y="0" width="571" height="50" uuid="eb52aacc-130a-4c93-97cb-e4ea22197597"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["rpt_estadisticasVisita_RangoEdad.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="1" y="0" width="570" height="50" uuid="5129621b-dcc7-43b5-937f-7ba109093eac"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "rpt_estadisticasVisita_RazonVisita.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="1" y="0" width="571" height="50" uuid="a63610f7-ede0-469e-b326-edaca5429dd5"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "rpt_estadisticasVisita_FrecuenciaAsistencia.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="266">
+			<subreport>
+				<reportElement x="1" y="0" width="570" height="50" uuid="21f9f6ee-84fe-4825-aa1e-2c972c35d507"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "rpt_estadisticasVisita_NumeroAcompanantes.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="80" height="20" uuid="f8ea191d-e68a-4558-9c14-0c33fe83ba28"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="80" y="0" width="40" height="20" uuid="55389bad-6004-427a-a394-6cdb21d867dd"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
